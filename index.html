@@ -1,0 +1,2644 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Chấm Phiếu AI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: một cột 720px, ba bước xếp dọc (Đáp án → Phiếu → Kết quả), thanh hành động dính đáy cho ngón cái trên điện thoại.
+   Chất liệu: giấy phiếu OMR (viền ô tô màu cam-hồng "dropout") + mực bi xanh của giáo viên. */
+:root{
+  --paper:#f4f5f1; --surface:#ffffff; --sunken:#eceee8; --ink:#141c2f; --muted:#576072;
+  --line:#d8dcd3; --line-strong:#b5bbb0;
+  --accent:#2443c4; --accent-ink:#ffffff; --accent-soft:#e4e9fb;
+  --omr:#d0603f; --omr-soft:#fbe8e1;
+  --ok:#11703f; --ok-soft:#e0f1e7; --bad:#bd2529; --bad-soft:#fbe5e3; --warn:#8f5300; --warn-soft:#fcefd5;
+  --scrim:rgb(14 18 28/.5);
+  --shadow:0 1px 2px rgb(20 28 47/.06),0 6px 20px rgb(20 28 47/.07);
+  --f-display:"Bricolage Grotesque","Be Vietnam Pro",system-ui,sans-serif;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:14px; --r-sm:9px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0f131b; --surface:#171c26; --sunken:#1d2330; --ink:#e7eaf1; --muted:#9aa3b6;
+  --line:#2a3140; --line-strong:#3c4557;
+  --accent:#8199ff; --accent-ink:#0b1020; --accent-soft:#1f2950;
+  --omr:#ec8d6f; --omr-soft:#3a2219;
+  --ok:#55cf8f; --ok-soft:#14301f; --bad:#ff8077; --bad-soft:#3b1a1a; --warn:#f1b65c; --warn-soft:#352710;
+  --scrim:rgb(0 0 0/.6); --shadow:0 1px 2px rgb(0 0 0/.3),0 6px 20px rgb(0 0 0/.3);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f131b; --surface:#171c26; --sunken:#1d2330; --ink:#e7eaf1; --muted:#9aa3b6;
+  --line:#2a3140; --line-strong:#3c4557;
+  --accent:#8199ff; --accent-ink:#0b1020; --accent-soft:#1f2950;
+  --omr:#ec8d6f; --omr-soft:#3a2219;
+  --ok:#55cf8f; --ok-soft:#14301f; --bad:#ff8077; --bad-soft:#3b1a1a; --warn:#f1b65c; --warn-soft:#352710;
+  --scrim:rgb(0 0 0/.6); --shadow:0 1px 2px rgb(0 0 0/.3),0 6px 20px rgb(0 0 0/.3);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 132px;-webkit-text-size-adjust:100%}
+body.lock{overflow:hidden}
+.wrap{max-width:720px;margin-inline:auto}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* Header */
+.top{padding-block:22px 14px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand svg{flex:none}
+h1{font-family:var(--f-display);font-weight:700;font-size:27px;line-height:1.1;margin:0;letter-spacing:-.01em}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:99px;background:var(--sunken);color:var(--muted);border:1px solid var(--line)}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.chip.ok{color:var(--ok);background:var(--ok-soft);border-color:transparent}
+.chip.warn{color:var(--warn);background:var(--warn-soft);border-color:transparent}
+
+/* Steps */
+main{display:grid;gap:14px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);min-width:0}
+.step-head{display:flex;gap:12px;align-items:center;padding:16px;width:100%;text-align:left;background:none;border:0;border-radius:var(--r)}
+.step-head h2{font-family:var(--f-display);font-weight:700;font-size:19px;margin:0;line-height:1.2}
+.step-head p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+.step-head .grow{flex:1;min-width:0}
+.num{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--omr);color:var(--omr);display:grid;place-items:center;font:700 14px var(--f-mono)}
+.step.done .num{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.chev{flex:none;width:22px;height:22px;color:var(--muted);transition:transform .2s ease-out}
+.step-head[aria-expanded="false"] .chev{transform:rotate(-90deg)}
+.step-body{padding:0 16px 16px;display:grid;gap:14px;min-width:0}
+
+/* Fields */
+.fmt{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
+.field{display:grid;gap:5px;min-width:0}
+.field>span{font-size:13px;font-weight:500;color:var(--muted);display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+input[type=text],input[type=number],input[type=password],textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface);color:var(--ink)}
+textarea{resize:vertical;font-family:var(--f-mono);font-size:15px;letter-spacing:.06em;line-height:1.45}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.hint{margin:0;font-size:13px;color:var(--muted)}
+.v{font:700 12px var(--f-mono);padding:1px 7px;border-radius:99px}
+.v.ok{color:var(--ok);background:var(--ok-soft)}
+.v.no{color:var(--warn);background:var(--warn-soft)}
+.keycard{background:var(--sunken);border-radius:12px;padding:12px;display:grid;gap:10px;min-width:0}
+.kc-head{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.kc-head .field{width:120px}
+.kc-head input{font-family:var(--f-mono);font-weight:700;font-size:17px}
+.badge{font-size:12px;font-weight:600;padding:4px 9px;border-radius:99px;margin-bottom:10px}
+.badge.warn{color:var(--warn);background:var(--warn-soft)}
+.icon-btn{margin-left:auto;width:44px;height:44px;border-radius:var(--r-sm);border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);font-size:16px}
+.icon-btn:hover{color:var(--bad);border-color:var(--bad)}
+
+/* Buttons */
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-strong);background:var(--surface);font-weight:600;font-size:14.5px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .15s ease-out,transform .1s ease-out}
+.btn:hover{background:var(--sunken)}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);min-height:50px;padding:0 22px;font-size:16px}
+.btn.primary:hover{filter:brightness(1.07);background:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.link{border:0;background:none;color:var(--accent);padding:0 4px;min-height:40px;justify-self:start}
+.btn.link:hover{text-decoration:underline;background:none}
+.btn.danger{color:var(--bad)}
+.btn.primary-soft{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary-soft:hover{background:var(--accent);filter:brightness(1.07)}
+.btn.link.inline{min-height:0;padding:0;display:inline;font-size:inherit;font-weight:600}
+.import{display:grid;gap:10px;padding:12px;border-radius:12px;background:var(--accent-soft)}
+.import textarea{font-size:13px;letter-spacing:0;tab-size:6}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Upload */
+.drop{display:grid;justify-items:center;gap:6px;text-align:center;padding:24px 16px;border:2px dashed var(--line-strong);border-radius:12px;background:var(--sunken);cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop strong{font-size:16px}
+.drop span{font-size:13px;color:var(--muted)}
+.drop svg{color:var(--accent)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+.th{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--sunken);aspect-ratio:1/1.35;padding:0;max-width:100%}
+.th img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.th .tb{position:absolute;left:5px;right:5px;bottom:5px;border-radius:7px;padding:3px 6px;font-size:12px;font-weight:600;background:var(--surface);color:var(--muted);box-shadow:var(--shadow);text-align:center}
+.th.done .tb{color:var(--ink);font:700 15px var(--f-mono)}
+.th.error .tb{color:var(--bad);background:var(--bad-soft)}
+.th.busy .tb{color:var(--accent)}
+.th.busy::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,var(--accent-soft) 50%,transparent);opacity:.7;animation:scan 1.3s ease-in-out infinite}
+.th .flag{position:absolute;top:6px;right:6px;width:12px;height:12px;border-radius:50%;background:var(--warn);border:2px solid var(--surface)}
+.th .pg{position:absolute;top:5px;left:5px;font:700 11px var(--f-mono);background:var(--surface);color:var(--muted);padding:1px 5px;border-radius:5px}
+@keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+
+/* Engine */
+.engine{display:grid;gap:12px;padding:12px;border-radius:12px;border:1px solid var(--line)}
+.eng-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.lbl{font-size:13.5px;font-weight:600}
+.seg{display:inline-flex;background:var(--sunken);border-radius:10px;padding:3px;gap:3px}
+.seg button{min-height:38px;padding:0 14px;border:0;border-radius:8px;background:none;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button[aria-checked="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.check{display:flex;gap:10px;align-items:center;font-size:14px;min-height:36px}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.gem{display:grid;gap:10px}
+
+/* Results */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--sunken);border-radius:10px;padding:10px 12px;min-width:0}
+.stat b{display:block;font:700 24px/1.15 var(--f-mono);font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted)}
+.hist{display:grid;gap:6px}
+.hist-bars{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;align-items:end;height:64px}
+.hist-bars i{display:block;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.hist-bars i.zero{background:var(--line)}
+.hist-lbl{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;text-align:center;font:500 11px var(--f-mono);color:var(--muted)}
+.list{display:grid;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:10px 4px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;width:100%}
+.row:hover{background:var(--sunken)}
+.row img{width:40px;height:54px;object-fit:cover;object-position:top;border-radius:5px;border:1px solid var(--line)}
+.row .who{min-width:0}
+.row .who b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .who small{color:var(--muted);font-size:12.5px;display:block}
+.row .sc{font:700 22px var(--f-mono);text-align:right}
+.row .sc small{display:block;font:500 11.5px var(--f-body);color:var(--muted)}
+.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.tag{font-size:11.5px;font-weight:600;padding:1px 7px;border-radius:99px;color:var(--warn);background:var(--warn-soft)}
+.tag.bad{color:var(--bad);background:var(--bad-soft)}
+.empty{padding:18px;border-radius:12px;background:var(--sunken);color:var(--muted);font-size:14px;text-align:center}
+
+/* Action bar */
+.actionbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+  padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.prog{position:absolute;left:0;right:0;top:-1px;height:3px;background:transparent}
+.prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s ease-out}
+.ab-in{display:flex;align-items:center;gap:12px}
+.ab-text{flex:1;min-width:0;font-size:13.5px;color:var(--muted);line-height:1.35}
+.ab-text b{color:var(--ink);font-weight:600;display:block;font-size:14.5px}
+
+/* Overlay */
+.ov{position:fixed;inset:0;z-index:40;background:var(--scrim);display:flex;justify-content:center}
+.panel{position:absolute;left:0;right:0;bottom:0;top:max(20px,env(safe-area-inset-top,0px));max-width:760px;margin-inline:auto;background:var(--paper);border-radius:18px 18px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:.4}to{transform:none;opacity:1}}
+.panel-head{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:var(--surface)}
+.panel-head h3{flex:1;min-width:0;margin:0;font:700 18px var(--f-display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.panel-body{flex:1;overflow:auto;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:16px;align-content:start}
+.zoom{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);max-height:46vh}
+.zoom img{width:100%;display:block;cursor:zoom-in}
+.zoom.big img{width:230%;max-width:none;cursor:zoom-out}
+.idgrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.idgrid input{font-weight:600}
+.scorebar{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.scorebar .big{grid-row:span 3;font:700 40px/1 var(--f-mono);color:var(--accent)}
+.scorebar .big small{display:block;font:500 12px var(--f-body);color:var(--muted);margin-top:4px}
+.scorebar div{font-size:13.5px;color:var(--muted)}
+.scorebar div b{color:var(--ink);font-family:var(--f-mono)}
+.sec h4{margin:0 0 8px;font:700 15px var(--f-display);display:flex;justify-content:space-between;gap:8px}
+.sec h4 span{font:500 13px var(--f-body);color:var(--muted)}
+.legend{font-size:12.5px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin-right:4px}
+.legend .l1{background:var(--ink)}
+.legend .l2{border:1.5px solid var(--omr);outline:2px solid var(--ok);outline-offset:1px}
+.q1{display:grid;grid-template-columns:repeat(auto-fill,minmax(186px,1fr));gap:6px}
+.qrow{display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.qrow.ok{background:var(--ok-soft);border-color:transparent}
+.qrow.bad{background:var(--bad-soft);border-color:transparent}
+.qn{width:26px;font:700 13px var(--f-mono);color:var(--muted);flex:none}
+.mk{margin-left:auto;font-weight:700;width:18px;text-align:center;flex:none}
+.qrow.ok .mk{color:var(--ok)} .qrow.bad .mk{color:var(--bad)}
+.bub{width:32px;height:32px;flex:none;border-radius:50%;border:1.5px solid var(--omr);background:var(--surface);color:var(--omr);font:700 12.5px var(--f-mono);padding:0;display:grid;place-items:center}
+.bub.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.bub.key{outline:2.5px solid var(--ok);outline-offset:1.5px}
+.q2{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.q2 .blk{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:grid;gap:4px}
+.q2 .bh{display:flex;justify-content:space-between;font-size:13px;font-weight:600}
+.q2 .bh span{font-family:var(--f-mono);color:var(--muted);font-weight:500}
+.q2 .qrow{border:0;padding:3px 6px}
+.q3{display:grid;gap:6px}
+.q3 .qrow{gap:10px}
+.q3 input{max-width:130px;min-height:40px;padding:6px 10px;font-family:var(--f-mono);font-weight:700}
+.q3 .kv{font-size:13px;color:var(--muted)}
+.q3 .kv b{font-family:var(--f-mono);color:var(--ink)}
+.note{padding:12px 14px;border-radius:12px;font-size:14px}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.note.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* Tổng hợp */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px;min-width:0}
+.card h4{margin:0;font:700 16px var(--f-display);display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.card h4 span{font:500 13px var(--f-body);color:var(--muted)}
+.exp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.exp{display:grid;gap:3px;align-content:start;text-align:left;padding:12px 14px;border:1px solid var(--line-strong);border-radius:10px;background:var(--surface);min-height:44px;transition:border-color .15s,background .15s}
+.exp b{font-size:15px;font-weight:600}
+.exp span{font-size:12.5px;color:var(--muted);line-height:1.4}
+.exp:hover{border-color:var(--accent);background:var(--accent-soft)}
+.exp:disabled{opacity:.5;cursor:progress}
+.repgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.qchips{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:5px}
+.qc{display:grid;text-align:center;padding:5px 2px;border-radius:8px;background:var(--sunken);font:700 13px var(--f-mono)}
+.qc b{font-size:11px;font-weight:500;color:var(--muted)}
+.qc.ok{background:var(--ok-soft);color:var(--ok)}
+.qc.bad{background:var(--bad-soft);color:var(--bad)}
+.nxlist{display:grid;gap:10px}
+.nxrow{display:grid;gap:6px;padding-top:10px;border-top:1px solid var(--line);min-width:0}
+.nxh{display:flex;gap:2px 10px;align-items:baseline;flex-wrap:wrap}
+.nxh b{font-weight:600}
+.nxh small{color:var(--muted);font-size:12.5px}
+.pill{margin-left:auto;font:700 13px var(--f-mono);padding:2px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.nxrow textarea,#dNx{font-family:var(--f-body);letter-spacing:0;font-size:14.5px;line-height:1.5}
+select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface);color:var(--ink);font:inherit}
+
+/* Lớp */
+.cls-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.cls-row .field{flex:1;min-width:180px}
+.ros summary,.gs>summary,.howto summary{cursor:pointer;font-weight:600;min-height:40px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ros-wrap{overflow-x:auto;margin-top:6px;border:1px solid var(--line);border-radius:10px}
+.ros table{border-collapse:collapse;width:100%;font-size:14px}
+.ros th,.ros td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.ros th{font-size:12.5px;color:var(--muted);font-weight:600;background:var(--sunken)}
+.ros td:nth-child(3){white-space:normal;min-width:150px}
+.ros tr.has{cursor:pointer}
+.ros tr.has:hover td{background:var(--accent-soft)}
+.ros td:last-child,.ros th:last-child{text-align:right}
+.muted{color:var(--muted)}
+.gs{border:1px solid var(--line);border-radius:12px;padding:6px 12px}
+.gs[open]{padding-bottom:12px}
+.gs>summary{justify-content:space-between}
+.gs-body{display:grid;gap:10px;padding-top:6px}
+.howto{border-top:1px solid var(--line);padding-top:6px}
+.howto ol{margin:6px 0 10px;padding-left:20px;display:grid;gap:6px;font-size:14px}
+.howto code{font-family:var(--f-mono);font-size:12.5px;background:var(--sunken);padding:1px 5px;border-radius:5px}
+.absent{font-size:14px;line-height:1.6}
+.exp.muted-card{border-style:dashed}
+#expStatus a{color:var(--accent);font-weight:600}
+
+.gtest{padding:10px 12px;border-radius:10px;background:var(--sunken);font-size:14px;line-height:1.5;display:grid;gap:8px}
+.gtest.ok{background:var(--ok-soft);color:var(--ok)}
+.gtest.bad{background:var(--bad-soft);color:var(--bad)}
+.gtest.warn{background:var(--warn-soft);color:var(--warn)}
+.gtest code{font-family:var(--f-mono);font-size:12.5px}
+.gtest .krow{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:baseline}
+.gtest .kname{font:700 13px var(--f-mono)}
+.gtest .k-ok{color:var(--ok)} .gtest .k-bad{color:var(--bad)} .gtest .k-warn{color:var(--warn)}
+.secret:not(:focus){-webkit-text-security:disc}
+#gKeys{font-size:13.5px;letter-spacing:0}
+.mchips{display:flex;flex-wrap:wrap;gap:6px}
+.mchips button{min-height:36px;padding:0 10px;border-radius:99px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font:500 13px var(--f-mono)}
+.mchips button:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Camera */
+.cam-btn{width:100%}
+.scan{position:fixed;inset:0;z-index:50;background:#000;color:#fff;overflow:hidden;font-family:var(--f-body)}
+.scan video,#scanOv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scan-top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:calc(10px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 14px max(14px,env(safe-area-inset-left,0px));background:linear-gradient(rgb(0 0 0/.6),transparent)}
+.sbtn{min-height:44px;padding:0 18px;border-radius:99px;border:1px solid rgb(255 255 255/.4);background:rgb(0 0 0/.4);color:#fff;font-weight:600;font-size:15px}
+.sbtn[aria-pressed="true"]{background:#ffd54a;color:#141414;border-color:#ffd54a}
+.scount{font:700 15px var(--f-mono);background:rgb(0 0 0/.5);padding:7px 12px;border-radius:99px;text-align:center}
+.scan-msg{position:absolute;left:50%;transform:translateX(-50%);top:calc(74px + env(safe-area-inset-top,0px));background:rgb(0 0 0/.6);padding:8px 14px;border-radius:12px;font-size:14.5px;text-align:center;width:max-content;max-width:calc(100% - 32px)}
+.scan-msg.ok{background:rgb(17 112 63/.85)}
+.scan-bottom{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;
+  padding:18px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:linear-gradient(transparent,rgb(0 0 0/.65))}
+.scan-last img{width:54px;height:74px;object-fit:cover;object-position:top;border-radius:6px;border:2px solid #fff;display:block}
+.shutter{width:76px;height:76px;border-radius:50%;border:4px solid #fff;background:rgb(255 255 255/.22);padding:0;transition:transform .1s ease-out}
+.shutter:active{transform:scale(.92);background:#fff}
+.scan-opts{justify-self:end;display:grid;gap:8px;font-size:14px}
+.scan-opts label{display:flex;gap:8px;align-items:center;min-height:30px}
+.scan-opts input{width:20px;height:20px;accent-color:#5fd796}
+.scan-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .3s ease-out}
+.scan-flash.on{opacity:.75;transition:none}
+
+/* Toast */
+.toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
+.toast button{background:none;border:0;color:var(--accent-soft);font-weight:700;min-height:32px;text-decoration:underline}
+
+@media (max-width:520px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .idgrid{grid-template-columns:1fr 1fr}
+  .idgrid .f-name{grid-column:1/-1}
+  h1{font-size:24px}
+}
+@media (prefers-reduced-motion:reduce){*,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<header class="wrap top">
+  <div class="brand">
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="10" fill="var(--surface)" stroke="var(--line-strong)"/><circle cx="12" cy="20" r="5" fill="none" stroke="var(--omr)" stroke-width="1.6"/><circle cx="20" cy="20" r="5" fill="var(--ink)"/><circle cx="28" cy="20" r="5" fill="none" stroke="var(--omr)" stroke-width="1.6"/><path d="M8 31h24" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/></svg>
+    <div><h1>Chấm Phiếu AI</h1><p>Tải phiếu PDF, AI đọc ô tô, chấm theo đáp án của thầy</p></div>
+  </div>
+  <span id="engineChip" class="chip">Đang kết nối AI…</span>
+</header>
+
+<main class="wrap">
+  <section class="step" id="stepKey">
+    <button class="step-head" id="keyToggle" aria-expanded="true" aria-controls="keyBody">
+      <span class="num">1</span>
+      <span class="grow"><h2>Đáp án</h2><p id="keySummary"></p></span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="step-body" id="keyBody">
+      <div class="import">
+        <div class="btnrow">
+          <button class="btn primary-soft" id="impBtn" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+            Nhập từ file Excel</button>
+          <button class="btn" id="pasteToggle" type="button" aria-expanded="false" aria-controls="pasteBox">Dán từ Excel</button>
+        </div>
+        <input type="file" id="xlsxIn" accept=".xlsx,.xls,.csv,.ods,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" hidden>
+        <div class="field" id="pasteBox" hidden>
+          <span>Bôi đen bảng đáp án trong Excel (gồm cả dòng mã đề), sao chép rồi dán vào đây</span>
+          <textarea id="pasteTa" rows="4" spellcheck="false" autocomplete="off" placeholder="Câu	101	102&#10;1	A	C&#10;2	B	D"></textarea>
+          <button class="btn" id="pasteGo" type="button">Nhập đáp án đã dán</button>
+        </div>
+        <p class="hint">Đọc được bảng <b>mỗi cột một mã đề</b> (dòng đầu ghi mã đề) hoặc <b>mỗi dòng một mã đề</b>. Đáp án theo thứ tự Phần I → Phần II (ĐSĐS trong một ô hoặc từng ý) → Phần III; app tự nhận số câu. <button class="btn link inline" id="tplBtn" type="button">Tải file Excel mẫu</button></p>
+      </div>
+      <div class="fmt">
+        <label class="field"><span>Phần I (câu)</span><input type="number" id="n1" min="0" max="80" inputmode="numeric"></label>
+        <label class="field"><span>Phần II (câu)</span><input type="number" id="n2" min="0" max="10" inputmode="numeric"></label>
+        <label class="field"><span>Phần III (câu)</span><input type="number" id="n3" min="0" max="12" inputmode="numeric"></label>
+        <label class="field"><span>Điểm/câu P.I</span><input type="number" id="pt1" min="0" step="0.05" inputmode="decimal"></label>
+        <label class="field"><span>Điểm/câu P.III</span><input type="number" id="pt3" min="0" step="0.05" inputmode="decimal"></label>
+      </div>
+      <p class="hint">Phần II chấm theo thang của Bộ: đúng 1 ý 0,1 · 2 ý 0,25 · 3 ý 0,5 · 4 ý 1 điểm. Phiếu chỉ có trắc nghiệm ABCD thì để Phần II, III bằng 0.</p>
+      <div id="keyList" style="display:grid;gap:10px"></div>
+      <button class="btn" id="addKey" type="button">+ Thêm mã đề</button>
+    </div>
+  </section>
+
+  <section class="step" id="stepClass">
+    <button class="step-head" id="clsToggle" type="button" aria-expanded="true" aria-controls="clsBody">
+      <span class="num">2</span>
+      <span class="grow"><h2>Lớp &amp; danh sách</h2><p id="clsSummary"></p></span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="step-body" id="clsBody">
+      <div class="cls-row">
+        <label class="field"><span>Lớp đang chấm</span><select id="clsSel"></select></label>
+        <button class="btn" id="clsNew" type="button" aria-expanded="false" aria-controls="clsNewBox">+ Lớp mới</button>
+      </div>
+      <div class="cls-row" id="clsNewBox" hidden>
+        <label class="field"><span>Tên lớp mới</span><input type="text" id="clsNewName" placeholder="VD: 10A3" autocomplete="off"></label>
+        <button class="btn primary-soft" id="clsNewOk" type="button">Tạo lớp</button>
+      </div>
+      <div class="import" id="rosActions" hidden>
+        <div class="btnrow">
+          <button class="btn primary-soft" id="rosImp" type="button">Nhập danh sách từ Excel</button>
+          <button class="btn" id="rosPasteToggle" type="button" aria-expanded="false" aria-controls="rosPasteBox">Dán từ Excel</button>
+        </div>
+        <input type="file" id="rosIn" accept=".xlsx,.xls,.csv,.ods,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" hidden>
+        <div class="field" id="rosPasteBox" hidden>
+          <span>Bôi đen bảng danh sách trong Excel (gồm dòng tiêu đề), sao chép rồi dán vào đây</span>
+          <textarea id="rosPasteTa" rows="4" spellcheck="false" autocomplete="off" placeholder="STT	SBD	Họ và tên&#10;1	100101	Nguyễn Văn An"></textarea>
+          <button class="btn" id="rosPasteGo" type="button">Nhập danh sách đã dán</button>
+        </div>
+        <p class="hint">Cần cột <b>Họ và tên</b> (hoặc tách Họ / Tên) và cột <b>SBD</b>. Không có cột SBD thì app dùng STT làm SBD, học sinh ghi STT vào ô SBD trên phiếu. Nhập lại sẽ thay danh sách cũ của lớp. <button class="btn link inline" id="clsDel" type="button">Xóa lớp này</button></p>
+      </div>
+      <div id="rosList"></div>
+      <details class="gs" id="gsBox">
+        <summary><span>Kết nối Google Sheet</span><span id="gsState" class="chip">Chưa kết nối</span></summary>
+        <div class="gs-body">
+          <p class="note warn" id="gsClaudeNote" hidden>Trang đang mở trong Claude nên không gọi được Google Sheet (mạng ra ngoài bị chặn). Ở đây thầy dùng nút <b>Lưu lên Google Drive</b> trong Tổng hợp. Kết nối Google Sheet đầy đủ (tải danh sách lớp, ghi sổ điểm) chạy trên bản HTML đưa lên Vercel.</p>
+          <label class="field"><span>URL ứng dụng web Apps Script (đuôi /exec)</span><input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false" inputmode="url"></label>
+          <label class="field"><span>Mật khẩu kết nối (giống MAT_KHAU trong script)</span><input type="password" id="gasTok" autocomplete="off"></label>
+          <div class="btnrow">
+            <button class="btn" id="gasTest" type="button">Kiểm tra kết nối</button>
+            <button class="btn" id="gasLoad" type="button">Tải DS lớp từ Google Sheet</button>
+            <button class="btn" id="gasSaveRos" type="button">Lưu DS lớp lên Google Sheet</button>
+          </div>
+          <p class="hint" id="gasStatus" aria-live="polite"></p>
+          <details class="howto"><summary>Cách cài đặt (5 phút, làm một lần)</summary>
+            <ol>
+              <li>Tạo một Google Sheet mới, ví dụ "Sổ điểm Toán".</li>
+              <li>Vào <b>Tiện ích mở rộng → Apps Script</b>, xóa code mẫu, dán mã sao chép bằng nút bên dưới, bấm Lưu.</li>
+              <li>Sửa dòng <code>MAT_KHAU = ''</code> thành mật khẩu tuỳ ý (nên làm), Lưu lại.</li>
+              <li><b>Triển khai → Tùy chọn triển khai mới →</b> chọn <b>Ứng dụng web</b>; Thực thi: <b>Tôi</b>; Quyền truy cập: <b>Bất kỳ ai</b> → Triển khai → cấp quyền cho tài khoản.</li>
+              <li>Sao chép URL ứng dụng web, dán vào ô trên, nhập mật khẩu, bấm <b>Kiểm tra kết nối</b>.</li>
+            </ol>
+            <p class="hint">App sẽ tạo sheet <b>"Lớp 10A3"</b> (STT, SBD, Họ và tên, mỗi bài kiểm tra một cột điểm) và sheet <b>"10A3 · tên bài"</b> chứa điểm từng phần, nhận xét, bài làm.</p>
+            <button class="btn" id="gasCopy" type="button">Sao chép mã Apps Script</button>
+          </details>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="step" id="stepSheets">
+    <div class="step-head" role="presentation">
+      <span class="num">3</span>
+      <span class="grow"><h2>Phiếu bài làm</h2><p id="sheetSummary">Mỗi trang PDF là một phiếu</p></span>
+    </div>
+    <div class="step-body">
+      <button class="btn primary cam-btn" id="camBtn" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>
+        Quét phiếu bằng camera</button>
+      <input type="file" id="camIn" accept="image/*" capture="environment" hidden>
+      <p class="hint" id="camHint" style="margin-top:-6px"></p>
+      <label class="drop" id="drop" for="fileIn">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
+        <strong>Chọn file PDF hoặc ảnh phiếu</strong>
+        <span>Chọn được nhiều file một lúc · ảnh chụp bằng điện thoại cũng được</span>
+      </label>
+      <input type="file" id="fileIn" accept="application/pdf,image/*" multiple hidden>
+      <div class="btnrow">
+        <button class="btn link" id="demoBtn" type="button">Chưa có phiếu? Thử với phiếu mẫu</button>
+        <button class="btn link danger" id="clearBtn" type="button" hidden>Xóa tất cả phiếu</button>
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+
+      <div class="engine" id="engineBox">
+        <div class="eng-row"><span class="lbl">AI đọc phiếu</span>
+          <div class="seg" role="radiogroup" aria-label="Chọn AI" id="engSeg">
+            <button type="button" role="radio" data-eng="claude" aria-checked="true">Claude</button>
+            <button type="button" role="radio" data-eng="gemini" aria-checked="false">Gemini</button>
+          </div></div>
+        <div class="eng-row" id="tierRow"><span class="lbl">Chế độ</span>
+          <div class="seg" role="radiogroup" aria-label="Tốc độ đọc" id="tierSeg">
+            <button type="button" role="radio" data-tier="quick" aria-checked="true">Nhanh</button>
+            <button type="button" role="radio" data-tier="default" aria-checked="false">Kỹ hơn</button>
+          </div></div>
+        <label class="check"><input type="checkbox" id="splitChk"> Tách mỗi phiếu thành 2 nửa khi gửi (ô tô nét hơn, đọc chuẩn hơn)</label>
+        <div class="gem" id="gemBox" hidden>
+          <label class="field"><span>Gemini API key · mỗi dòng một key. Nhiều key thì chấm nhanh hơn; key nào hết lượt app tự chuyển key khác</span><textarea id="gKeys" class="secret" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="AIza…"></textarea></label>
+          <label class="check"><input type="checkbox" id="gAuto"> Tự động chọn model tốt nhất mà từng key dùng được</label>
+          <label class="field" id="gModelRow"><span>Model</span><input type="text" id="gModel" list="gModels" autocomplete="off" spellcheck="false" autocapitalize="off"><datalist id="gModels"></datalist></label>
+          <label class="check"><input type="checkbox" id="gNoThink"> Tắt chế độ suy nghĩ (nhanh và rẻ hơn, đủ chính xác để đọc ô tô)</label>
+          <div class="btnrow"><button class="btn" id="gTest" type="button">Kiểm tra key</button></div>
+          <div class="gtest" id="gTestOut" aria-live="polite" hidden></div>
+        </div>
+        <p class="hint" id="engNote"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="stepRes">
+    <div class="step-head" role="presentation">
+      <span class="num">4</span>
+      <span class="grow"><h2>Kết quả</h2><p id="resSummary">Chạm từng phiếu để xem chi tiết và sửa nếu AI đọc nhầm</p></span>
+    </div>
+    <div class="step-body" id="resBody"></div>
+  </section>
+</main>
+
+<div class="actionbar">
+  <div class="prog"><i id="progFill"></i></div>
+  <div class="wrap ab-in">
+    <div class="ab-text" id="abText" aria-live="polite"></div>
+    <button class="btn" id="stopBtn" type="button" hidden>Dừng</button>
+    <button class="btn primary" id="runBtn" type="button">Chấm</button>
+  </div>
+</div>
+
+<div class="ov" id="ov" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+    <div class="panel-head">
+      <h3 id="ovTitle">Phiếu</h3>
+      <button class="icon-btn" id="ovClose" type="button" aria-label="Đóng" style="margin-left:0">✕</button>
+    </div>
+    <div class="panel-body" id="ovBody"></div>
+  </div>
+</div>
+<div class="ov" id="ov2" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="ov2Title">
+    <div class="panel-head">
+      <h3 id="ov2Title">Tổng hợp &amp; nhận xét</h3>
+      <button class="icon-btn" id="ov2Close" type="button" aria-label="Đóng" style="margin-left:0">✕</button>
+    </div>
+    <div class="panel-body" id="sumBody"></div>
+  </div>
+</div>
+<div class="scan" id="scan" hidden role="dialog" aria-modal="true" aria-label="Quét phiếu bằng camera">
+  <video id="scanVid" playsinline muted autoplay></video>
+  <canvas id="scanOv"></canvas>
+  <div class="scan-flash" id="scanFlash"></div>
+  <div class="scan-top">
+    <button class="sbtn" id="scanClose" type="button">Xong</button>
+    <div class="scount" id="scanCount" aria-live="polite">0 phiếu</div>
+    <button class="sbtn" id="scanTorch" type="button" aria-pressed="false" style="visibility:hidden">Đèn</button>
+  </div>
+  <div class="scan-msg" id="scanMsg" aria-live="polite">Đang mở camera…</div>
+  <div class="scan-bottom">
+    <div class="scan-last"><img id="scanLast" alt="Phiếu vừa quét" style="visibility:hidden"></div>
+    <button class="shutter" id="scanShot" type="button" aria-label="Chụp phiếu"></button>
+    <div class="scan-opts">
+      <label><input type="checkbox" id="scanAuto"> Tự chụp</label>
+      <label><input type="checkbox" id="scanGrade"> Chấm ngay</label>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="text/plain" id="gasCode">/**
+ * CHẤM PHIẾU AI – KẾT NỐI GOOGLE SHEET
+ * Lưu danh sách lớp và điểm từ app Chấm Phiếu AI vào Google Sheet này.
+ *
+ * CÀI ĐẶT (làm 1 lần):
+ * 1. Tạo một Google Sheet mới (ví dụ "Sổ điểm Toán").
+ * 2. Tiện ích mở rộng → Apps Script → xóa hết code mẫu → dán toàn bộ file này → bấm Lưu.
+ * 3. (Nên làm) Đặt mật khẩu ở dòng MAT_KHAU bên dưới, rồi Lưu.
+ * 4. Triển khai → Tùy chọn triển khai mới → bánh răng chọn "Ứng dụng web":
+ *      - Thực thi dưới dạng: Tôi
+ *      - Người có quyền truy cập: Bất kỳ ai
+ *    → Triển khai → Cấp quyền truy cập (chọn tài khoản, Nâng cao → Đi tới… → Cho phép).
+ * 5. Sao chép "URL ứng dụng web" (đuôi /exec), dán vào app ở bước "Lớp & danh sách",
+ *    nhập mật khẩu giống hệt MAT_KHAU, bấm "Kiểm tra kết nối".
+ * Sửa code sau này: Triển khai → Quản lý triển khai → bút chì → Phiên bản: Mới → Triển khai (URL giữ nguyên).
+ *
+ * CẤU TRÚC SHEET:
+ *  - "Lớp 10A3": STT | SBD | Họ và tên | <tên bài 1> | <tên bài 2> | …  (sổ điểm, mỗi bài một cột)
+ *  - "10A3 · <tên bài>": bảng chi tiết của từng bài (điểm từng phần, xếp loại, nhận xét, bài làm).
+ */
+const MAT_KHAU = ''; // ví dụ: 'toan10a3'. Để trống = không cần mật khẩu.
+
+const PREFIX = 'Lớp ';
+const HEAD_BG = '#e8ecf9';
+
+function doGet() {
+  return out_({ ok: true, app: 'cham-phieu-ai', msg: 'Kết nối hoạt động. Dán URL này vào app Chấm Phiếu AI.' });
+}
+
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(25000);
+  try {
+    const b = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    if (MAT_KHAU && b.token !== MAT_KHAU) return out_({ ok: false, error: 'Sai mật khẩu kết nối' });
+    switch (b.action) {
+      case 'ping': return out_({ ok: true, name: SpreadsheetApp.getActive().getName(), url: SpreadsheetApp.getActive().getUrl(), classes: listClasses_() });
+      case 'getAll': return out_({ ok: true, classes: getAll_() });
+      case 'saveRoster': return out_(saveRoster_(b.lop, b.students || []));
+      case 'saveScores': return out_(saveScores_(b));
+      default: return out_({ ok: false, error: 'Lệnh không hợp lệ: ' + b.action });
+    }
+  } catch (err) {
+    return out_({ ok: false, error: String((err && err.message) || err) });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function out_(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+}
+function clean_(s) { return String(s || '').replace(/[\[\]\*\?\/\\:]/g, '-').trim().slice(0, 95); }
+function norm_(s) { return String(s || '').replace(/\D/g, '').replace(/^0+(?=\d)/, ''); }
+function sheetName_(lop) { return clean_(PREFIX + String(lop).trim()); }
+function isClassSheet_(sh) {
+  if (sh.getLastColumn() < 3) return false;
+  const h = sh.getRange(1, 1, 1, 3).getDisplayValues()[0];
+  return h[0] === 'STT' && h[1] === 'SBD' && h[2] === 'Họ và tên';
+}
+function listClasses_() {
+  return SpreadsheetApp.getActive().getSheets().filter(isClassSheet_)
+    .map(s => s.getName().indexOf(PREFIX) === 0 ? s.getName().slice(PREFIX.length) : s.getName());
+}
+function classSheet_(lop) {
+  const ss = SpreadsheetApp.getActive();
+  let sh = ss.getSheetByName(sheetName_(lop));
+  if (!sh) {
+    sh = ss.insertSheet(sheetName_(lop));
+    sh.getRange(1, 1, 1, 3).setValues([['STT', 'SBD', 'Họ và tên']]).setFontWeight('bold').setBackground(HEAD_BG);
+    sh.setFrozenRows(1); sh.setFrozenColumns(3); sh.setColumnWidth(3, 210);
+  }
+  sh.getRange('B:B').setNumberFormat('@');
+  return sh;
+}
+function readStudents_(sh) {
+  const n = sh.getLastRow() - 1;
+  if (n < 1) return [];
+  return sh.getRange(2, 1, n, 3).getDisplayValues()
+    .filter(r => r[1] || r[2])
+    .map(r => ({ stt: r[0], sbd: r[1], ten: r[2] }));
+}
+function getAll_() {
+  const o = {};
+  SpreadsheetApp.getActive().getSheets().filter(isClassSheet_).forEach(s => {
+    const name = s.getName().indexOf(PREFIX) === 0 ? s.getName().slice(PREFIX.length) : s.getName();
+    o[name] = readStudents_(s);
+  });
+  return o;
+}
+
+/** Thêm học sinh mới, cập nhật STT/họ tên theo SBD; giữ nguyên các cột điểm. Trả về map SBD → số dòng. */
+function upsertStudents_(sh, students, overwriteNames) {
+  const n = Math.max(0, sh.getLastRow() - 1);
+  const data = n ? sh.getRange(2, 1, n, 3).getValues() : [];
+  const idx = {};
+  data.forEach((r, i) => { const k = norm_(r[1]); if (k) idx[k] = i; });
+  let added = 0, updated = 0;
+  const extra = [];
+  students.forEach(st => {
+    const k = norm_(st.sbd);
+    if (!k && !st.ten) return;
+    if (k && idx[k] !== undefined) {
+      const r = data[idx[k]];
+      if (overwriteNames) { if (st.stt !== undefined && st.stt !== '') r[0] = st.stt; if (st.ten) r[2] = st.ten; updated++; }
+    } else {
+      extra.push([st.stt || '', String(st.sbd || ''), st.ten || '']);
+      if (k) idx[k] = data.length + extra.length - 1;
+      added++;
+    }
+  });
+  if (n) sh.getRange(2, 1, n, 3).setValues(data);
+  if (extra.length) sh.getRange(n + 2, 1, extra.length, 3).setValues(extra);
+  const rows = {};
+  Object.keys(idx).forEach(k => { rows[k] = idx[k] + 2; });
+  return { rows, added, updated };
+}
+
+function saveRoster_(lop, students) {
+  if (!lop) return { ok: false, error: 'Thiếu tên lớp' };
+  const sh = classSheet_(lop);
+  const r = upsertStudents_(sh, students, true);
+  return { ok: true, sheet: sh.getName(), added: r.added, updated: r.updated, url: SpreadsheetApp.getActive().getUrl() + '#gid=' + sh.getSheetId() };
+}
+
+/**
+ * b = { lop, bai, students: [{stt, sbd, ten, total}], header: [...], rows: [[...]] }
+ */
+function saveScores_(b) {
+  const ss = SpreadsheetApp.getActive();
+  const lop = String(b.lop || 'Chưa xếp lớp').trim();
+  const bai = clean_(b.bai || 'Bài kiểm tra');
+  const students = b.students || [];
+  const sh = classSheet_(lop);
+
+  // 1) Sổ điểm của lớp: mỗi bài một cột
+  const u = upsertStudents_(sh, students, false);
+  const lastCol = Math.max(3, sh.getLastColumn());
+  const head = sh.getRange(1, 1, 1, lastCol).getDisplayValues()[0];
+  let col = head.indexOf(bai) + 1;
+  if (!col) {
+    col = lastCol + 1;
+    sh.getRange(1, col).setValue(bai).setFontWeight('bold').setBackground(HEAD_BG).setWrap(true);
+    sh.setColumnWidth(col, 110);
+  }
+  const nRows = sh.getLastRow() - 1;
+  let saved = 0;
+  if (nRows > 0) {
+    const colRange = sh.getRange(2, col, nRows, 1);
+    const vals = colRange.getValues();
+    students.forEach(st => {
+      const r = u.rows[norm_(st.sbd)];
+      if (r && st.total !== '' && st.total !== null && st.total !== undefined) { vals[r - 2][0] = st.total; saved++; }
+    });
+    colRange.setValues(vals);
+  }
+
+  // 2) Sheet chi tiết của bài
+  let detail = '';
+  if (Array.isArray(b.header) && b.header.length) {
+    detail = clean_(lop + ' · ' + bai);
+    let ds = ss.getSheetByName(detail);
+    if (!ds) ds = ss.insertSheet(detail); else ds.clear();
+    const w = b.header.length;
+    const rows = [b.header].concat((b.rows || []).map(r => { const a = r.slice(0, w); while (a.length < w) a.push(''); return a; }));
+    ds.getRange(1, 1, rows.length, w).setValues(rows);
+    ds.getRange(1, 1, 1, w).setFontWeight('bold').setBackground(HEAD_BG);
+    ds.setFrozenRows(1);
+    const nx = b.header.indexOf('Nhận xét');
+    if (nx >= 0) { ds.setColumnWidth(nx + 1, 380); ds.getRange(2, nx + 1, Math.max(1, rows.length - 1), 1).setWrap(true); }
+  }
+  return { ok: true, sheet: sh.getName(), detail: detail, saved: saved, added: u.added, url: ss.getUrl() + '#gid=' + sh.getSheetId() };
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const LS = 'cham-phieu-ai-v1';
+const P2PTS = [0, 0.1, 0.25, 0.5, 1];
+const DEFAULT = {
+  n1: 12, n2: 4, n3: 6, pt1: 0.25, pt3: 0.5,
+  keys: [{ code: '101', p1: 'ABCDDCBAACBD', p2: 'ĐSĐS SSĐĐ ĐĐSS SĐSĐ', p3: '2,5 -3 12 0,75 40 1,2', sample: true }],
+  engine: 'claude', tier: 'quick', split: true, gKey: '', gKeys: [], gAuto: true, gKeyModel: {}, gModel: 'gemini-2.5-flash', keyOpen: true,
+  rep: { truong: 'Trường THPT Nguyễn Hữu Cảnh', bai: '', lop: '', gv: 'Vũ Tiến Lực' },
+  classes: {}, curClass: '', clsOpen: true, gas: { url: '', token: '' }, gNoThink: true, gThinkIdx: {}, scanAuto: true, scanGrade: true
+};
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const r2 = x => Math.round(x * 100) / 100;
+const fmt = x => (Math.round(x * 100) / 100).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+
+let cfg = loadCfg();
+function loadCfg() {
+  try { const s = JSON.parse(localStorage.getItem(LS)); if (s && Array.isArray(s.keys) && s.keys.length) return { ...DEFAULT, ...s, rep: { ...DEFAULT.rep, ...(s.rep || {}) }, gas: { ...DEFAULT.gas, ...(s.gas || {}) }, classes: s.classes || {} }; } catch (e) {}
+  return JSON.parse(JSON.stringify(DEFAULT));
+}
+function migrateCfg() {
+  if (!Array.isArray(cfg.gKeys)) cfg.gKeys = [];
+  if (cfg.gKey && !cfg.gKeys.length) cfg.gKeys = [cfg.gKey.trim()];
+  cfg.gKey = ''; if (typeof cfg.gKeyModel !== 'object' || !cfg.gKeyModel) cfg.gKeyModel = {};
+  if (cfg.gAuto === undefined) cfg.gAuto = true;
+}
+migrateCfg();
+function saveCfg() { try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch (e) {} }
+
+/* ---------- Đáp án ---------- */
+const parseP1 = s => String(s || '').toUpperCase().replace(/[^ABCD]/g, '').split('').filter(Boolean);
+function parseP2(s) {
+  const t = String(s || '').replace(/[a-dA-D]\s*[).:]/g, '').replace(/[^ĐđDdTtSsFf]/g, '').toUpperCase().replace(/[DT]/g, 'Đ').replace(/F/g, 'S');
+  const out = []; for (let i = 0; i < t.length; i += 4) out.push(t.slice(i, i + 4).split('')); return out;
+}
+const parseP3 = s => String(s || '').split(/[\s;|]+/).filter(Boolean);
+const normNum = v => String(v ?? '').trim().replace(/\s/g, '').replace(/,/g, '.').replace(/^\+/, '');
+function sameP3(a, b) {
+  const x = normNum(a), y = normNum(b); if (!x || !y) return false;
+  const nx = Number(x), ny = Number(y);
+  if (x !== '' && y !== '' && !isNaN(nx) && !isNaN(ny)) return Math.abs(nx - ny) < 1e-9;
+  return x.toLowerCase() === y.toLowerCase();
+}
+const maxScore = () => r2(cfg.n1 * cfg.pt1 + cfg.n2 + cfg.n3 * cfg.pt3);
+function keyFor(made) {
+  if (cfg.keys.length === 1) return cfg.keys[0];
+  const m = String(made || '').replace(/\D/g, '');
+  if (!m) return null;
+  return cfg.keys.find(k => String(k.code).replace(/\D/g, '') === m) || null;
+}
+function grade(d) {
+  const k = keyFor(d.ma_de); if (!k) return null;
+  const K1 = parseP1(k.p1), K2 = parseP2(k.p2), K3 = parseP3(k.p3);
+  let c1 = 0; const r1 = [];
+  for (let i = 0; i < cfg.n1; i++) { const ok = !!K1[i] && d.p1[i] === K1[i]; if (ok) c1++; r1.push(ok); }
+  let s2 = 0; const rr2 = [];
+  for (let i = 0; i < cfg.n2; i++) {
+    let n = 0; const row = [];
+    for (let j = 0; j < 4; j++) { const kv = (K2[i] || [])[j]; const ok = !!kv && (d.p2[i] || [])[j] === kv; if (ok) n++; row.push(ok); }
+    s2 += P2PTS[n]; rr2.push({ row, n, pts: P2PTS[n] });
+  }
+  let c3 = 0; const r3 = [];
+  for (let i = 0; i < cfg.n3; i++) { const ok = sameP3(d.p3[i], K3[i]); if (ok) c3++; r3.push(ok); }
+  const sc1 = r2(c1 * cfg.pt1), sc3 = r2(c3 * cfg.pt3);
+  return { k, K1, K2, K3, c1, r1, s2: r2(s2), rr2, c3, r3, sc1, sc3, total: r2(sc1 + s2 + sc3) };
+}
+
+/* ---------- Phiếu ---------- */
+let sheets = [];
+let uid = 0;
+const byId = id => sheets.find(s => s.id === id);
+function padData(d) {
+  const p2 = [];
+  for (let i = 0; i < cfg.n2; i++) { const r = d.p2[i] || []; p2.push([0, 1, 2, 3].map(j => r[j] || '')); }
+  d.p1 = Array.from({ length: cfg.n1 }, (_, i) => d.p1[i] || '');
+  d.p2 = p2;
+  d.p3 = Array.from({ length: cfg.n3 }, (_, i) => d.p3[i] || '');
+}
+function normDS(v) {
+  const s = String(v ?? '').trim().toUpperCase(); if (!s) return '';
+  if (s === 'X') return 'X';
+  if (/^(Đ|D|T|TRUE|ĐÚNG|DUNG)$/.test(s)) return 'Đ';
+  if (/^(S|F|FALSE|SAI)$/.test(s)) return 'S';
+  return '';
+}
+function normResult(o) {
+  o = o && typeof o === 'object' ? o : {};
+  const a1 = Array.isArray(o.p1) ? o.p1 : [], a2 = Array.isArray(o.p2) ? o.p2 : [], a3 = Array.isArray(o.p3) ? o.p3 : [];
+  const p1 = [], p2 = [], p3 = [];
+  for (let i = 0; i < cfg.n1; i++) {
+    let v = String(a1[i] ?? '').trim().toUpperCase();
+    if (v.length > 1 && /^[ABCD,\s]+$/.test(v)) v = 'X';
+    if (!/^[ABCDX]$/.test(v)) v = '';
+    p1.push(v);
+  }
+  for (let i = 0; i < cfg.n2; i++) {
+    const r = Array.isArray(a2[i]) ? a2[i] : (typeof a2[i] === 'string' ? a2[i].replace(/[\s,]/g, '').split('') : []);
+    p2.push([0, 1, 2, 3].map(j => normDS(r[j])));
+  }
+  for (let i = 0; i < cfg.n3; i++) p3.push(String(a3[i] ?? '').trim().replace(/\s/g, ''));
+  const str = v => String(v ?? '').trim();
+  return { sbd: str(o.sbd), ho_ten: str(o.ho_ten), ma_de: str(o.ma_de), p1, p2, p3,
+    low: /thap|thấp|low/i.test(String(o.chac_chan || '')), note: str(o.ghi_chu) };
+}
+function flags(sh) {
+  const d = sh.data, f = []; if (!d) return f;
+  if (!grade(d)) f.push(['Không khớp mã đề', 'bad']);
+  if (d.low) f.push(['AI chưa chắc', '']);
+  if (d.p1.includes('X') || d.p2.some(r => r.includes('X'))) f.push(['Tô nhiều ô', '']);
+  if (sh.match) {
+    if (sh.match.how === 'none') f.push(['Không có trong DS lớp', 'bad']);
+    else {
+      if (sh.match.how === 'fuzzy') f.push([`SBD đọc là ${d.sbd_doc}`, '']);
+      if (sh.match.how === 'name') f.push(['Khớp theo tên', '']);
+      if (sh.match.how === 'conflict') f.push([`Tên trên phiếu: ${d.ten_doc}`, 'bad']);
+      if (dupSbd().has(normSbd(d.sbd))) f.push(['Trùng học sinh', 'bad']);
+    }
+  } else if (!d.sbd) f.push(['Thiếu SBD', '']);
+  return f;
+}
+
+const canvasBlob = (c, q = 0.86) => new Promise(res => c.toBlob(b => res(b), 'image/jpeg', q));
+function crop(src, y0, y1) {
+  const c = document.createElement('canvas'); const h = Math.round(src.height * (y1 - y0));
+  c.width = src.width; c.height = h;
+  c.getContext('2d').drawImage(src, 0, Math.round(src.height * y0), src.width, h, 0, 0, src.width, h);
+  return c;
+}
+async function addCanvas(c, name) {
+  const t = document.createElement('canvas'); const tw = 220; t.width = tw; t.height = Math.round(c.height * tw / c.width);
+  t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
+  const full = await canvasBlob(c);
+  const [top, bot] = await Promise.all([canvasBlob(crop(c, 0, 0.56)), canvasBlob(crop(c, 0.44, 1))]);
+  sheets.push({ id: ++uid, name, full, top, bot, url: URL.createObjectURL(full), thumb: t.toDataURL('image/jpeg', 0.7),
+    status: 'wait', data: null, err: '' });
+}
+function whiteCanvas(w, h) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); return c;
+}
+async function addPdf(file) {
+  if (!window.pdfjsLib) throw new Error('Không tải được thư viện đọc PDF. Kiểm tra mạng rồi tải lại trang.');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+  for (let p = 1; p <= pdf.numPages; p++) {
+    setBar(`Đang mở ${file.name}`, `Trang ${p}/${pdf.numPages}`);
+    const page = await pdf.getPage(p);
+    const v1 = page.getViewport({ scale: 1 });
+    const scale = Math.min(3, 1700 / Math.max(v1.width, v1.height) * (v1.height > v1.width ? 1.18 : 1));
+    const vp = page.getViewport({ scale });
+    const c = whiteCanvas(Math.ceil(vp.width), Math.ceil(vp.height));
+    await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+    await addCanvas(flatten(c), pdf.numPages > 1 ? `${file.name} · tr.${p}` : file.name);
+    renderSheets();
+  }
+}
+async function addImage(file) {
+  let bmp;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch (e) { bmp = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('Ảnh không mở được')); im.src = URL.createObjectURL(file); }); }
+  const w = bmp.width, h = bmp.height, k = Math.min(1, 2000 / Math.max(w, h));
+  const c = whiteCanvas(Math.round(w * k), Math.round(h * k));
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  await addCanvas(flatten(c), file.name);
+  renderSheets();
+}
+let loading = false;
+async function addFiles(list) {
+  const files = [...list]; if (!files.length) return;
+  loading = true; updateBar();
+  const before = sheets.length; const errs = [];
+  for (const f of files) {
+    try {
+      if (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)) await addPdf(f);
+      else if (f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic|gif)$/i.test(f.name)) await addImage(f);
+      else errs.push(`${f.name}: không phải PDF hay ảnh`);
+    } catch (e) { errs.push(`${f.name}: ${e.message || 'không đọc được'}`); }
+  }
+  loading = false;
+  const added = sheets.length - before;
+  renderAll();
+  if (errs.length) toast(errs[0]);
+  else if (added) toast(`Đã thêm ${added} phiếu`);
+}
+
+/* ---------- Phiếu mẫu ---------- */
+async function addDemo() {
+  const W = 1240, H = 1754, c = whiteCanvas(W, H), g = c.getContext('2d');
+  const ink = '#1b1f2a', pink = '#d9603f', pen = '#1d3c9e';
+  const P1 = 'ABCDBCBAACAD', P2 = ['ĐSĐS', 'SSĐS', 'ĐĐSS', 'SSSĐ'], P3 = ['2,5', '-3', '12', '0,8', '40', '1,2'];
+  g.fillStyle = ink; g.textAlign = 'center';
+  g.font = 'bold 40px Arial, sans-serif'; g.fillText('PHIẾU TRẢ LỜI TRẮC NGHIỆM', W / 2, 92);
+  g.font = '24px Arial, sans-serif'; g.fillText('Kiểm tra giữa kì I · Môn Toán 10 · Thời gian 90 phút', W / 2, 132);
+  g.textAlign = 'left'; g.font = '26px Arial, sans-serif'; g.fillText('Họ và tên:', 80, 210);
+  g.strokeStyle = '#999'; g.lineWidth = 1.5; g.setLineDash([4, 6]); g.beginPath(); g.moveTo(210, 214); g.lineTo(760, 214); g.stroke(); g.setLineDash([]);
+  g.fillStyle = pen; g.font = 'italic 36px Georgia, serif'; g.fillText('Trần Minh Anh', 240, 206);
+  const boxes = (label, x, y, digits) => {
+    g.fillStyle = ink; g.font = '24px Arial, sans-serif'; g.fillText(label, x, y + 38);
+    const bx = x + g.measureText(label).width + 14;
+    digits.split('').forEach((d, i) => {
+      g.strokeStyle = pink; g.lineWidth = 2; g.strokeRect(bx + i * 46, y, 40, 54);
+      g.fillStyle = pen; g.font = 'italic 36px Georgia, serif'; g.textAlign = 'center'; g.fillText(d, bx + i * 46 + 20, y + 41); g.textAlign = 'left';
+    });
+  };
+  boxes('Số báo danh:', 80, 250, '012345'); boxes('Mã đề:', 760, 250, '101');
+  const head = (t, y) => { g.fillStyle = ink; g.font = 'bold 26px Arial, sans-serif'; g.fillText(t, 80, y); g.strokeStyle = ink; g.lineWidth = 2; g.beginPath(); g.moveTo(80, y + 12); g.lineTo(W - 80, y + 12); g.stroke(); };
+  const bubble = (x, y, txt, on) => {
+    g.beginPath(); g.arc(x, y, 18, 0, Math.PI * 2);
+    if (on) { g.fillStyle = '#111'; g.fill(); }
+    else { g.strokeStyle = pink; g.lineWidth = 2; g.stroke(); g.fillStyle = pink; g.font = 'bold 17px Arial, sans-serif'; g.textAlign = 'center'; g.fillText(txt, x, y + 6); g.textAlign = 'left'; }
+  };
+  head('PHẦN I. Mỗi câu chọn một phương án A, B, C, D', 380);
+  for (let q = 0; q < 12; q++) {
+    const col = Math.floor(q / 4), row = q % 4, x0 = 90 + col * 370, y = 450 + row * 64;
+    g.fillStyle = ink; g.font = 'bold 22px Arial, sans-serif'; g.fillText(String(q + 1).padStart(2, ' '), x0, y + 8);
+    'ABCD'.split('').forEach((L, k) => bubble(x0 + 80 + k * 64, y, L, P1[q] === L));
+  }
+  head('PHẦN II. Mỗi ý a), b), c), d) chọn Đúng hoặc Sai', 760);
+  for (let q = 0; q < 4; q++) {
+    const x0 = 90 + q * 270;
+    g.fillStyle = ink; g.font = 'bold 22px Arial, sans-serif'; g.fillText(`Câu ${q + 1}`, x0, 820);
+    g.font = '18px Arial, sans-serif'; g.fillText('Đúng', x0 + 62, 852); g.fillText('Sai', x0 + 140, 852);
+    'abcd'.split('').forEach((L, j) => {
+      const y = 895 + j * 58; g.fillStyle = ink; g.font = '22px Arial, sans-serif'; g.fillText(L + ')', x0, y + 8);
+      bubble(x0 + 82, y, 'Đ', P2[q][j] === 'Đ'); bubble(x0 + 155, y, 'S', P2[q][j] === 'S');
+    });
+  }
+  head('PHẦN III. Ghi đáp số vào ô', 1170);
+  for (let q = 0; q < 6; q++) {
+    const col = q % 3, row = Math.floor(q / 3), x0 = 90 + col * 370, y = 1230 + row * 150;
+    g.fillStyle = ink; g.font = 'bold 22px Arial, sans-serif'; g.fillText(`Câu ${q + 1}`, x0, y);
+    g.strokeStyle = pink; g.lineWidth = 2; g.strokeRect(x0, y + 18, 290, 86);
+    g.fillStyle = pen; g.font = 'italic 44px Georgia, serif'; g.fillText(P3[q], x0 + 30, y + 78);
+  }
+  g.fillStyle = '#888'; g.font = '18px Arial, sans-serif'; g.textAlign = 'center';
+  g.fillText('Phiếu mẫu do ứng dụng tạo để thử — học sinh giả định', W / 2, H - 60);
+  await addCanvas(c, 'Phiếu mẫu');
+  renderAll(); toast('Đã thêm phiếu mẫu. Bấm Chấm để thử AI đọc.');
+}
+
+/* ---------- AI ---------- */
+let sampleFn = null, maxImgs = 0, engineProbe = true, downloadsCap = null, mcpCap = null;
+const inClaude = !!(window.claude && window.claude.use);
+const claudeOK = () => !!sampleFn && maxImgs > 0;
+const engine = () => (cfg.engine === 'gemini' || !claudeOK()) ? 'gemini' : 'claude';
+const geminiOK = () => !inClaude && cfg.gKeys.length > 0 && (cfg.gAuto || !!cfg.gModel.trim());
+const engineReady = () => engine() === 'claude' ? claudeOK() : geminiOK();
+(async () => {
+  if (inClaude) {
+    try {
+      sampleFn = await window.claude.use('sample');
+      if (sampleFn) { const lim = await sampleFn.limits().catch(() => null); maxImgs = lim?.images?.maxCount || 0; }
+    } catch (e) { sampleFn = null; }
+    try { downloadsCap = await window.claude.use('downloads'); } catch (e) {}
+    try { mcpCap = await window.claude.use('mcp'); } catch (e) { mcpCap = null; }
+  }
+  engineProbe = false; renderEngine(); updateBar();
+})();
+
+function buildPrompt(nImg) {
+  const L = [];
+  L.push(nImg === 2
+    ? 'Bạn là máy đọc phiếu trả lời trắc nghiệm (OMR). Hai ảnh là HAI NỬA của cùng MỘT phiếu: ảnh 1 là nửa trên, ảnh 2 là nửa dưới; hai ảnh chồng lấn một dải ở giữa, đừng đọc trùng.'
+    : 'Bạn là máy đọc phiếu trả lời trắc nghiệm (OMR). Ảnh là MỘT phiếu trả lời của một học sinh.');
+  L.push('Nhiệm vụ: đọc chính xác những ô học sinh đã tô và thông tin thí sinh. KHÔNG chấm điểm, KHÔNG suy đoán đáp án đúng.');
+  L.push('Cấu trúc phiếu:');
+  if (cfg.n1) L.push(`- PHẦN I: ${cfg.n1} câu, đánh số 1 đến ${cfg.n1}; mỗi câu chọn một trong A, B, C, D.`);
+  if (cfg.n2) L.push(`- PHẦN II: ${cfg.n2} câu; mỗi câu có 4 ý a, b, c, d; mỗi ý tô ô Đúng hoặc ô Sai.`);
+  if (cfg.n3) L.push(`- PHẦN III: ${cfg.n3} câu trả lời ngắn; mỗi đáp số có thể có dấu "-" và dấu phẩy thập phân; học sinh tô các ô ký tự theo từng cột hoặc viết số vào ô.`);
+  L.push('Quy tắc đọc:');
+  L.push('- Ô được chọn là ô tô kín, đậm. Vết mờ, gạch chéo, dấu đã tẩy coi như không chọn.');
+  L.push('- Câu không tô ô nào ghi "". Phần I tô từ 2 ô trở lên ghi "X". Phần II một ý tô cả Đúng và Sai ghi "X".');
+  L.push('- Phần III: ghi đáp số đúng như học sinh tô/viết, dùng dấu phẩy thập phân; bỏ trống ghi "".');
+  L.push('- Số báo danh, mã đề: đọc từ các cột ô tô chữ số (mỗi cột một chữ số) hoặc chữ viết; không đọc được ghi "".');
+  L.push('- Ảnh có thể bị xoay ngang hoặc lộn ngược: tự xác định chiều đúng của phiếu trước khi đọc.');
+  L.push('- Ảnh mờ, nghiêng hay có chỗ khó đọc vẫn đọc hết sức, đặt "chac_chan":"thap" và ghi lý do ngắn vào "ghi_chu".');
+  const RO = roster();
+  if (RO.length) {
+    L.push(`Danh sách lớp ${cfg.curClass} (SBD – họ tên) để đối chiếu:`);
+    L.push(RO.slice(0, 80).map(r => `${r.sbd} – ${r.ten}`).join('\n'));
+    L.push('Nếu SBD hoặc họ tên trên phiếu khớp (kể cả gần khớp do chữ khó đọc) với một em trong danh sách thì ghi đúng SBD và họ tên theo danh sách. Không khớp ai thì ghi đúng như trên phiếu.');
+  }
+  L.push('Chỉ trả về MỘT đối tượng JSON, không lời giải thích, theo mẫu:');
+  L.push('{"sbd":"012345","ho_ten":"Nguyễn Văn A","ma_de":"101","p1":["B","","D","X"],"p2":[["Đ","S","S","Đ"]],"p3":["-1,5","12"],"chac_chan":"cao","ghi_chu":""}');
+  L.push(`Bắt buộc: "p1" có đúng ${cfg.n1} phần tử theo thứ tự câu 1→${cfg.n1}; "p2" có đúng ${cfg.n2} mảng con, mỗi mảng 4 phần tử theo ý a, b, c, d; "p3" có đúng ${cfg.n3} chuỗi.`);
+  return L.join('\n');
+}
+function tolerantJSON(t) {
+  try { return JSON.parse(t); } catch (e) {}
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a >= 0 && b > a) { try { return JSON.parse(t.slice(a, b + 1)); } catch (e) {} }
+  throw { code: 'invalid_json', message: 'AI trả về không đúng định dạng' };
+}
+const toB64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
+async function readClaude(sh, signal, fresh) {
+  const imgs = cfg.split && maxImgs >= 2 ? [sh.top, sh.bot] : [sh.full];
+  const opt = { images: imgs, modelTier: cfg.tier, signal };
+  if (fresh) opt.cache = false;
+  return await sampleFn.json(buildPrompt(imgs.length), opt);
+}
+/* ---------- Gemini ---------- */
+const GEM = 'https://generativelanguage.googleapis.com/v1beta/';
+// Cách tắt/giảm suy nghĩ theo từng đời model; thử lần lượt, nhớ cách nào model chấp nhận
+function thinkCands(model) {
+  const m = String(model).toLowerCase();
+  if (!cfg.gNoThink) return [null];
+  if (/2\.5-flash/.test(m)) return [{ thinkingBudget: 0 }, null];          // 2.5 Flash, Flash-Lite: 0 = tắt hẳn
+  if (/2\.5-pro/.test(m)) return [{ thinkingBudget: 128 }, null];          // 2.5 Pro không tắt được, 128 là mức thấp nhất
+  if (/gemini-([3-9]|\d{2})/.test(m)) return /flash|lite/.test(m)          // Gemini 3 trở lên: thinkingLevel
+    ? [{ thinkingLevel: 'minimal' }, { thinkingLevel: 'low' }, null] : [{ thinkingLevel: 'low' }, null];
+  return [{ thinkingBudget: 0 }, null];
+}
+/* Nhiều key: chia lượt, key hết hạn mức thì nghỉ, key sai thì bỏ; mỗi key tự chọn model */
+const parseKeys = t => [...new Set(String(t || '').split(/[\s,;]+/).map(x => x.replace(/^["'`]+|["'`]+$/g, '').trim()).filter(x => x.length >= 20))];
+const maskKey = k => '…' + k.slice(-4);
+const KS = new Map();     // trạng thái từng key trong phiên: { bad, cool, list, p }
+const ks = k => { if (!KS.has(k)) KS.set(k, { bad: '', cool: 0, list: null, p: null, skip: new Set() }); return KS.get(k); };
+let keyRR = 0;
+const usableKeys = () => cfg.gKeys.filter(k => !ks(k).bad);
+function pickKey() {
+  const now = Date.now(), ok = cfg.gKeys.filter(k => !ks(k).bad && ks(k).cool <= now);
+  if (!ok.length) return null;
+  return ok[(keyRR++) % ok.length];
+}
+function gErr(status, m, body) {
+  const e = { status, message: m };
+  if (status === 429) {
+    e.kind = 'quota';
+    const rd = (body?.error?.details || []).map(d => d.retryDelay).find(Boolean);
+    e.retry = rd ? Math.min(120000, parseFloat(rd) * 1000 + 500) : 60000;
+  }
+  else if (/api key|api_key|permission|denied|billing|consumer/i.test(m) || status === 401 || status === 403) e.kind = 'badkey';
+  else if (status === 404 || /not found|not supported|is not available|deprecated|no longer/i.test(m)) e.kind = 'nomodel';
+  return e;
+}
+async function gFetch(key, path, init) {
+  let r;
+  try { r = await fetch(GEM + path, { ...init, headers: { ...(init?.headers || {}), 'x-goog-api-key': key } }); }
+  catch (e) { if (e?.name === 'AbortError') throw e; throw { kind: 'net', message: 'Không gọi được Gemini. Kiểm tra mạng (trong Claude, Gemini bị chặn).' }; }
+  if (r.ok) return r.json();
+  let body = null; try { body = await r.json(); } catch (e) {}
+  throw gErr(r.status, body?.error?.message || '', body);
+}
+async function listModels(key) {
+  const st = ks(key);
+  if (st.list) return st.list;
+  if (!st.p) st.p = gFetch(key, 'models?pageSize=200').then(j => {
+    st.list = (j.models || []).filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+      .map(m => ({ id: String(m.name).replace(/^models\//, ''), label: m.displayName || '' }))
+      .filter(m => /^gemini/i.test(m.id) && !/image|tts|audio|embed|live|robotics|computer|native|thinking-exp|learnlm/i.test(m.id));
+    return st.list;
+  }).finally(() => { st.p = null; });
+  return st.p;
+}
+function modelScore(id) {
+  const m = id.toLowerCase();
+  if (!/flash|pro/.test(m)) return -1;
+  const ver = parseFloat((m.match(/gemini-(\d+(?:\.\d+)?)/) || [])[1] || 0);
+  const fam = /lite/.test(m) ? 1 : /flash/.test(m) ? 0 : 2;          // ưu tiên Flash, rồi Flash-Lite, rồi Pro
+  const pre = /preview|exp/.test(m) ? 1 : 0;                         // ưu tiên bản ổn định
+  return (3 - fam) * 10000 + (1 - pre) * 1000 + ver * 10 - (/latest/.test(m) ? 1 : 0) - (/-\d{3}$/.test(m) ? 0.5 : 0);
+}
+const bestModel = list => [...list].filter(m => modelScore(m.id) >= 0).sort((a, b) => modelScore(b.id) - modelScore(a.id))[0]?.id || '';
+async function modelFor(key) {
+  if (!cfg.gAuto) return cfg.gModel.trim();
+  if (cfg.gKeyModel[key]) return cfg.gKeyModel[key];
+  const best = bestModel((await listModels(key)).filter(m => !ks(key).skip.has(m.id)));
+  if (!best) throw { kind: 'badkey', message: 'Key không có model Gemini nào đọc được ảnh' };
+  cfg.gKeyModel[key] = best; saveCfg();
+  return best;
+}
+async function genWith(key, model, parts, opt) {
+  const cands = thinkCands(model);
+  let i = Math.min(cfg.gThinkIdx[model] ?? 0, cands.length - 1);
+  for (;;) {
+    const gc = { temperature: opt.temperature ?? 0 };
+    if (opt.json !== false) gc.responseMimeType = 'application/json';
+    if (cands[i]) gc.thinkingConfig = cands[i];
+    const t0 = performance.now();
+    try {
+      const j = await gFetch(key, `models/${encodeURIComponent(model)}:generateContent`, {
+        method: 'POST', signal: opt.signal, headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: gc })
+      });
+      if ((cfg.gThinkIdx[model] ?? 0) !== i) { cfg.gThinkIdx[model] = i; saveCfg(); }
+      return { j, ms: performance.now() - t0, think: cands[i], key, model };
+    } catch (e) {
+      if (e?.status === 400 && /think/i.test(e.message) && i < cands.length - 1) { i++; continue; }
+      throw e;
+    }
+  }
+}
+async function geminiGen(parts, opt = {}) {
+  if (!cfg.gKeys.length) throw { code: 'not_granted', message: 'Chưa nhập Gemini API key' };
+  let lastErr = null;
+  for (let t = 0; t < cfg.gKeys.length * 2 + 1; t++) {
+    const key = pickKey();
+    if (!key) break;
+    try {
+      const model = await modelFor(key);
+      return await genWith(key, model, parts, opt);
+    } catch (e) {
+      if (e?.name === 'AbortError') throw e;
+      lastErr = e;
+      const st = ks(key);
+      if (e.kind === 'quota') st.cool = Date.now() + (e.retry || 60000);
+      else if (e.kind === 'badkey') st.bad = e.message || 'Key không dùng được';
+      else if (e.kind === 'nomodel' && cfg.gAuto) { if (cfg.gKeyModel[key]) st.skip.add(cfg.gKeyModel[key]); delete cfg.gKeyModel[key]; saveCfg(); }
+      else if (e.kind === 'nomodel') throw { code: 'not_granted', message: `Model "${cfg.gModel.trim()}" không dùng được. Bật "Tự động chọn model" hoặc bấm Kiểm tra key` };
+      else if (e.kind === 'net') throw { code: 'upstream_error', message: e.message };
+      else throw { code: 'upstream_error', message: `Gemini lỗi ${e.status || ''}${e.message ? ': ' + e.message : ''}` };
+    }
+  }
+  if (cfg.gKeys.every(k => ks(k).bad)) throw { code: 'not_granted', message: 'Không key Gemini nào hợp lệ. Bấm Kiểm tra key để xem lý do' };
+  const wait = Math.max(0, Math.min(...cfg.gKeys.filter(k => !ks(k).bad).map(k => ks(k).cool)) - Date.now());
+  throw { code: 'rate_limited', message: `Các key Gemini đang hết hạn mức${wait ? `, thử lại sau khoảng ${Math.ceil(wait / 1000)} giây` : ''}${lastErr?.message ? ' (' + lastErr.message.slice(0, 80) + ')' : ''}` };
+}
+const geminiText = j => (j.candidates?.[0]?.content?.parts || []).filter(p => !p.thought).map(p => p.text || '').join('');
+async function readGemini(sh, signal) {
+  const imgs = cfg.split ? [sh.top, sh.bot] : [sh.full];
+  const parts = [{ text: buildPrompt(imgs.length) }];
+  for (const b of imgs) parts.push({ inline_data: { mime_type: 'image/jpeg', data: await toB64(b) } });
+  const { j } = await geminiGen(parts, { signal });
+  const t = geminiText(j);
+  if (!t) throw { code: 'empty_completion', message: j.promptFeedback?.blockReason ? 'Gemini chặn ảnh này (' + j.promptFeedback.blockReason + ')' : 'Gemini không trả lời' };
+  return tolerantJSON(t);
+}
+async function testGemini() {
+  const out = $('#gTestOut'), btn = $('#gTest');
+  const show = (cls, html) => { out.hidden = false; out.className = 'gtest ' + cls; out.innerHTML = html; };
+  if (!cfg.gKeys.length) { show('bad', 'Chưa nhập API key.'); return; }
+  if (inClaude) { show('warn', 'Đang mở trong Claude nên không gọi được Gemini. Thầy kiểm tra trên bản HTML đưa lên Vercel.'); return; }
+  btn.disabled = true;
+  const rows = cfg.gKeys.map((k, i) => ({ k, name: `Key ${i + 1} ${maskKey(k)}`, cls: '', text: 'đang chờ…' }));
+  const paint = () => show(rows.some(r => r.cls === 'k-ok') ? (rows.every(r => r.cls === 'k-ok') ? 'ok' : 'warn') : rows.some(r => r.cls === '') ? '' : 'bad',
+    rows.map(r => `<div class="krow"><span class="kname">${esc(r.name)}</span><span class="${r.cls}">${r.text}</span></div>`).join('') + extra);
+  let extra = '';
+  paint();
+  const models = new Map();
+  try {
+    for (const r of rows) {
+      const st = ks(r.k); st.bad = ''; st.cool = 0; st.list = null; st.skip.clear(); delete cfg.gKeyModel[r.k];
+      r.text = 'đang kiểm tra…'; paint();
+      let list;
+      try { list = await listModels(r.k); }
+      catch (e) {
+        r.cls = e.kind === 'quota' ? 'k-warn' : 'k-bad';
+        r.text = e.kind === 'quota' ? 'key đúng nhưng đang hết hạn mức (429)' : e.kind === 'net' ? esc(e.message)
+          : e.status === 400 ? 'key không hợp lệ (gõ sai hoặc đã bị xóa)' : 'key bị chặn hoặc dự án chưa bật Gemini API';
+        if (e.kind === 'badkey' || e.status === 400) st.bad = r.text;
+        paint(); continue;
+      }
+      list.forEach(m => models.set(m.id, m.label));
+      const model = cfg.gAuto ? bestModel(list) : cfg.gModel.trim();
+      if (!model) { r.cls = 'k-bad'; r.text = 'key hợp lệ nhưng không có model Gemini nào đọc được ảnh'; st.bad = r.text; paint(); continue; }
+      if (!cfg.gAuto && !list.some(m => m.id === model)) { r.cls = 'k-warn'; r.text = `key hợp lệ nhưng không dùng được model "${esc(model)}". Gợi ý: bật Tự động chọn model`; paint(); continue; }
+      r.text = `hợp lệ · đang thử ${esc(model)}…`; paint();
+      try {
+        const g = await genWith(r.k, model, [{ text: 'Chỉ trả về JSON {"ok":true}' }], {});
+        if (cfg.gAuto) cfg.gKeyModel[r.k] = model;
+        const th = g.j.usageMetadata?.thoughtsTokenCount || 0;
+        const how = !cfg.gNoThink ? 'có suy nghĩ' : !g.think ? 'model không cho tắt suy nghĩ' : g.think.thinkingBudget === 0 ? 'đã tắt suy nghĩ' : 'suy nghĩ mức thấp nhất';
+        r.cls = 'k-ok'; r.text = `✓ ${esc(model)} · ${fmt(g.ms / 1000)} giây · ${how}${th ? ` (${th} token suy nghĩ)` : ''}`;
+      } catch (e) {
+        r.cls = e.kind === 'quota' ? 'k-warn' : 'k-bad';
+        r.text = e.kind === 'quota' ? `key đúng, model ${esc(model)} đang hết hạn mức` : `gọi thử ${esc(model)} lỗi: ${esc(e.message || e.status || '')}`;
+        if (e.kind === 'quota') st.cool = Date.now() + (e.retry || 60000);
+      }
+      paint();
+    }
+    saveCfg();
+    const all = [...models.keys()].sort((a, b) => modelScore(b) - modelScore(a));
+    $('#gModels').innerHTML = all.map(id => `<option value="${esc(id)}">${esc(models.get(id))}</option>`).join('');
+    const okN = rows.filter(r => r.cls === 'k-ok').length;
+    extra = `<div>${okN}/${rows.length} key dùng được${okN > 1 ? ` · app chia lượt cho ${okN} key, chấm song song ${Math.min(8, 2 + 2 * okN)} phiếu` : ''}.</div>`
+      + (!cfg.gAuto && all.length ? `<div class="mchips">${all.slice(0, 8).map(id => `<button type="button" data-gmodel="${esc(id)}">${esc(id)}</button>`).join('')}</div>` : '');
+    paint();
+  } finally { btn.disabled = false; renderEngine(); updateBar(); }
+}
+
+let running = false, halt = '', ctrls = new Set(), runInfo = null, wakeLock = null;
+async function readOne(sh, fresh) {
+  const ctl = new AbortController(); ctrls.add(ctl);
+  sh.status = 'busy'; sh.err = ''; renderSheets();
+  const t0 = performance.now();
+  try {
+    const raw = engine() === 'claude' ? await readClaude(sh, ctl.signal, fresh) : await readGemini(sh, ctl.signal);
+    sh.data = normResult(raw); sh.manual = false; applyMatch(sh); sh.status = 'done'; sh.ms = performance.now() - t0;
+  } catch (e) {
+    const code = e?.code || (e?.name === 'AbortError' ? 'cancelled' : 'upstream_error');
+    if (code === 'cancelled') { sh.status = sh.data ? 'done' : 'wait'; }
+    else if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed', 'images_unavailable', 'session_expired'].includes(code)) {
+      sh.status = sh.data ? 'done' : 'wait';
+      halt = code === 'not_granted' && engine() === 'claude' ? 'Chưa cho phép trang dùng Claude. Bấm Chấm và chọn Cho phép.' : (e.message && engine() === 'gemini' ? e.message : 'AI không dùng được ở đây.');
+    } else if (code === 'rate_limited') {
+      sh.status = sh.data ? 'done' : 'wait'; halt = engine() === 'claude' ? 'Claude đang giới hạn lượt. Đợi một lát rồi bấm Chấm tiếp.' : (e.message || 'Hết lượt, thử lại sau.');
+    } else {
+      sh.status = 'error';
+      sh.err = { invalid_json: 'AI trả về sai định dạng', image_rejected: 'Ảnh quá lớn hoặc hỏng', refused: 'AI từ chối đọc ảnh này', empty_completion: 'AI không trả lời' }[code] || (e.message || 'Lỗi kết nối');
+    }
+  } finally { ctrls.delete(ctl); }
+  renderAll();
+}
+async function runAll(ids, fresh) {
+  if (running || !engineReady()) return;
+  const todo = ids ? sheets.filter(s => ids.includes(s.id)) : sheets.filter(s => s.status === 'wait' || s.status === 'error');
+  if (!todo.length) return;
+  running = true; halt = '';
+  runInfo = { total: todo.length, done: 0, t0: performance.now() };
+  try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) { wakeLock = null; }
+  updateBar();
+  let idx = 0;
+  const conc = engine() === 'claude' ? 2 : Math.min(8, 2 + 2 * Math.max(1, usableKeys().length));
+  const worker = async () => {
+    while (idx < todo.length && !halt && running) { const sh = todo[idx++]; await readOne(sh, !!fresh); runInfo.done++; updateBar(); }
+  };
+  await Promise.all(Array.from({ length: Math.min(conc, todo.length) }, worker));
+  const secs = (performance.now() - runInfo.t0) / 1000, n = runInfo.done;
+  running = false; runInfo = null;
+  try { await wakeLock?.release(); } catch (e) {}
+  renderAll();
+  if (halt) toast(halt);
+  else if (scan.on) { if (cfg.scanGrade && sheets.some(s => s.status === 'wait')) setTimeout(() => runAll(), 30); }
+  else if (n) toast(`Đã đọc ${n} phiếu trong ${fmt(secs)} giây`);
+}
+function stopAll() { running = false; halt = 'Đã dừng. Bấm Chấm để chấm tiếp các phiếu còn lại.'; ctrls.forEach(c => c.abort()); }
+
+/* ---------- Giao diện ---------- */
+let toastTimer;
+function toast(msg, action) {
+  const t = $('#toast'); t.innerHTML = ''; const s = document.createElement('span'); s.textContent = msg; t.append(s);
+  if (action) { const b = document.createElement('button'); b.type = 'button'; b.textContent = action.label; b.addEventListener('click', () => { action.fn(); t.hidden = true; }); t.append(b); }
+  t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, action ? 6000 : 3200);
+}
+
+function keySummary() {
+  const parts = []; if (cfg.n1) parts.push(`${cfg.n1} câu ABCD`); if (cfg.n2) parts.push(`${cfg.n2} câu Đ/S`); if (cfg.n3) parts.push(`${cfg.n3} câu trả lời ngắn`);
+  $('#keySummary').textContent = `${parts.join(' · ') || 'Chưa có câu nào'} · ${cfg.keys.length} mã đề · tối đa ${fmt(maxScore())} điểm`;
+  const complete = cfg.keys.every(k => keyComplete(k));
+  $('#stepKey').classList.toggle('done', complete);
+}
+function keyComplete(k) {
+  return parseP1(k.p1).length === cfg.n1 && parseP2(k.p2).filter(r => r.length === 4).length === cfg.n2 && parseP3(k.p3).length === cfg.n3;
+}
+function renderFmt() { ['n1', 'n2', 'n3', 'pt1', 'pt3'].forEach(id => { $('#' + id).value = cfg[id]; }); }
+function renderKeys() {
+  const L = $('#keyList');
+  L.innerHTML = cfg.keys.map((k, i) => `
+  <div class="keycard" data-i="${i}">
+    <div class="kc-head">
+      <label class="field"><span>Mã đề</span><input type="text" id="k${i}code" data-k="code" value="${esc(k.code)}" inputmode="numeric" autocomplete="off"></label>
+      ${k.sample ? '<span class="badge warn">Ví dụ · thay bằng đáp án thật</span>' : ''}
+      ${cfg.keys.length > 1 ? `<button class="icon-btn" type="button" data-del="${i}" aria-label="Xóa mã đề ${esc(k.code)}">✕</button>` : ''}
+    </div>
+    ${cfg.n1 ? `<label class="field"><span>Phần I · ${cfg.n1} chữ cái A/B/C/D <b class="v" data-v="p1"></b></span><textarea id="k${i}p1" data-k="p1" rows="2" spellcheck="false" autocapitalize="characters" autocomplete="off" placeholder="VD: ABCDDCBAACBD">${esc(k.p1)}</textarea></label>` : ''}
+    ${cfg.n2 ? `<label class="field"><span>Phần II · mỗi câu 4 ký tự Đ/S, cách nhau dấu cách (gõ D thay Đ được) <b class="v" data-v="p2"></b></span><textarea id="k${i}p2" data-k="p2" rows="2" spellcheck="false" autocapitalize="characters" autocomplete="off" placeholder="VD: ĐSĐS SSĐĐ ĐĐSS SĐSĐ">${esc(k.p2)}</textarea></label>` : ''}
+    ${cfg.n3 ? `<label class="field"><span>Phần III · ${cfg.n3} đáp số, cách nhau dấu cách hoặc ; <b class="v" data-v="p3"></b></span><textarea id="k${i}p3" data-k="p3" rows="1" spellcheck="false" autocomplete="off" placeholder="VD: 2,5 -3 12 0,75">${esc(k.p3)}</textarea></label>` : ''}
+  </div>`).join('');
+  L.querySelectorAll('.keycard').forEach(updValid);
+}
+function updValid(card) {
+  const k = cfg.keys[card.dataset.i]; if (!k) return;
+  const set = (v, n, need) => { const el = card.querySelector(`[data-v="${v}"]`); if (!el) return; el.textContent = `${n}/${need}`; el.className = 'v ' + (n === need ? 'ok' : 'no'); };
+  set('p1', parseP1(k.p1).length, cfg.n1);
+  set('p2', parseP2(k.p2).filter(r => r.length === 4).length, cfg.n2);
+  set('p3', parseP3(k.p3).length, cfg.n3);
+}
+function setKeyOpen(open) {
+  cfg.keyOpen = open; $('#keyToggle').setAttribute('aria-expanded', String(open)); $('#keyBody').hidden = !open;
+}
+
+function renderSheets() {
+  const T = $('#thumbs');
+  T.innerHTML = sheets.map((s, i) => {
+    const g = s.data ? grade(s.data) : null;
+    const lab = s.status === 'busy' ? 'Đang đọc…' : s.status === 'error' ? 'Lỗi' : s.status === 'done' ? (g ? fmt(g.total) : '?') : 'Chờ chấm';
+    const fl = s.status === 'done' && flags(s).length;
+    return `<button class="th ${s.status}" type="button" data-open="${s.id}" aria-label="Phiếu ${i + 1}: ${esc(s.name)}, ${esc(lab)}">
+      <img src="${s.thumb}" alt=""><span class="pg">${i + 1}</span>${fl ? '<span class="flag" title="Cần xem lại"></span>' : ''}<span class="tb">${esc(lab)}</span></button>`;
+  }).join('');
+  const done = sheets.filter(s => s.status === 'done').length;
+  $('#sheetSummary').textContent = sheets.length ? `${sheets.length} phiếu · đã đọc ${done}` : 'Mỗi trang PDF là một phiếu';
+  $('#clearBtn').hidden = !sheets.length || running;
+  $('#stepSheets').classList.toggle('done', sheets.length > 0 && done === sheets.length);
+}
+
+function renderResults() {
+  const B = $('#resBody');
+  const rows = sheets.map((s, i) => ({ s, i, g: s.data ? grade(s.data) : null })).filter(x => x.s.status === 'done').sort((a, b) => byOrder(a.s, b.s));
+  $('#stepRes').classList.toggle('done', rows.length > 0);
+  if (!rows.length) {
+    B.innerHTML = `<div class="empty">Chưa có phiếu nào được chấm. Tải phiếu ở bước 3 rồi bấm <b>Chấm</b> ở thanh dưới cùng.</div>`;
+    return;
+  }
+  const scored = rows.filter(r => r.g).map(r => r.g.total), mx = maxScore() || 10;
+  const avg = scored.length ? scored.reduce((a, b) => a + b, 0) / scored.length : 0;
+  const bins = Array(11).fill(0); scored.forEach(t => { bins[Math.max(0, Math.min(10, Math.floor(t / mx * 10 + 1e-9)))]++; });
+  const top = Math.max(1, ...bins);
+  const review = rows.filter(r => flags(r.s).length).length;
+  B.innerHTML = `
+    <div class="stats">
+      <div class="stat"><b>${rows.length}</b><span>phiếu đã chấm</span></div>
+      <div class="stat"><b>${scored.length ? fmt(avg) : '–'}</b><span>điểm trung bình</span></div>
+      <div class="stat"><b>${scored.length ? fmt(Math.max(...scored)) : '–'}</b><span>cao nhất</span></div>
+      <div class="stat"><b>${scored.length ? fmt(Math.min(...scored)) : '–'}</b><span>thấp nhất</span></div>
+    </div>
+    <div class="hist" aria-label="Phổ điểm">
+      <div class="hist-bars">${bins.map((n, i) => `<i class="${n ? '' : 'zero'}" style="height:${n ? Math.max(8, n / top * 100) : 3}%" title="${n} phiếu"></i>`).join('')}</div>
+      <div class="hist-lbl">${bins.map((n, i) => `<span>${i}</span>`).join('')}</div>
+      <p class="hint">Phổ điểm theo thang 10${review ? ` · <b style="color:var(--warn)">${review} phiếu nên xem lại</b> (chấm cam trên ảnh)` : ''}</p>
+    </div>
+    ${absentNote()}
+    <div class="btnrow">
+      <button class="btn primary-soft" type="button" id="sumBtn">Tổng hợp &amp; nhận xét</button>
+      <button class="btn" type="button" id="xlsxBtn">Tải Excel</button>
+      <button class="btn" type="button" id="copyBtn">Sao chép bảng điểm</button>
+    </div>
+    <div class="list">${rows.map(({ s, i, g }) => `
+      <button class="row" type="button" data-open="${s.id}">
+        <img src="${s.thumb}" alt="">
+        <span class="who"><b>${esc(s.data.ho_ten || 'Chưa đọc được tên')}</b>
+          <small>SBD ${esc(s.data.sbd || '—')} · Mã ${esc(s.data.ma_de || '—')} · Phiếu ${i + 1}</small>
+          ${flags(s).length ? `<span class="tags">${flags(s).map(([t, c]) => `<span class="tag ${c}">${t}</span>`).join('')}</span>` : ''}</span>
+        <span class="sc">${g ? fmt(g.total) : '?'}<small>/ ${fmt(mx)}</small></span>
+      </button>`).join('')}</div>`;
+}
+
+function setBar(main, sub) { $('#abText').innerHTML = `<b>${esc(main)}</b>${sub ? esc(sub) : ''}`; }
+function updateBar() {
+  const run = $('#runBtn'), stop = $('#stopBtn'), fill = $('#progFill');
+  const pending = sheets.filter(s => s.status === 'wait' || s.status === 'error').length;
+  stop.hidden = !running; run.hidden = running;
+  if (running && runInfo) {
+    fill.style.width = (runInfo.done / runInfo.total * 100) + '%';
+    const el = (performance.now() - runInfo.t0) / 1000;
+    setBar(`Đang chấm ${runInfo.done}/${runInfo.total} phiếu`, runInfo.done ? `${fmt(el / runInfo.done)} giây/phiếu` : (engine() === 'claude' && !runInfo.done ? 'Lần đầu Claude sẽ hỏi quyền, chọn Cho phép' : 'Đang gửi ảnh cho AI…'));
+    return;
+  }
+  fill.style.width = '0';
+  if (loading) { run.disabled = true; return; }
+  if (engineProbe) { setBar('Đang kết nối AI…', ''); run.disabled = true; run.textContent = 'Chấm'; return; }
+  if (!engineReady()) {
+    run.disabled = true; run.textContent = 'Chấm';
+    setBar('Chưa có AI để đọc phiếu', engine() === 'gemini' ? (inClaude ? 'Trong Claude chỉ dùng được Claude' : 'Nhập Gemini API key ở bước 2') : '');
+    return;
+  }
+  if (!sheets.length) { run.disabled = true; run.textContent = 'Chấm'; setBar('Tải phiếu lên để bắt đầu', 'PDF nhiều trang hoặc ảnh chụp'); return; }
+  if (pending) { run.disabled = false; run.textContent = `Chấm ${pending} phiếu`; setBar(`${pending} phiếu chờ chấm`, `AI: ${engine() === 'claude' ? 'Claude' : 'Gemini'} · ${engine() === 'gemini' ? (cfg.gNoThink !== false ? 'tắt suy nghĩ' : 'có suy nghĩ') : (cfg.tier === 'quick' ? 'Nhanh' : 'Kỹ hơn')}`); return; }
+  const g = sheets.map(s => s.data && grade(s.data)).filter(Boolean);
+  run.disabled = false; run.textContent = g.length ? 'Tổng hợp & nhận xét' : 'Xem kết quả';
+  setBar(`Đã chấm xong ${sheets.length} phiếu`, g.length ? `Điểm TB ${fmt(g.reduce((a, b) => a + b.total, 0) / g.length)}` : '');
+}
+function renderEngine() {
+  const e = engine();
+  $('#engSeg').querySelectorAll('button').forEach(b => {
+    b.setAttribute('aria-checked', String(b.dataset.eng === e));
+    if (b.dataset.eng === 'claude') b.disabled = !claudeOK();
+  });
+  $('#tierSeg').querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.tier === cfg.tier)));
+  $('#splitChk').checked = cfg.split;
+  $('#gemBox').hidden = e !== 'gemini';
+  const ta = $('#gKeys'); if (document.activeElement !== ta) ta.value = cfg.gKeys.join('\n');
+  $('#gAuto').checked = cfg.gAuto !== false;
+  const gm = $('#gModel'); gm.disabled = cfg.gAuto !== false;
+  if (document.activeElement !== gm) {
+    const chosen = [...new Set(cfg.gKeys.map(k => cfg.gKeyModel[k]).filter(Boolean))];
+    gm.value = cfg.gAuto !== false ? (chosen.join(', ') || 'Tự chọn khi chấm') : cfg.gModel;
+  }
+  $('#gNoThink').checked = cfg.gNoThink !== false;
+  $('#tierRow').hidden = e === 'gemini'; $('#gTest').disabled = !cfg.gKeys.length;
+  const chip = $('#engineChip'); const note = $('#engNote');
+  if (engineProbe) { chip.className = 'chip'; chip.textContent = 'Đang kết nối AI…'; note.textContent = ''; return; }
+  if (e === 'claude') {
+    chip.className = 'chip ok'; chip.textContent = `Claude · ${cfg.tier === 'quick' ? 'Nhanh' : 'Kỹ hơn'}`;
+    note.textContent = cfg.tier === 'quick'
+      ? 'Nhanh: vài giây mỗi phiếu, đọc 2 phiếu song song. Phiếu mờ hoặc tô nhạt nên chọn Kỹ hơn. Dùng lượt Claude của tài khoản thầy, không cần API key.'
+      : 'Kỹ hơn: AI suy nghĩ trước khi trả lời, chậm hơn (khoảng 10–40 giây/phiếu) nhưng ít nhầm hơn.';
+  } else {
+    const ok = geminiOK();
+    chip.className = 'chip ' + (ok ? 'ok' : 'warn'); chip.textContent = ok ? `Gemini${cfg.gKeys.length > 1 ? ' · ' + cfg.gKeys.length + ' key' : ''}` : 'Chưa có AI';
+    note.textContent = inClaude
+      ? 'Trang đang mở trong Claude nên mạng ra ngoài bị chặn, Gemini không gọi được. Dùng Claude, hoặc đưa file HTML lên Vercel/GitHub rồi dùng Gemini.'
+      : 'Lấy key miễn phí tại aistudio.google.com/apikey. Key chỉ lưu trên máy này. Bấm Kiểm tra key để biết key còn dùng được và tốc độ trả lời.';
+  }
+}
+function renderAll() { keySummary(); renderClass(); renderSheets(); renderResults(); updateBar(); if (curId != null) renderDetail(); scanHud(); }
+
+/* ---------- Chi tiết phiếu ---------- */
+let curId = null, lastFocus = null;
+function openDetail(id) {
+  curId = id; lastFocus = document.activeElement;
+  $('#ov').hidden = false; document.body.classList.add('lock');
+  renderDetail(); $('#ovBody').scrollTop = 0; $('#ovClose').focus();
+}
+function closeDetail() {
+  $('#ov').hidden = true; document.body.classList.remove('lock'); curId = null;
+  lastFocus?.focus?.();
+}
+function renderDetail() {
+  const sh = byId(curId); if (!sh) { closeDetail(); return; }
+  const idx = sheets.indexOf(sh) + 1, d = sh.data;
+  $('#ovTitle').textContent = `Phiếu ${idx}${d?.ho_ten ? ' · ' + d.ho_ten : ''}`;
+  const zoomBig = $('#zoomBox')?.classList.contains('big');
+  let h = `<div class="zoom${zoomBig ? ' big' : ''}" id="zoomBox"><img src="${sh.url}" alt="Ảnh phiếu ${esc(sh.name)}"></div>
+    <p class="hint" style="margin-top:-8px">${esc(sh.name)} · chạm ảnh để phóng to</p>`;
+  const actions = `<div class="btnrow">
+      <button class="btn" type="button" data-act="reread" ${running || !engineReady() ? 'disabled' : ''}>${d ? 'Cho AI đọc lại' : 'Đọc phiếu này'}</button>
+      ${d && grade(d) ? '<button class="btn" type="button" data-act="pdf1">PDF kết quả của em</button>' : ''}
+      <button class="btn danger" type="button" data-act="del" ${running ? 'disabled' : ''}>Xóa phiếu</button></div>`;
+  if (!d) {
+    h += sh.status === 'error' ? `<div class="note bad">Chưa đọc được: ${esc(sh.err)}.</div>` : sh.status === 'busy' ? `<div class="note warn">AI đang đọc phiếu này…</div>` : `<div class="note warn">Phiếu chưa được chấm.</div>`;
+    $('#ovBody').innerHTML = h + actions; return;
+  }
+  const g = grade(d);
+  h += `<div class="idgrid">
+      <label class="field f-name"><span>Họ tên</span><input type="text" id="dTen" data-f="ho_ten" value="${esc(d.ho_ten)}" autocomplete="off"></label>
+      <label class="field"><span>SBD</span><input type="text" id="dSbd" data-f="sbd" value="${esc(d.sbd)}" inputmode="numeric" autocomplete="off" class="mono"></label>
+      <label class="field"><span>Mã đề</span><input type="text" id="dMade" data-f="ma_de" value="${esc(d.ma_de)}" inputmode="numeric" autocomplete="off" class="mono"></label>
+    </div>`;
+  const RO = roster();
+  if (RO.length) {
+    const how = { exact: 'khớp theo SBD', conflict: 'SBD khớp nhưng tên trên phiếu là em khác, kiểm tra lại', fuzzy: 'khớp SBD gần đúng, nên kiểm tra', name: 'khớp theo tên', manual: 'thầy đã chọn', none: 'chưa khớp ai trong lớp' }[sh.match?.how] || '';
+    const cur = sh.match && sh.match.how !== 'none' ? normSbd(d.sbd) : null;
+    h += `<label class="field"><span>Học sinh lớp ${esc(cfg.curClass)}${how ? ' · ' + how : ''}</span><select id="dStu"><option value="">— Chọn học sinh —</option>${RO.map((r, i) => `<option value="${i}"${cur !== null && normSbd(r.sbd) === cur ? ' selected' : ''}>${esc(r.stt)}. ${esc(r.ten)} · ${esc(r.sbd)}</option>`).join('')}</select></label>
+      <p class="hint" style="margin-top:-8px">AI đọc trên phiếu: SBD <b class="mono">${esc(d.sbd_doc || '—')}</b> · ${esc(d.ten_doc || 'không ghi tên')}</p>`;
+  }
+  if (d.low || d.note) h += `<div class="note warn">AI đánh dấu cần xem lại${d.note ? ': ' + esc(d.note) : ''}. Đối chiếu ảnh và sửa trực tiếp bên dưới.</div>`;
+  if (!g) {
+    h += `<div class="note bad">Không có đáp án cho mã đề "${esc(d.ma_de || 'trống')}". Sửa mã đề ở trên cho đúng, hoặc thêm mã đề này ở bước 1.</div>`;
+  } else {
+    h += `<div class="scorebar"><span class="big">${fmt(g.total)}<small>trên ${fmt(maxScore())} điểm</small></span>
+      ${cfg.n1 ? `<div>Phần I: đúng <b>${g.c1}/${cfg.n1}</b> → <b>${fmt(g.sc1)}</b> đ</div>` : ''}
+      ${cfg.n2 ? `<div>Phần II: <b>${g.rr2.map(x => x.n).join('·')}</b> ý đúng → <b>${fmt(g.s2)}</b> đ</div>` : ''}
+      ${cfg.n3 ? `<div>Phần III: đúng <b>${g.c3}/${cfg.n3}</b> → <b>${fmt(g.sc3)}</b> đ</div>` : ''}</div>`;
+  }
+  h += `<div class="legend"><span><i class="l1"></i>ô học sinh tô</span><span><i class="l2"></i>đáp án đúng</span><span>Chạm ô để sửa nếu AI đọc nhầm</span></div>`;
+  if (cfg.n1) {
+    h += `<div class="sec"><h4>Phần I <span>${g ? `${g.c1}/${cfg.n1} câu đúng` : ''}</span></h4><div class="q1">`;
+    for (let i = 0; i < cfg.n1; i++) {
+      const st = g ? (g.r1[i] ? 'ok' : 'bad') : '';
+      h += `<div class="qrow ${st}"><span class="qn">${i + 1}</span>${'ABCD'.split('').map(L =>
+        `<button type="button" class="bub${d.p1[i] === L ? ' on' : ''}${g && g.K1[i] === L ? ' key' : ''}" data-p1="${i}" data-l="${L}" aria-label="Câu ${i + 1} ${L}" aria-pressed="${d.p1[i] === L}">${L}</button>`).join('')}
+        <span class="mk" aria-label="${st === 'ok' ? 'đúng' : st === 'bad' ? 'sai' : ''}">${d.p1[i] === 'X' ? '<span title="Tô nhiều ô">⁑</span>' : st === 'ok' ? '✓' : st === 'bad' ? '✕' : ''}</span></div>`;
+    }
+    h += `</div></div>`;
+  }
+  if (cfg.n2) {
+    h += `<div class="sec"><h4>Phần II <span>${g ? fmt(g.s2) + ' điểm' : ''}</span></h4><div class="q2">`;
+    for (let i = 0; i < cfg.n2; i++) {
+      const rr = g ? g.rr2[i] : null;
+      h += `<div class="blk"><div class="bh">Câu ${i + 1}<span>${rr ? `${rr.n}/4 ý · ${fmt(rr.pts)} đ` : ''}</span></div>`;
+      'abcd'.split('').forEach((L, j) => {
+        const st = rr ? (rr.row[j] ? 'ok' : 'bad') : '';
+        const kv = g ? (g.K2[i] || [])[j] : '';
+        h += `<div class="qrow ${st}"><span class="qn">${L})</span>${['Đ', 'S'].map(v =>
+          `<button type="button" class="bub${d.p2[i][j] === v ? ' on' : ''}${kv === v ? ' key' : ''}" data-p2="${i}" data-j="${j}" data-l="${v}" aria-label="Câu ${i + 1} ý ${L} ${v === 'Đ' ? 'Đúng' : 'Sai'}" aria-pressed="${d.p2[i][j] === v}">${v}</button>`).join('')}
+          <span class="mk">${d.p2[i][j] === 'X' ? '⁑' : st === 'ok' ? '✓' : st === 'bad' ? '✕' : ''}</span></div>`;
+      });
+      h += `</div>`;
+    }
+    h += `</div></div>`;
+  }
+  if (cfg.n3) {
+    h += `<div class="sec"><h4>Phần III <span>${g ? `${g.c3}/${cfg.n3} câu đúng` : ''}</span></h4><div class="q3">`;
+    for (let i = 0; i < cfg.n3; i++) {
+      const st = g ? (g.r3[i] ? 'ok' : 'bad') : '';
+      h += `<div class="qrow ${st}"><span class="qn" style="width:auto">Câu ${i + 1}</span>
+        <input type="text" id="dp3_${i}" data-p3="${i}" value="${esc(d.p3[i])}" inputmode="decimal" autocomplete="off" aria-label="Đáp số học sinh câu ${i + 1}">
+        <span class="kv">Đáp án <b>${esc(g ? (g.K3[i] ?? '—') : '—')}</b></span><span class="mk">${st === 'ok' ? '✓' : st === 'bad' ? '✕' : ''}</span></div>`;
+    }
+    h += `</div></div>`;
+  }
+  if (g) {
+    ensureNx(sh);
+    h += `<label class="field sec"><span>Nhận xét (in trên phiếu kết quả)</span><textarea id="dNx" rows="3">${esc(d.nx || '')}</textarea></label>`;
+  }
+  $('#ovBody').innerHTML = h + actions;
+}
+
+/* ---------- Xuất ---------- */
+const JSPDF_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+const JSZIP_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Không tải được thư viện, kiểm tra mạng rồi thử lại')); document.head.append(s); }); }
+function xepLoai(t) { const p = t / (maxScore() || 10) * 10; return p >= 8 ? 'Giỏi' : p >= 6.5 ? 'Khá' : p >= 5 ? 'Trung bình' : p >= 3.5 ? 'Yếu' : 'Kém'; }
+function graded() { return sheets.filter(s => s.status === 'done' && s.data).sort(byOrder).map(s => ({ s, g: grade(s.data) })).filter(x => x.g); }
+function ranks() {
+  const L = graded().sort((a, b) => b.g.total - a.g.total), m = new Map();
+  L.forEach((x, i) => m.set(x.s.id, i > 0 && L[i - 1].g.total === x.g.total ? m.get(L[i - 1].s.id) : i + 1));
+  return m;
+}
+function analyse(d, g) {
+  const wrong = []; let blank = 0;
+  for (let i = 0; i < cfg.n1; i++) { if (!g.r1[i]) wrong.push(`I.${i + 1}`); if (!d.p1[i]) blank++; }
+  for (let i = 0; i < cfg.n2; i++) for (let j = 0; j < 4; j++) { if (!g.rr2[i].row[j]) wrong.push(`II.${i + 1}${'abcd'[j]}`); if (!(d.p2[i] || [])[j]) blank++; }
+  for (let i = 0; i < cfg.n3; i++) { if (!g.r3[i]) wrong.push(`III.${i + 1}`); if (!d.p3[i]) blank++; }
+  const parts = [];
+  if (cfg.n1) parts.push({ name: 'trắc nghiệm nhiều lựa chọn', short: `P.I ${g.c1}/${cfg.n1} câu`, r: g.c1 / cfg.n1 });
+  if (cfg.n2) parts.push({ name: 'Đúng/Sai', short: `P.II ${fmt(g.s2)}/${cfg.n2} điểm`, r: g.s2 / cfg.n2 });
+  if (cfg.n3) parts.push({ name: 'trả lời ngắn', short: `P.III ${g.c3}/${cfg.n3} câu`, r: g.c3 / cfg.n3 });
+  return { wrong, blank, parts };
+}
+function autoComment(sh) {
+  const d = sh.data, g = grade(d); if (!g) return '';
+  const mx = maxScore() || 10, p = g.total / mx * 10, { wrong, blank, parts } = analyse(d, g);
+  if (g.total >= mx) return 'Bài làm trọn vẹn, không sai câu nào. Chúc mừng em, hãy giữ vững phong độ!';
+  const out = [p >= 9 ? 'Bài làm rất tốt, em nắm chắc kiến thức.' : p >= 8 ? 'Bài làm tốt, em hiểu bài.' : p >= 6.5 ? 'Bài làm khá, em đã nắm được phần lớn kiến thức.' : p >= 5 ? 'Bài làm đạt yêu cầu nhưng còn nhiều chỗ chưa chắc.' : 'Kết quả chưa đạt, em cần ôn lại kiến thức cơ bản của bài.'];
+  const strong = parts.filter(x => x.r >= 0.85), weak = parts.filter(x => x.r < 0.7).sort((a, b) => a.r - b.r);
+  if (strong.length && weak.length) out.push(`Phần ${strong[0].name} làm chắc; cần luyện thêm phần ${weak[0].name}.`);
+  else if (weak.length) out.push(`Em cần luyện thêm phần ${weak[0].name}.`);
+  if (wrong.length && wrong.length <= 8) out.push(`Xem lại câu ${wrong.join(', ')}.`);
+  else if (wrong.length > 8) out.push('Em nên làm lại các câu sai theo bảng đối chiếu.');
+  if (blank > 0) out.push(`Còn ${blank} chỗ bỏ trống, lần sau em nên làm hết.`);
+  return out.join(' ');
+}
+function ensureNx(sh) { if (sh.data && grade(sh.data) && (sh.data.nx == null || sh.nxAuto)) { sh.data.nx = autoComment(sh); sh.nxAuto = true; } }
+function qStats(code) {
+  const L = graded().filter(x => !code || x.g.k.code === code), N = L.length, items = [];
+  const push = (lab, f) => { const ok = L.filter(f).length; items.push({ lab, ok, pct: N ? ok / N : 0 }); };
+  for (let i = 0; i < cfg.n1; i++) push(`I.${i + 1}`, x => x.g.r1[i]);
+  for (let i = 0; i < cfg.n2; i++) for (let j = 0; j < 4; j++) push(`II.${i + 1}${'abcd'[j]}`, x => x.g.rr2[i].row[j]);
+  for (let i = 0; i < cfg.n3; i++) push(`III.${i + 1}`, x => x.g.r3[i]);
+  return { N, items };
+}
+function tableRows() {
+  const head = ['STT', 'SBD', 'Họ tên', 'Mã đề'];
+  if (cfg.n1) head.push('P.I đúng', 'Điểm P.I'); if (cfg.n2) head.push('Điểm P.II'); if (cfg.n3) head.push('P.III đúng', 'Điểm P.III');
+  head.push('Tổng điểm', 'Xếp loại', 'Hạng', 'Nhận xét', 'Cần xem lại', 'Phiếu');
+  for (let i = 0; i < cfg.n1; i++) head.push(`I.${i + 1}`);
+  for (let i = 0; i < cfg.n2; i++) head.push(`II.${i + 1}`);
+  for (let i = 0; i < cfg.n3; i++) head.push(`III.${i + 1}`);
+  const rows = [head], rk = ranks();
+  let n = 0;
+  sheets.filter(s => s.status === 'done' && s.data).sort(byOrder).forEach(s => {
+    const d = s.data, g = grade(d);
+    ensureNx(s);
+    const r = [s.match && s.match.how !== 'none' && s.match.stt !== '' ? s.match.stt : (roster().length ? '' : ++n), d.sbd, d.ho_ten, d.ma_de];
+    if (cfg.n1) r.push(g ? g.c1 : '', g ? g.sc1 : ''); if (cfg.n2) r.push(g ? g.s2 : ''); if (cfg.n3) r.push(g ? g.c3 : '', g ? g.sc3 : '');
+    r.push(g ? g.total : '', g ? xepLoai(g.total) : '', g ? rk.get(s.id) : '', d.nx || '', flags(s).map(f => f[0]).join(', '), s.name);
+    d.p1.forEach(v => r.push(v)); d.p2.forEach(v => r.push(v.map(x => x || '_').join(''))); d.p3.forEach(v => r.push(v));
+    rows.push(r);
+  });
+  const ci = head.indexOf('Cần xem lại');
+  absent().forEach(st => { const r = Array(head.length).fill(''); r[0] = st.stt; r[1] = st.sbd; r[2] = st.ten; r[ci] = 'Chưa có bài'; rows.push(r); });
+  if (roster().length) {
+    const body = rows.slice(1).sort((a, b) => (Number(a[0]) || 1e9) - (Number(b[0]) || 1e9));
+    return [head, ...body];
+  }
+  return rows;
+}
+async function exportXlsx() {
+  if (!window.XLSX) await loadScript(XLSX_SRC);
+  const rows = tableRows();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const nxCol = rows[0].indexOf('Nhận xét');
+  ws['!cols'] = rows[0].map((h, i) => ({ wch: i === nxCol ? 60 : h === 'Họ tên' ? 24 : h === 'Phiếu' ? 18 : h === 'Cần xem lại' ? 16 : Math.max(5, String(h).length + 2) }));
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: rows.length - 1, c: rows[0].length - 1 } }) };
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Bảng điểm');
+  const L = graded();
+  if (L.length) {
+    const tot = L.map(x => x.g.total), avg = tot.reduce((a, b) => a + b, 0) / tot.length;
+    const xl = ['Giỏi', 'Khá', 'Trung bình', 'Yếu', 'Kém'].map(k => [k, L.filter(x => xepLoai(x.g.total) === k).length]);
+    const tk = [['Tổng hợp'], ['Số bài', L.length], ['Điểm trung bình', r2(avg)], ['Cao nhất', Math.max(...tot)], ['Thấp nhất', Math.min(...tot)], [], ['Xếp loại', 'Số HS', 'Tỉ lệ'], ...xl.map(([k, v]) => [k, v, `${Math.round(v / L.length * 100)}%`]), []];
+    const codes = [...new Set(L.map(x => x.g.k.code))];
+    for (const code of codes) {
+      const st = qStats(codes.length > 1 ? code : '');
+      tk.push([codes.length > 1 ? `Tỉ lệ đúng từng câu · mã đề ${code} (${st.N} bài)` : `Tỉ lệ đúng từng câu (${st.N} bài)`], ['Câu', 'Số HS đúng', 'Tỉ lệ đúng']);
+      st.items.forEach(it => tk.push([it.lab, it.ok, `${Math.round(it.pct * 100)}%`]));
+      tk.push([]);
+    }
+    const ws2 = XLSX.utils.aoa_to_sheet(tk); ws2['!cols'] = [{ wch: 26 }, { wch: 12 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Thống kê');
+  }
+  const buf = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+  const name = `bang-diem${cfg.rep.lop ? '-' + slug(cfg.rep.lop) : ''}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  await saveFile(name, new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'Đã lưu bảng điểm Excel');
+}
+const slug = s => String(s || '').replace(/[\\/:*?"<>|]+/g, '').trim().replace(/\s+/g, '-');
+function pdfName(sh) {
+  const d = sh.data, i = sheets.indexOf(sh) + 1;
+  return `${slug(d.sbd || String(i).padStart(2, '0'))} - ${String(d.ho_ten || 'Hoc sinh ' + i).replace(/[\\/:*?"<>|]+/g, '').trim()}.pdf`;
+}
+
+/* ---------- Phiếu kết quả PDF (vẽ trên canvas A4 150 dpi) ---------- */
+const RW = 1240, RH = 1754, RM = 72;
+const FB = '"Be Vietnam Pro", Arial, sans-serif', FM = '"JetBrains Mono", Menlo, Consolas, monospace';
+const PC = { ink: '#141c2f', muted: '#5b6475', line: '#d3d8cf', band: '#f2f3ef', acc: '#2443c4', accBg: '#eef2ff', ok: '#11703f', okBg: '#e2f2e8', bad: '#b8232a', badBg: '#fbe6e4', note: '#f6f7f3' };
+async function ensureFonts() {
+  try { await Promise.all(['400 24px "Be Vietnam Pro"', '600 24px "Be Vietnam Pro"', '700 24px "Be Vietnam Pro"', '700 24px "JetBrains Mono"'].map(f => document.fonts.load(f, 'Ááẻ'))); } catch (e) {}
+}
+function fitText(x, t, maxW) {
+  t = String(t ?? ''); if (x.measureText(t).width <= maxW) return t;
+  while (t.length > 1 && x.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+  return t + '…';
+}
+function cell(x, t, cx, cy, w, color, font) { x.font = font; x.fillStyle = color; x.textAlign = 'center'; x.fillText(fitText(x, t, w - 8), cx, cy); x.textAlign = 'left'; }
+function rrect(x, X, Y, W, H, r) { x.beginPath(); if (x.roundRect) x.roundRect(X, Y, W, H, r); else x.rect(X, Y, W, H); }
+function wrapLines(x, text, maxW) {
+  const lines = []; let cur = '';
+  for (const w of String(text || '').split(/\s+/).filter(Boolean)) { const t = cur ? cur + ' ' + w : w; if (x.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; }
+  if (cur) lines.push(cur); return lines;
+}
+function secTitle(x, y, title, sub) {
+  x.fillStyle = PC.ink; x.font = `700 25px ${FB}`; x.fillText(title, RM, y + 26);
+  if (sub) { x.fillStyle = PC.muted; x.font = `500 21px ${FB}`; x.textAlign = 'right'; x.fillText(sub, RW - RM, y + 26); x.textAlign = 'left'; }
+  return y + 42;
+}
+function gridLines(x, X, Y, colX, rows, rh) {
+  x.strokeStyle = PC.line; x.lineWidth = 1.5;
+  const R = colX[colX.length - 1];
+  for (let r = 0; r <= rows; r++) { x.beginPath(); x.moveTo(X, Y + r * rh); x.lineTo(R, Y + r * rh); x.stroke(); }
+  for (const cx of colX) { x.beginPath(); x.moveTo(cx, Y); x.lineTo(cx, Y + rows * rh); x.stroke(); }
+}
+function drawRowTable(x, y, n, labels, em, key, ok) {
+  const per = Math.min(n, 20), labW = 150, cw = (RW - 2 * RM - labW) / per, rh = 44;
+  for (let s = 0; s < n; s += per) {
+    const cnt = Math.min(per, n - s);
+    x.fillStyle = PC.band; x.fillRect(RM, y, labW + cnt * cw, rh); x.fillRect(RM, y, labW, rh * 3);
+    labels.forEach((l, r) => { x.fillStyle = PC.muted; x.font = `600 19px ${FB}`; x.fillText(l, RM + 14, y + r * rh + 29); });
+    for (let k = 0; k < cnt; k++) {
+      const i = s + k, cx = RM + labW + k * cw, good = ok(i);
+      cell(x, String(i + 1), cx + cw / 2, y + 29, cw, PC.muted, `700 19px ${FM}`);
+      x.fillStyle = good ? PC.okBg : PC.badBg; x.fillRect(cx, y + rh, cw, rh);
+      cell(x, em(i) || '–', cx + cw / 2, y + rh + 30, cw, good ? PC.ok : PC.bad, `700 21px ${FM}`);
+      cell(x, key(i) || '?', cx + cw / 2, y + 2 * rh + 30, cw, PC.ink, `700 21px ${FM}`);
+    }
+    gridLines(x, RM, y, [RM, ...Array.from({ length: cnt + 1 }, (_, k) => RM + labW + k * cw)], 3, rh);
+    y += 3 * rh + 14;
+  }
+  return y + 12;
+}
+function drawP2(x, y, d, g) {
+  const rh = 44, W = RW - 2 * RM;
+  const cols = [120, 150, 150, 150, 150, 170]; cols.push(W - cols.reduce((a, b) => a + b, 0));
+  const colX = [RM]; cols.forEach(w => colX.push(colX[colX.length - 1] + w));
+  const heads = ['Câu', 'a', 'b', 'c', 'd', 'Số ý đúng', 'Điểm'];
+  x.fillStyle = PC.band; x.fillRect(RM, y, W, rh);
+  heads.forEach((h, c) => cell(x, h, colX[c] + cols[c] / 2, y + 29, cols[c], PC.muted, `600 19px ${FB}`));
+  for (let i = 0; i < cfg.n2; i++) {
+    const ry = y + (i + 1) * rh, rr = g.rr2[i];
+    cell(x, String(i + 1), colX[0] + cols[0] / 2, ry + 30, cols[0], PC.muted, `700 20px ${FM}`);
+    for (let j = 0; j < 4; j++) {
+      const c = j + 1, em = (d.p2[i] || [])[j] || '–', kv = (g.K2[i] || [])[j] || '?', good = rr.row[j];
+      x.fillStyle = good ? PC.okBg : PC.badBg; x.fillRect(colX[c], ry, cols[c], rh);
+      cell(x, good ? `${em} ✓` : `${em} → ${kv}`, colX[c] + cols[c] / 2, ry + 30, cols[c], good ? PC.ok : PC.bad, `700 21px ${FM}`);
+    }
+    cell(x, `${rr.n}/4`, colX[5] + cols[5] / 2, ry + 30, cols[5], PC.ink, `700 20px ${FM}`);
+    cell(x, fmt(rr.pts), colX[6] + cols[6] / 2, ry + 30, cols[6], PC.ink, `700 20px ${FM}`);
+  }
+  gridLines(x, RM, y, colX, cfg.n2 + 1, rh);
+  y += (cfg.n2 + 1) * rh + 26;
+  x.fillStyle = PC.muted; x.font = `400 18px ${FB}`; x.fillText('Ô đỏ ghi: em chọn → đáp án đúng.', RM, y); 
+  return y + 22;
+}
+async function drawReport(sh) {
+  const d = sh.data, g = grade(d), mx = maxScore(), R = cfg.rep;
+  ensureNx(sh);
+  const c = document.createElement('canvas'); c.width = RW; c.height = RH;
+  const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, RW, RH); x.textBaseline = 'alphabetic';
+  let y = RM;
+  x.fillStyle = PC.muted; x.font = `600 21px ${FB}`; x.fillText(fitText(x, (R.truong || '').toUpperCase(), 760), RM, y + 16);
+  x.textAlign = 'right'; x.font = `400 21px ${FB}`; x.fillText(new Date().toLocaleDateString('vi-VN'), RW - RM, y + 16); x.textAlign = 'left';
+  y += 62; x.fillStyle = PC.ink; x.font = `700 38px ${FB}`; x.fillText(fitText(x, R.bai || 'Kết quả bài kiểm tra', RW - 2 * RM), RM, y);
+  const sub = [R.lop && 'Lớp ' + R.lop, R.gv && 'Giáo viên: ' + R.gv].filter(Boolean).join('   ·   ');
+  if (sub) { y += 38; x.fillStyle = PC.muted; x.font = `400 22px ${FB}`; x.fillText(sub, RM, y); }
+  y += 26; x.strokeStyle = PC.ink; x.lineWidth = 2.5; x.beginPath(); x.moveTo(RM, y); x.lineTo(RW - RM, y); x.stroke();
+  // học sinh + điểm
+  y += 26; const top = y, bw = 290, bh = 150, bx = RW - RM - bw;
+  x.fillStyle = PC.muted; x.font = `600 19px ${FB}`; x.fillText('HỌ VÀ TÊN', RM, y + 22);
+  x.fillStyle = PC.ink; x.font = `700 42px ${FB}`; x.fillText(fitText(x, d.ho_ten || '(chưa ghi tên)', bx - RM - 30), RM, y + 74);
+  x.fillStyle = PC.muted; x.font = `400 23px ${FB}`; x.fillText(`SBD  ${d.sbd || '—'}      Mã đề  ${d.ma_de || '—'}`, RM, y + 118);
+  rrect(x, bx, top, bw, bh, 18); x.fillStyle = PC.accBg; x.fill(); x.lineWidth = 3; x.strokeStyle = PC.acc; x.stroke();
+  cell(x, g ? fmt(g.total) : '?', bx + bw / 2, top + 90, bw, PC.acc, `700 76px ${FM}`);
+  cell(x, g ? `trên ${fmt(mx)} điểm · ${xepLoai(g.total)}` : 'Chưa có đáp án', bx + bw / 2, top + 128, bw, PC.ink, `600 22px ${FB}`);
+  y = top + bh + 34;
+  if (g) {
+    const parts = [];
+    if (cfg.n1) parts.push(`Phần I: ${g.c1}/${cfg.n1} câu (${fmt(g.sc1)} đ)`);
+    if (cfg.n2) parts.push(`Phần II: ${fmt(g.s2)} đ`);
+    if (cfg.n3) parts.push(`Phần III: ${g.c3}/${cfg.n3} câu (${fmt(g.sc3)} đ)`);
+    x.fillStyle = PC.ink; x.font = `500 22px ${FB}`; x.fillText(fitText(x, parts.join('    ·    '), RW - 2 * RM), RM, y);
+    y += 30;
+    if (cfg.n1) { y = secTitle(x, y, 'Phần I · Trắc nghiệm nhiều lựa chọn', `${g.c1}/${cfg.n1} câu đúng`); y = drawRowTable(x, y, cfg.n1, ['Câu', 'Em chọn', 'Đáp án'], i => d.p1[i], i => g.K1[i], i => g.r1[i]); }
+    if (cfg.n2) { y = secTitle(x, y, 'Phần II · Đúng/Sai', `${fmt(g.s2)}/${cfg.n2} điểm`); y = drawP2(x, y, d, g); }
+    if (cfg.n3) { y = secTitle(x, y, 'Phần III · Trả lời ngắn', `${g.c3}/${cfg.n3} câu đúng`); y = drawRowTable(x, y, cfg.n3, ['Câu', 'Em ghi', 'Đáp án'], i => d.p3[i], i => g.K3[i], i => g.r3[i]); }
+  }
+  if (d.nx) {
+    x.font = `400 24px ${FB}`; const lines = wrapLines(x, d.nx, RW - 2 * RM - 48).slice(0, 5);
+    const h = 66 + lines.length * 36;
+    rrect(x, RM, y, RW - 2 * RM, h, 14); x.fillStyle = PC.note; x.fill(); x.strokeStyle = PC.line; x.lineWidth = 1.5; x.stroke();
+    x.fillStyle = PC.muted; x.font = `700 18px ${FB}`; x.fillText('NHẬN XÉT CỦA GIÁO VIÊN', RM + 24, y + 36);
+    x.fillStyle = PC.ink; x.font = `400 24px ${FB}`; lines.forEach((l, k) => x.fillText(l, RM + 24, y + 74 + k * 36));
+    y += h + 26;
+  }
+  const avail = RH - 74 - y;
+  if (avail > 240 && sh.full) {
+    try {
+      const bmp = await createImageBitmap(sh.full);
+      x.fillStyle = PC.muted; x.font = `700 18px ${FB}`; x.fillText('ẢNH PHIẾU CỦA EM', RM, y + 18); y += 30;
+      const sc = Math.min((RW - 2 * RM) / bmp.width, (avail - 30) / bmp.height), w = bmp.width * sc, h = bmp.height * sc, ix = (RW - w) / 2;
+      x.drawImage(bmp, ix, y, w, h); x.strokeStyle = PC.line; x.lineWidth = 1.5; x.strokeRect(ix, y, w, h); bmp.close?.();
+    } catch (e) {}
+  }
+  cell(x, `${R.truong ? R.truong + '  ·  ' : ''}Phiếu kết quả tạo bằng Chấm Phiếu AI`, RW / 2, RH - 36, RW - 2 * RM, PC.muted, `400 17px ${FB}`);
+  return c;
+}
+async function makePdf(list, onProg) {
+  if (!window.jspdf) await loadScript(JSPDF_SRC);
+  await ensureFonts();
+  const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compress: true });
+  for (let i = 0; i < list.length; i++) {
+    onProg?.(i + 1, list.length);
+    const c = await drawReport(list[i]);
+    if (i) doc.addPage();
+    doc.addImage(c.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+    await new Promise(r => setTimeout(r, 0));
+  }
+  doc.setProperties({ title: cfg.rep.bai || 'Kết quả bài kiểm tra', author: cfg.rep.gv || '' });
+  return doc.output('blob');
+}
+
+/* ---------- Tổng hợp & nhận xét ---------- */
+let sumCode = '', busyExp = false;
+function openSummary() {
+  graded().forEach(x => ensureNx(x.s));
+  $('#ov2').hidden = false; document.body.classList.add('lock');
+  renderSummary(); $('#sumBody').scrollTop = 0; $('#ov2Close').focus();
+}
+function closeSummary() { $('#ov2').hidden = true; if ($('#ov').hidden) document.body.classList.remove('lock'); renderAll(); }
+function renderSummary() {
+  if ($('#ov2').hidden) return;
+  const L = graded(), R = cfg.rep, rk = ranks();
+  const codes = [...new Set(L.map(x => x.g.k.code))];
+  if (sumCode && !codes.includes(sumCode)) sumCode = '';
+  const code = codes.length > 1 ? (sumCode || codes[0]) : '';
+  const st = qStats(code), worst = st.items.filter(x => x.pct < 1).sort((a, b) => a.pct - b.pct).slice(0, 5);
+  if (!L.length) { $('#sumBody').innerHTML = '<div class="empty">Chưa có bài nào chấm xong. Chấm phiếu ở bước 3 trước.</div>'; return; }
+  $('#sumBody').innerHTML = `
+  <section class="card"><h4>Xuất và chia sẻ <span>${L.length} học sinh</span></h4>
+    <div class="exp-grid">
+      <button class="exp" type="button" data-exp="xlsx"><b>Bảng điểm Excel</b><span>Điểm, xếp loại, hạng, nhận xét, thống kê từng câu</span></button>
+      <button class="exp" type="button" data-exp="pdfall"><b>PDF cả lớp</b><span>Một file, mỗi em một trang A4: điểm, bảng đối chiếu, nhận xét, ảnh phiếu</span></button>
+      <button class="exp" type="button" data-exp="pdfzip"><b>PDF từng em (.zip)</b><span>Mỗi em một file, tên theo SBD và họ tên, để gửi riêng qua Zalo</span></button>
+      ${gasOK() ? `<button class="exp" type="button" data-exp="gsheet"><b>Lưu điểm lên Google Sheet</b><span>Ghi cột "${esc(baiTitle())}" vào sổ điểm lớp ${esc(lopName() || 'chưa đặt tên')} và tạo sheet chi tiết</span></button>`
+        : mcpCap ? `<button class="exp" type="button" data-exp="gdrive"><b>Lưu lên Google Drive</b><span>Tạo một Google Sheet bảng điểm mới trong Drive của thầy</span></button>`
+        : `<button class="exp muted-card" type="button" data-exp="gsetup"><b>Lưu điểm lên Google Sheet</b><span>Chưa kết nối. Bấm để mở phần Kết nối Google Sheet ở bước 2</span></button>`}
+    </div>
+    <p class="hint" id="expStatus" aria-live="polite"></p></section>
+  <section class="card"><h4>Thông tin in trên phiếu kết quả</h4>
+    <div class="repgrid">
+      <label class="field"><span>Trường</span><input type="text" id="rTruong" data-rep="truong" value="${esc(R.truong)}" autocomplete="off"></label>
+      <label class="field"><span>Tên bài kiểm tra</span><input type="text" id="rBai" data-rep="bai" value="${esc(R.bai)}" autocomplete="off" placeholder="VD: Kiểm tra giữa kì I · Toán 10"></label>
+      <label class="field"><span>Lớp</span><input type="text" id="rLop" data-rep="lop" value="${esc(R.lop)}" autocomplete="off" placeholder="VD: 10A3"></label>
+      <label class="field"><span>Giáo viên</span><input type="text" id="rGv" data-rep="gv" value="${esc(R.gv)}" autocomplete="off"></label>
+    </div></section>
+  <section class="card"><h4>Tỉ lệ đúng từng câu <span>${st.N} bài${code ? ' · mã ' + esc(code) : ''}</span></h4>
+    ${codes.length > 1 ? `<label class="field"><span>Mã đề (các mã đề thường trộn thứ tự câu nên xem riêng)</span><select id="sumCode">${codes.map(c => `<option value="${esc(c)}"${c === code ? ' selected' : ''}>Mã đề ${esc(c)}</option>`).join('')}</select></label>` : ''}
+    ${worst.length ? `<p class="hint">Nhiều em sai nhất: <b style="color:var(--ink)">${worst.map(w => `${w.lab} (${Math.round(w.pct * 100)}% đúng)`).join(', ')}</b></p>` : '<p class="hint">Cả lớp làm đúng hết các câu.</p>'}
+    <div class="qchips">${st.items.map(w => `<span class="qc ${w.pct < 0.5 ? 'bad' : w.pct >= 0.8 ? 'ok' : ''}"><b>${w.lab}</b>${Math.round(w.pct * 100)}%</span>`).join('')}</div></section>
+  ${roster().length ? `<section class="card"><h4>Danh sách lớp ${esc(cfg.curClass)} <span>có bài ${roster().length - absent().length}/${roster().length} em</span></h4>
+    ${absent().length ? `<p class="absent"><b>Chưa có bài (${absent().length}):</b> ${absent().map(r => `${esc(r.stt)}. ${esc(r.ten)}`).join(', ')}</p>` : '<p class="hint">Đủ bài cả lớp.</p>'}
+    ${sheets.filter(s => s.status === 'done' && s.match?.how === 'none').length ? `<p class="hint" style="color:var(--bad)">${sheets.filter(s => s.status === 'done' && s.match?.how === 'none').length} phiếu không khớp học sinh nào. Mở phiếu đó để chọn đúng em.</p>` : ''}</section>` : ''}
+  <section class="card"><h4>Nhận xét từng em</h4>
+    <p class="hint">Đã tự điền theo kết quả bài làm. Thầy sửa trực tiếp, hoặc để AI viết lời nhận xét tự nhiên hơn cho cả lớp.</p>
+    <div class="btnrow">
+      <button class="btn" type="button" data-nx="ai" ${engineReady() ? '' : 'disabled'}>AI viết nhận xét cho cả lớp</button>
+      <button class="btn" type="button" data-nx="auto">Viết lại theo điểm</button>
+    </div>
+    <div class="nxlist">${L.map(({ s, g }) => `
+      <div class="nxrow">
+        <div class="nxh"><b>${esc(s.data.ho_ten || 'Chưa có tên')}</b><small>SBD ${esc(s.data.sbd || '—')} · Mã ${esc(s.data.ma_de || '—')} · Hạng ${rk.get(s.id)}</small><span class="pill">${fmt(g.total)} · ${xepLoai(g.total)}</span></div>
+        <textarea rows="2" id="nx${s.id}" data-nxid="${s.id}" aria-label="Nhận xét cho ${esc(s.data.ho_ten || 'học sinh')}">${esc(s.data.nx || '')}</textarea>
+      </div>`).join('')}</div></section>`;
+}
+async function aiJSON(prompt, signal) {
+  if (engine() === 'claude') return await sampleFn.json(prompt, { modelTier: 'quick', cache: false, signal });
+  const { j } = await geminiGen([{ text: prompt }], { temperature: 0.7, signal });
+  return tolerantJSON(geminiText(j));
+}
+async function aiComments(btn) {
+  const L = graded(); if (!L.length || !engineReady()) return;
+  const mx = maxScore(); btn.disabled = true; const label = btn.textContent;
+  let done = 0;
+  try {
+    for (let s = 0; s < L.length; s += 25) {
+      const chunk = L.slice(s, s + 25);
+      btn.textContent = `AI đang viết… ${s}/${L.length}`;
+      const lines = chunk.map(({ s: sh, g }) => { const a = analyse(sh.data, g); return `${sh.id}|${sh.data.ho_ten || 'Học sinh'}|${fmt(g.total)}/${fmt(mx)}|${a.parts.map(p => p.short).join('; ')}|sai: ${a.wrong.join(',') || 'không'}|bỏ trống: ${a.blank}`; });
+      const prompt = [
+        `Bạn là giáo viên đang viết nhận xét ngắn sau bài kiểm tra${cfg.rep.bai ? ' "' + cfg.rep.bai + '"' : ''} cho từng học sinh. Thang điểm ${fmt(mx)}.`,
+        'Cấu trúc bài: Phần I trắc nghiệm A/B/C/D; Phần II Đúng/Sai, mỗi câu 4 ý a-d; Phần III trả lời ngắn. Mã câu: I.3 là Phần I câu 3; II.2b là Phần II câu 2 ý b.',
+        'Yêu cầu cho mỗi em: 1-2 câu, tối đa 40 từ, gọi học sinh là "em"; ân cần, cụ thể theo kết quả; nêu một điểm làm tốt và một việc nên làm tiếp (ví dụ xem lại câu sai, luyện phần yếu); không nhắc lại điểm số; không chê bai con người; mỗi em một lời khác nhau.',
+        'Dữ liệu, mỗi dòng: id|tên|điểm|kết quả từng phần|các câu sai|số chỗ bỏ trống',
+        ...lines,
+        'Chỉ trả về JSON array, ví dụ: [{"id":3,"nx":"..."}]'
+      ].join('\n');
+      const arr = await aiJSON(prompt);
+      (Array.isArray(arr) ? arr : []).forEach(it => { const sh = byId(Number(it?.id)); if (sh?.data && typeof it.nx === 'string' && it.nx.trim()) { sh.data.nx = it.nx.trim(); sh.nxAuto = false; done++; } });
+    }
+    toast(`AI đã viết nhận xét cho ${done} em. Thầy đọc lại và sửa nếu cần.`);
+  } catch (e) {
+    toast(e?.code === 'not_granted' ? 'Chưa cho phép trang dùng Claude.' : e?.code === 'rate_limited' ? 'AI đang giới hạn lượt, thử lại sau ít phút.' : (e?.message ? 'AI lỗi: ' + e.message : 'AI chưa viết được nhận xét, thử lại sau.'));
+  } finally { btn.textContent = label; btn.disabled = false; renderSummary(); }
+}
+async function doExport(kind) {
+  if (busyExp) return; const L = graded(); if (!L.length) { toast('Chưa có bài nào chấm xong.'); return; }
+  L.forEach(x => ensureNx(x.s));
+  busyExp = true; const say = t => { const el = $('#expStatus'); if (el) el.textContent = t; };
+  document.querySelectorAll('[data-exp]').forEach(b => { b.disabled = true; });
+  try {
+    if (kind === 'xlsx') { say('Đang tạo file Excel…'); await exportXlsx(); }
+    else if (kind === 'gsetup') { closeSummary(); setClsOpen(true); $('#gsBox').open = true; $('#gsBox').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    else if (kind === 'gsheet') {
+      say('Đang ghi lên Google Sheet…');
+      const r = await saveScoresGas();
+      linkStatus(`Đã lưu ${r.saved} điểm vào sheet "${r.sheet}"${r.detail ? ` và "${r.detail}"` : ''}. `, r.url, 'Mở Google Sheet');
+      toast('Đã lưu điểm lên Google Sheet'); return;
+    }
+    else if (kind === 'gdrive') {
+      say('Đang tạo Google Sheet trong Drive…');
+      const url = await saveToDrive();
+      linkStatus('Đã tạo Google Sheet bảng điểm trong Drive. ', url, 'Mở file');
+      toast('Đã lưu lên Google Drive'); return;
+    }
+    else if (kind === 'pdfall') {
+      say('Đang chuẩn bị…');
+      const blob = await makePdf(L.map(x => x.s), (i, n) => say(`Đang tạo trang ${i}/${n}…`));
+      await saveFile(`ket-qua-${slug(cfg.rep.bai || 'bai-kiem-tra')}${cfg.rep.lop ? '-' + slug(cfg.rep.lop) : ''}.pdf`, blob, 'Đã lưu PDF cả lớp');
+    } else {
+      say('Đang chuẩn bị…');
+      if (!window.JSZip) await loadScript(JSZIP_SRC);
+      const zip = new JSZip(), used = new Set();
+      for (let i = 0; i < L.length; i++) {
+        say(`Đang tạo PDF ${i + 1}/${L.length}…`);
+        let nm = pdfName(L[i].s); while (used.has(nm)) nm = nm.replace(/\.pdf$/, ' (2).pdf'); used.add(nm);
+        zip.file(nm, await makePdf([L[i].s]));
+      }
+      say('Đang nén…');
+      const z = await zip.generateAsync({ type: 'blob' });
+      await saveFile(`ket-qua-tung-em${cfg.rep.lop ? '-' + slug(cfg.rep.lop) : ''}.zip`, z, `Đã lưu ${L.length} file PDF trong một file nén`);
+    }
+  } catch (e) { toast(e?.message || 'Không tạo được file'); }
+  finally { if (!keepStatus) say(''); keepStatus = false; busyExp = false; document.querySelectorAll('[data-exp]').forEach(b => { b.disabled = false; }); }
+}
+function copyTable() {
+  const tsv = tableRows().map(r => r.map(v => typeof v === 'number' ? String(v).replace('.', ',') : String(v ?? '').replace(/\t|\n/g, ' ')).join('\t')).join('\n');
+  const fallback = () => {
+    const ta = document.createElement('textarea'); ta.value = tsv; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.append(ta); ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e) {} ta.remove();
+    toast(ok ? 'Đã sao chép. Dán vào Excel hoặc Google Sheets.' : 'Trình duyệt chặn sao chép. Hãy dùng nút Tải Excel.');
+  };
+  try { navigator.clipboard.writeText(tsv).then(() => toast('Đã sao chép. Dán vào Excel hoặc Google Sheets.'), fallback); }
+  catch (e) { fallback(); }
+}
+
+/* ---------- Nhập đáp án từ Excel ---------- */
+/* IMPORT-START */
+const XLSX_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+const CODE_RE = /^(?:m[ãa]\s*(?:đ[ềe]|de)?\s*[:.\-]?\s*)?(\d{3,4})$/i;
+function classify(raw) {
+  let s = String(raw ?? '').trim(); if (!s) return null;
+  s = s.replace(/[−–—]/g, '-');
+  const u = s.toUpperCase(), u2 = u.replace(/^\(|[.)]$/g, '');
+  if (/^[ABCD]$/.test(u2)) return { t: 'abcd', v: u2 };
+  if (/^(Đ|T|ĐÚNG|DUNG|TRUE)$/.test(u)) return { t: 'ds', v: ['Đ'] };
+  if (/^(S|F|SAI|FALSE)$/.test(u)) return { t: 'ds', v: ['S'] };
+  const compact = u.replace(/[\s,;\-\/|.]/g, '');
+  if (compact.length >= 2 && compact.length <= 4 && /^[ĐDSTF]+$/.test(compact)) return { t: 'ds', v: compact.replace(/[DT]/g, 'Đ').replace(/F/g, 'S').split('') };
+  if (/^[+-]?\d+([.,]\d+)?$/.test(s)) return { t: 'num', v: s.replace(/^\+/, '').replace('.', ',') };
+  return null;
+}
+function splitTokens(toks) {
+  let i = 0; const p1 = [];
+  while (i < toks.length && toks[i].t === 'abcd') { p1.push(toks[i].v); i++; }
+  // "D" của Phần II (Đúng) bị đọc lẫn vào cuối Phần I
+  if (cfg.n1 > 0 && cfg.n2 > 0 && p1.length > cfg.n1 && p1.slice(cfg.n1).every(v => v === 'D')) { i -= p1.length - cfg.n1; p1.length = cfg.n1; }
+  const ds = [];
+  while (i < toks.length && (toks[i].t === 'ds' || (toks[i].t === 'abcd' && toks[i].v === 'D'))) { ds.push(...(toks[i].t === 'ds' ? toks[i].v : ['Đ'])); i++; }
+  const p3 = [];
+  for (; i < toks.length; i++) if (toks[i].t === 'num') p3.push(toks[i].v);
+  return { p1, ds, p3 };
+}
+const tokensOf = cells => cells.map(classify).filter(Boolean);
+const tokCount = k => k.p1.length + k.ds.length + k.p3.length;
+function keysFromGrid(aoa) {
+  const G = (aoa || []).map(r => (r || []).map(v => String(v ?? '').trim()));
+  const W = Math.max(0, ...G.map(r => r.length));
+  const cands = [];
+  G.forEach((r, ri) => { const cs = []; r.forEach((v, ci) => { const m = v.match(CODE_RE); if (m) cs.push({ ri, ci, code: m[1] }); }); if (cs.length) cands.push({ dir: 'down', cs }); });
+  for (let ci = 0; ci < W; ci++) { const cs = []; G.forEach((r, ri) => { const m = (r[ci] || '').match(CODE_RE); if (m) cs.push({ ri, ci, code: m[1] }); }); if (cs.length) cands.push({ dir: 'right', cs }); }
+  let best = [], bestScore = 0;
+  for (const cand of cands) {
+    const seen = new Set();
+    const ks = cand.cs.map(c => {
+      const cells = cand.dir === 'down' ? G.slice(c.ri + 1).map(r => r[c.ci] || '') : G[c.ri].slice(c.ci + 1);
+      return { code: c.code, ...splitTokens(tokensOf(cells)) };
+    }).filter(k => tokCount(k) >= 3 && !seen.has(k.code) && seen.add(k.code));
+    const sc = ks.length * 10000 + ks.reduce((a, k) => a + tokCount(k), 0);
+    if (sc > bestScore) { best = ks; bestScore = sc; }
+  }
+  if (!best.length) {
+    // Không có dòng/cột mã đề: lấy cột hoặc dòng nhiều đáp án nhất
+    const score = t => t.filter(x => x.t !== 'num').length * 2 + t.length;
+    let bt = null, bs = 0;
+    for (let ci = 0; ci < W; ci++) { const t = tokensOf(G.map(r => r[ci] || '')); if (score(t) > bs) { bs = score(t); bt = t; } }
+    G.forEach(r => { const t = tokensOf(r); if (score(t) > bs) { bs = score(t); bt = t; } });
+    if (bt && bt.length >= 3) best = [{ code: cfg.keys[0]?.code || '101', ...splitTokens(bt) }];
+  }
+  // Các mã đề cùng cấu trúc: mã nào dư chữ "D" ở cuối Phần I thì đó là "Đúng" của Phần II
+  if (best.length > 1) {
+    const cnt = {}; best.forEach(k => { cnt[k.p1.length] = (cnt[k.p1.length] || 0) + 1; });
+    const n1 = +Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || a - b)[0];
+    best.forEach(k => { if (k.p1.length > n1 && k.p1.slice(n1).every(v => v === 'D')) { k.ds = Array(k.p1.length - n1).fill('Đ').concat(k.ds); k.p1.length = n1; } });
+  }
+  return best;
+}
+/* IMPORT-END */
+function applyImport(aoa, src) {
+  const res = keysFromGrid(aoa);
+  if (!res.length) { toast(`Không nhận ra bảng đáp án trong ${src}. Thầy tải file mẫu để xem cách xếp.`); return false; }
+  const old = JSON.parse(JSON.stringify({ keys: cfg.keys, n1: cfg.n1, n2: cfg.n2, n3: cfg.n3 }));
+  const n1 = Math.max(...res.map(k => k.p1.length)), n2 = Math.max(...res.map(k => Math.ceil(k.ds.length / 4))), n3 = Math.max(...res.map(k => k.p3.length));
+  const changed = n1 !== cfg.n1 || n2 !== cfg.n2 || n3 !== cfg.n3;
+  Object.assign(cfg, { n1, n2, n3 });
+  cfg.keys = res.map(k => {
+    const g = []; for (let i = 0; i < k.ds.length; i += 4) g.push(k.ds.slice(i, i + 4).join(''));
+    return { code: k.code, p1: k.p1.join(''), p2: g.join(' '), p3: k.p3.join(' ') };
+  });
+  sheets.forEach(s => s.data && padData(s.data));
+  saveCfg(); renderFmt(); renderKeys(); setKeyOpen(true); renderAll();
+  const undo = () => { Object.assign(cfg, old); sheets.forEach(s => s.data && padData(s.data)); saveCfg(); renderFmt(); renderKeys(); renderAll(); };
+  toast(`Đã nhập ${res.length} mã đề: ${res.map(k => k.code).slice(0, 6).join(', ')}${res.length > 6 ? '…' : ''}${changed ? ` · ${n1}+${n2}+${n3} câu` : ''}`, { label: 'Hoàn tác', fn: undo });
+  return true;
+}
+async function importExcel(file) {
+  try {
+    if (!window.XLSX) await loadScript(XLSX_SRC);
+    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+    for (const name of wb.SheetNames) {
+      const aoa = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: false, defval: '' });
+      if (keysFromGrid(aoa).length) { applyImport(aoa, file.name); return; }
+    }
+    toast(`Không nhận ra bảng đáp án trong ${file.name}. Thầy tải file mẫu để xem cách xếp.`);
+  } catch (e) { toast('Không mở được file: ' + (e.message || 'định dạng lạ')); }
+}
+async function saveFile(name, blob, okMsg) {
+  if (downloadsCap) {
+    try { await downloadsCap.save({ filename: name, data: blob }); toast(okMsg); }
+    catch (e) { if (e?.code !== 'declined') toast('Không lưu được file ở đây.'); }
+    return;
+  }
+  if (inClaude) { toast('Không lưu được file ở đây.'); return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast(okMsg);
+}
+async function downloadTemplate() {
+  try {
+    if (!window.XLSX) await loadScript(XLSX_SRC);
+    const K = cfg.keys.map(k => ({ code: k.sample ? '101' : (k.code || ''), p1: k.sample ? [] : parseP1(k.p1), p2: k.sample ? [] : parseP2(k.p2), p3: k.sample ? [] : parseP3(k.p3) }));
+    const codes = K.length > 1 || K[0].code ? K : [{ code: '101', p1: [], p2: [], p3: [] }];
+    if (codes.length === 1 && !codes[0].p1.length) codes.push({ code: String((parseInt(codes[0].code, 10) || 101) + 1), p1: [], p2: [], p3: [] });
+    const aoa = [['Câu', ...codes.map(k => k.code)]];
+    for (let i = 0; i < cfg.n1; i++) aoa.push([String(i + 1), ...codes.map(k => k.p1[i] || '')]);
+    for (let i = 0; i < cfg.n2; i++) aoa.push([`II.${i + 1}`, ...codes.map(k => (k.p2[i] || []).join(''))]);
+    for (let i = 0; i < cfg.n3; i++) aoa.push([`III.${i + 1}`, ...codes.map(k => k.p3[i] || '')]);
+    const ws = XLSX.utils.aoa_to_sheet(aoa); ws['!cols'] = [{ wch: 7 }, ...codes.map(() => ({ wch: 9 }))];
+    const guide = XLSX.utils.aoa_to_sheet([
+      ['Cách điền file đáp án cho Chấm Phiếu AI'],
+      ['Dòng 1: ghi mã đề, mỗi cột một mã đề. Thêm cột để có thêm mã đề.'],
+      ['Phần I (dòng 1, 2, 3…): mỗi ô một chữ A, B, C hoặc D.'],
+      ['Phần II (dòng II.1, II.2…): mỗi ô 4 ký tự Đ/S theo ý a, b, c, d, ví dụ ĐSĐS. Gõ D thay Đ cũng được.'],
+      ['Phần III (dòng III.1…): mỗi ô một đáp số, ví dụ -1,5.'],
+      ['Đề có số câu khác thì thêm hoặc xóa dòng; app tự nhận số câu khi nhập.']
+    ]); guide['!cols'] = [{ wch: 90 }];
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Đáp án'); XLSX.utils.book_append_sheet(wb, guide, 'Hướng dẫn');
+    const buf = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+    await saveFile('dap-an-mau.xlsx', new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'Đã lưu file mẫu');
+  } catch (e) { toast(e.message || 'Không tạo được file mẫu'); }
+}
+
+/* ---------- Nhận 4 ô vuông góc phiếu, nắn phẳng ---------- */
+const detCanvas = document.createElement('canvas');
+function detectQuad(src, sw, sh, maxSide) {
+  const k = Math.min(1, (maxSide || 480) / Math.max(sw, sh));
+  const w = Math.max(8, Math.round(sw * k)), h = Math.max(8, Math.round(sh * k)), N = w * h;
+  detCanvas.width = w; detCanvas.height = h;
+  const x = detCanvas.getContext('2d', { willReadFrequently: true });
+  x.drawImage(src, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data, g = new Uint8Array(N);
+  for (let i = 0; i < N; i++) g[i] = (d[i * 4] * 77 + d[i * 4 + 1] * 150 + d[i * 4 + 2] * 29) >> 8;
+  const W1 = w + 1, I = new Float64Array(W1 * (h + 1));
+  for (let yy = 0; yy < h; yy++) { let row = 0; for (let xx = 0; xx < w; xx++) { row += g[yy * w + xx]; I[(yy + 1) * W1 + xx + 1] = I[yy * W1 + xx + 1] + row; } }
+  const r = Math.max(6, Math.round(Math.min(w, h) / 10)), bin = new Uint8Array(N);
+  for (let yy = 0; yy < h; yy++) {
+    const y1 = Math.max(0, yy - r), y2 = Math.min(h - 1, yy + r);
+    for (let xx = 0; xx < w; xx++) {
+      const x1 = Math.max(0, xx - r), x2 = Math.min(w - 1, xx + r);
+      const sum = I[(y2 + 1) * W1 + x2 + 1] - I[y1 * W1 + x2 + 1] - I[(y2 + 1) * W1 + x1] + I[y1 * W1 + x1];
+      const mean = sum / ((x2 - x1 + 1) * (y2 - y1 + 1)), v = g[yy * w + xx];
+      bin[yy * w + xx] = v < mean * 0.62 && v < 150 ? 1 : 0;
+    }
+  }
+  const lab = new Int32Array(N), stack = new Int32Array(N), cands = [];
+  const minS = Math.max(4, Math.min(w, h) * 0.012), maxS = Math.min(w, h) * 0.09;
+  let nl = 0;
+  for (let i = 0; i < N; i++) {
+    if (!bin[i] || lab[i]) continue;
+    nl++; let sp = 0; stack[sp++] = i; lab[i] = nl;
+    let mnx = w, mxx = 0, mny = h, mxy = 0, cnt = 0, sx = 0, sy = 0;
+    while (sp) {
+      const j = stack[--sp], jx = j % w, jy = (j - jx) / w;
+      cnt++; sx += jx; sy += jy;
+      if (jx < mnx) mnx = jx; if (jx > mxx) mxx = jx; if (jy < mny) mny = jy; if (jy > mxy) mxy = jy;
+      if (jx > 0 && bin[j - 1] && !lab[j - 1]) { lab[j - 1] = nl; stack[sp++] = j - 1; }
+      if (jx < w - 1 && bin[j + 1] && !lab[j + 1]) { lab[j + 1] = nl; stack[sp++] = j + 1; }
+      if (jy > 0 && bin[j - w] && !lab[j - w]) { lab[j - w] = nl; stack[sp++] = j - w; }
+      if (jy < h - 1 && bin[j + w] && !lab[j + w]) { lab[j + w] = nl; stack[sp++] = j + w; }
+    }
+    const bw = mxx - mnx + 1, bh = mxy - mny + 1;
+    if (bw < minS || bh < minS || bw > maxS || bh > maxS) continue;
+    const ar = bw / bh; if (ar < 0.65 || ar > 1.55) continue;
+    if (cnt / (bw * bh) < 0.5) continue;                // bỏ khung rỗng, nét chữ
+    // Ô vuông: khoảng cách xa nhất tới tâm ≈ 0,71·√diện tích; ô tròn tô ≈ 0,56 (không phụ thuộc góc xoay)
+    const cx = sx / cnt, cy = sy / cnt; let md = 0;
+    for (let yy = mny; yy <= mxy; yy++) for (let xx = mnx; xx <= mxx; xx++) if (lab[yy * w + xx] === nl) { const dd = (xx - cx) ** 2 + (yy - cy) ** 2; if (dd > md) md = dd; }
+    if ((Math.sqrt(md) + 0.7) / Math.sqrt(cnt) < 0.64) continue;   // +0,7: bù kích thước điểm ảnh
+    cands.push({ x: cx, y: cy, a: cnt });
+  }
+  if (cands.length < 4) return null;
+  const pick = f => cands.reduce((b, c) => (f(c) > f(b) ? c : b));
+  const tl = pick(c => -(c.x + c.y)), br = pick(c => c.x + c.y), tr = pick(c => c.x - c.y), bl = pick(c => c.y - c.x);
+  const q = [tl, tr, br, bl];
+  if (new Set(q).size < 4) return null;
+  const areas = q.map(c => c.a); if (Math.max(...areas) / Math.min(...areas) > 3.2) return null;
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const top = dist(tl, tr), bot = dist(bl, br), lef = dist(tl, bl), rig = dist(tr, br);
+  if (top / bot > 1.45 || bot / top > 1.45 || lef / rig > 1.45 || rig / lef > 1.45) return null;
+  let cross = 0, sign = 0, area = 0;
+  for (let i = 0; i < 4; i++) {
+    const a = q[i], b = q[(i + 1) % 4], c = q[(i + 2) % 4];
+    const z = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
+    if (!sign) sign = Math.sign(z); else if (Math.sign(z) !== sign) return null;
+    area += a.x * b.y - b.x * a.y; cross++;
+  }
+  if (Math.abs(area) / 2 < 0.18 * N) return null;
+  return { quad: q.map(c => [c.x / k, c.y / k]), qs: q.map(c => [c.x, c.y]), g, w, h };
+}
+function homography(P, Q) {   // P: điểm đích, Q: điểm nguồn → H với Q ~ H·P
+  const A = [];
+  for (let i = 0; i < 4; i++) {
+    const [x, y] = P[i], [u, v] = Q[i];
+    A.push([x, y, 1, 0, 0, 0, -u * x, -u * y, u], [0, 0, 0, x, y, 1, -v * x, -v * y, v]);
+  }
+  for (let c = 0; c < 8; c++) {
+    let piv = c; for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[piv][c])) piv = r;
+    [A[c], A[piv]] = [A[piv], A[c]];
+    for (let r = 0; r < 8; r++) { if (r === c) continue; const f = A[r][c] / A[c][c]; for (let k = c; k < 9; k++) A[r][k] -= f * A[c][k]; }
+  }
+  return A.map((r, i) => r[8] / r[i]).concat(1);
+}
+function warpQuad(src, quad, outW) {
+  const [tl, tr, br, bl] = quad, D = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  const wq = (D(tl, tr) + D(bl, br)) / 2, hq = (D(tl, bl) + D(tr, br)) / 2;
+  const W = outW || 1240, m = Math.round(W * 0.022), Wi = W - 2 * m, H = Math.round(Wi * hq / wq) + 2 * m;
+  if (!isFinite(H) || H < 200 || H > 4000) return src;
+  const h = homography([[m, m], [W - m, m], [W - m, H - m], [m, H - m]], [tl, tr, br, bl]);
+  const sw = src.width, sh = src.height, sd = src.getContext('2d').getImageData(0, 0, sw, sh).data;
+  const out = document.createElement('canvas'); out.width = W; out.height = H;
+  const ox = out.getContext('2d'), od = ox.createImageData(W, H), o = od.data;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const den = h[6] * x + h[7] * y + 1, u = (h[0] * x + h[1] * y + h[2]) / den, v = (h[3] * x + h[4] * y + h[5]) / den;
+    const k = (y * W + x) * 4; o[k + 3] = 255;
+    if (u < 0 || v < 0 || u >= sw - 1 || v >= sh - 1) { o[k] = o[k + 1] = o[k + 2] = 255; continue; }
+    const x0 = u | 0, y0 = v | 0, fx = u - x0, fy = v - y0, i0 = (y0 * sw + x0) * 4, i1 = i0 + sw * 4;
+    for (let c = 0; c < 3; c++) o[k + c] = (sd[i0 + c] * (1 - fx) + sd[i0 + 4 + c] * fx) * (1 - fy) + (sd[i1 + c] * (1 - fx) + sd[i1 + 4 + c] * fx) * fy;
+  }
+  ox.putImageData(od, 0, 0);
+  return out;
+}
+function flatten(c) { try { const r = detectQuad(c, c.width, c.height, 700); return r ? warpQuad(c, r.quad) : c; } catch (e) { return c; } }
+/* ---------- Máy quét camera ---------- */
+const scan = { on: false, stream: null, track: null, raf: 0, last: 0, prev: null, stable: 0, lost: 0, armed: true, shotQuad: null, busy: false, n: 0, ids: [], audio: null, torch: false };
+const camLive = () => !inClaude && !!navigator.mediaDevices?.getUserMedia;
+function scanHud() {
+  if (!scan.on) return;
+  const mine = sheets.filter(s => scan.ids.includes(s.id)), done = mine.filter(s => s.status === 'done').length;
+  $('#scanCount').textContent = `${mine.length} phiếu${cfg.scanGrade && mine.length ? ` · chấm ${done}` : ''}`;
+}
+function scanSay(t, ok) { const m = $('#scanMsg'); m.textContent = t; m.classList.toggle('ok', !!ok); }
+async function openScanner() {
+  if (!camLive()) { $('#camIn').click(); return; }
+  const el = $('#scan'); el.hidden = false; document.body.classList.add('lock');
+  $('#scanAuto').checked = cfg.scanAuto; $('#scanGrade').checked = cfg.scanGrade;
+  Object.assign(scan, { on: true, prev: null, stable: 0, lost: 0, armed: true, shotQuad: null, busy: false, n: 0, ids: [], torch: false });
+  $('#scanLast').style.visibility = 'hidden'; scanHud(); scanSay('Đang mở camera…');
+  try { scan.audio = scan.audio || new (window.AudioContext || window.webkitAudioContext)(); scan.audio.resume?.(); } catch (e) { scan.audio = null; }
+  try {
+    scan.stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } } });
+  } catch (e) {
+    closeScanner();
+    toast(e?.name === 'NotAllowedError' ? 'Chưa cho phép dùng camera. Thầy cho phép camera cho trang này trong cài đặt trình duyệt.' : 'Không mở được camera. Thầy chụp từng phiếu thay thế.');
+    $('#camIn').click(); return;
+  }
+  if (!scan.on) { scan.stream.getTracks().forEach(t => t.stop()); return; }
+  const v = $('#scanVid'); v.srcObject = scan.stream;
+  try { await v.play(); } catch (e) {}
+  scan.track = scan.stream.getVideoTracks()[0];
+  const caps = scan.track.getCapabilities?.() || {};
+  $('#scanTorch').style.visibility = caps.torch ? 'visible' : 'hidden';
+  try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
+  scanSay('Đặt phiếu trong khung, thấy đủ 4 ô vuông đen ở góc');
+  scan.raf = requestAnimationFrame(scanTick);
+}
+function closeScanner() {
+  scan.on = false; cancelAnimationFrame(scan.raf);
+  scan.stream?.getTracks().forEach(t => t.stop()); scan.stream = null; scan.track = null;
+  $('#scanVid').srcObject = null; $('#scan').hidden = true;
+  if ($('#ov').hidden && $('#ov2').hidden) document.body.classList.remove('lock');
+  try { if (!running) wakeLock?.release(); } catch (e) {}
+  renderAll();
+  if (scan.n) toast(`Đã quét ${scan.n} phiếu${cfg.scanGrade ? '' : '. Bấm Chấm để AI đọc'}`);
+  if (scan.n && !cfg.scanGrade) $('#stepSheets').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function drawOverlay(r) {
+  const cv = $('#scanOv'), v = $('#scanVid'), dpr = Math.min(2, window.devicePixelRatio || 1);
+  const cw = cv.clientWidth, ch = cv.clientHeight;
+  if (cv.width !== Math.round(cw * dpr)) { cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr); }
+  const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, cw, ch);
+  const vw = v.videoWidth, vh = v.videoHeight; if (!vw) return;
+  const sc = Math.max(cw / vw, ch / vh), ox = (cw - vw * sc) / 2, oy = (ch - vh * sc) / 2;
+  if (!r) {   // khung gợi ý tỉ lệ phiếu A5
+    const gh = ch * 0.68, gw = Math.min(cw * 0.84, gh * 0.69), gx = (cw - gw) / 2, gy = (ch - gh) / 2 + 10;
+    x.strokeStyle = 'rgba(255,255,255,.7)'; x.lineWidth = 3; x.setLineDash([]);
+    const L = 26; [[gx, gy, 1, 1], [gx + gw, gy, -1, 1], [gx + gw, gy + gh, -1, -1], [gx, gy + gh, 1, -1]].forEach(([px, py, sx, sy]) => {
+      x.beginPath(); x.moveTo(px, py + sy * L); x.lineTo(px, py); x.lineTo(px + sx * L, py); x.stroke();
+    });
+    return;
+  }
+  const pts = r.quad.map(([qx, qy]) => [ox + qx * sc, oy + qy * sc]);
+  const good = scan.stable >= 3 && scan.armed;
+  x.fillStyle = good ? 'rgba(95,215,150,.18)' : 'rgba(255,213,74,.12)';
+  x.strokeStyle = good ? '#5fd796' : '#ffd54a'; x.lineWidth = 4;
+  x.beginPath(); pts.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py)); x.closePath(); x.fill(); x.stroke();
+  x.fillStyle = x.strokeStyle; pts.forEach(([px, py]) => { x.beginPath(); x.arc(px, py, 7, 0, Math.PI * 2); x.fill(); });
+}
+function scanTick(t) {
+  if (!scan.on) return;
+  scan.raf = requestAnimationFrame(scanTick);
+  const v = $('#scanVid'); if (!v.videoWidth || scan.busy || t - scan.last < 110) return;
+  scan.last = t;
+  let r = null; try { r = detectQuad(v, v.videoWidth, v.videoHeight, 480); } catch (e) {}
+  if (!r) {
+    scan.lost++; scan.stable = 0; scan.prev = null;
+    if (scan.lost >= 2) scan.armed = true;   // phiếu được nhấc ra hoặc che khi đổi phiếu
+    drawOverlay(null);
+    if (scan.lost >= 3) scanSay(scan.n ? 'Đặt phiếu tiếp theo vào khung' : 'Đặt phiếu trong khung, thấy đủ 4 ô vuông đen ở góc');
+    return;
+  }
+  scan.lost = 0;
+  const mv = scan.prev ? Math.max(...r.quad.map((p, i) => Math.hypot(p[0] - scan.prev[i][0], p[1] - scan.prev[i][1]))) / Math.min(v.videoWidth, v.videoHeight) : 1;
+  scan.prev = r.quad; scan.stable = mv < 0.012 ? scan.stable + 1 : 0;
+  const dim = Math.min(v.videoWidth, v.videoHeight);
+  if (!scan.armed && scan.shotQuad && Math.max(...r.quad.map((p, i) => Math.hypot(p[0] - scan.shotQuad[i][0], p[1] - scan.shotQuad[i][1]))) / dim > 0.06) scan.armed = true;   // phiếu mới đặt lệch chỗ
+  drawOverlay(r);
+  if (!scan.armed) { scanSay('Đã quét phiếu này · đổi sang phiếu tiếp theo', true); return; }
+  scanSay(scan.stable >= 2 ? 'Giữ yên…' : 'Thấy phiếu · giữ máy thẳng và yên');
+  if (cfg.scanAuto && scan.stable >= 4) scanCapture(r, false);
+}
+function scanFeedback() {
+  const f = $('#scanFlash'); f.classList.add('on'); requestAnimationFrame(() => requestAnimationFrame(() => f.classList.remove('on')));
+  try { navigator.vibrate?.(60); } catch (e) {}
+  try {
+    const a = scan.audio; if (!a) return;
+    const o = a.createOscillator(), g = a.createGain(); o.frequency.value = 1180; g.gain.value = 0.08;
+    o.connect(g); g.connect(a.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + 0.12); o.stop(a.currentTime + 0.13);
+  } catch (e) {}
+}
+async function scanCapture(r, manual) {
+  if (scan.busy) return; scan.busy = true;
+  try {
+    const v = $('#scanVid'), vw = v.videoWidth, vh = v.videoHeight; if (!vw) return;
+    if (!r) { try { r = detectQuad(v, vw, vh, 480); } catch (e) { r = null; } }
+    const full = whiteCanvas(vw, vh); full.getContext('2d').drawImage(v, 0, 0, vw, vh);
+    let fine = null; try { fine = detectQuad(full, vw, vh, 1000); } catch (e) {}
+    const q = fine?.quad || r?.quad;
+    const out = q ? warpQuad(full, q) : full;
+    scanFeedback();
+    scan.shotQuad = q || null; scan.armed = false; scan.n++;
+    await addCanvas(out, `Quét ${String(scan.n).padStart(2, '0')}`);
+    const sh = sheets[sheets.length - 1]; scan.ids.push(sh.id);
+    const img = $('#scanLast'); img.src = sh.thumb; img.style.visibility = 'visible';
+    scanSay(q ? `Đã quét phiếu ${scan.n} · đổi phiếu tiếp theo` : `Đã chụp phiếu ${scan.n} (không thấy đủ 4 góc)`, true);
+    renderAll();
+    if (cfg.scanGrade && engineReady() && !running) runAll();
+  } finally { scan.busy = false; }
+}
+
+/* ---------- Lớp & danh sách ---------- */
+const normSbd = v => String(v ?? '').replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+const normName = v => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[đĐ]/g, 'd').toLowerCase().replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+const roster = () => (cfg.curClass && cfg.classes[cfg.curClass]) || [];
+const lopName = () => cfg.curClass || cfg.rep.lop || '';
+const baiTitle = () => cfg.rep.bai || `Bài ${new Date().toLocaleDateString('vi-VN')}`;
+const HAS_LETTER = /[a-zà-ỹđ]/iu;
+function rosterFromGrid(aoa) {
+  const G = (aoa || []).map(r => (r || []).map(v => String(v ?? '').trim()));
+  let hr = -1, cS = -1, cN = -1, cH = -1, cT = -1, cStt = -1;
+  for (let r = 0; r < Math.min(G.length, 15) && hr < 0; r++) {
+    cS = cN = cH = cT = cStt = -1;
+    G[r].forEach((v, c) => {
+      const h = normName(v);
+      if (/^(sbd|so bao danh|ma hs|ma hoc sinh|ma so|ma so hs)$/.test(h) || /bao danh/.test(h)) cS = c;
+      else if (/^(ho va ten|ho ten|ho va ten hoc sinh|ho ten hoc sinh|ten hoc sinh|hoc sinh)$/.test(h)) cN = c;
+      else if (/^(ho|ho dem|ho va dem|ho lot|ho va ten dem)$/.test(h)) cH = c;
+      else if (h === 'ten') cT = c;
+      else if (/^(stt|tt|so tt|so thu tu)$/.test(h)) cStt = c;
+    });
+    if (cN >= 0 || (cH >= 0 && cT >= 0)) hr = r;
+  }
+  const out = [];
+  if (hr >= 0) {
+    for (let r = hr + 1; r < G.length; r++) {
+      const row = G[r];
+      const ten = (cN >= 0 ? row[cN] || '' : [row[cH] || '', row[cT] || ''].join(' ')).replace(/\s+/g, ' ').trim();
+      if (!ten || !HAS_LETTER.test(ten)) continue;
+      const stt = cStt >= 0 ? (row[cStt] || '') : '';
+      const sbd = cS >= 0 ? (row[cS] || '') : stt;
+      out.push({ stt: stt || String(out.length + 1), sbd: String(sbd || stt || out.length + 1).trim(), ten });
+    }
+  } else {
+    const W = Math.max(0, ...G.map(r => r.length)); let cName = -1, bn = 0, cNum = -1, bk = 0;
+    const isName = v => /[a-zà-ỹđ]{2,}\s+[a-zà-ỹđ]/iu.test(v);
+    for (let c = 0; c < W; c++) {
+      const col = G.map(r => r[c] || '');
+      const nn = col.filter(isName).length; if (nn > bn) { bn = nn; cName = c; }
+      const nums = col.filter(v => /^\d{1,12}$/.test(v)); const k = nums.length * 100 + (nums.length ? nums.reduce((a, v) => a + v.length, 0) / nums.length : 0);
+      if (nums.length && k > bk) { bk = k; cNum = c; }
+    }
+    if (cName >= 0 && bn >= 1) G.forEach(r => { const ten = (r[cName] || '').replace(/\s+/g, ' ').trim(); if (isName(ten)) { const i = out.length + 1; out.push({ stt: String(i), sbd: cNum >= 0 && r[cNum] ? r[cNum] : String(i), ten }); } });
+  }
+  return out;
+}
+function nameSim(a, b) { const A = a.split(' ').filter(Boolean), B = new Set(b.split(' ').filter(Boolean)); if (!A.length || !B.size) return 0; return A.filter(w => B.has(w)).length / Math.max(A.length, B.size); }
+function matchStudent(sbd, ten) {
+  const R = roster(); if (!R.length) return null;
+  const s = normSbd(sbd), n = normName(ten);
+  if (s) {
+    const ex = R.filter(r => normSbd(r.sbd) === s);
+    if (ex.length === 1) {
+      const other = n && nameSim(n, normName(ex[0].ten)) < 0.5 && R.some(r => r !== ex[0] && nameSim(n, normName(r.ten)) >= 0.75);
+      return { st: ex[0], how: other ? 'conflict' : 'exact' };
+    }
+  }
+  if (n) { const bn = R.filter(r => normName(r.ten) === n); if (bn.length === 1) return { st: bn[0], how: 'name' }; }
+  if (s && s.length >= 2) {
+    const near = R.filter(r => { const t = normSbd(r.sbd); if (t.length !== s.length) return false; let d = 0; for (let i = 0; i < t.length; i++) if (t[i] !== s[i]) d++; return d === 1; });
+    if (near.length === 1 && (!n || nameSim(n, normName(near[0].ten)) >= 0.5)) return { st: near[0], how: 'fuzzy' };
+    if (near.length > 1 && n) { const pick = near.filter(r => nameSim(n, normName(r.ten)) >= 0.5); if (pick.length === 1) return { st: pick[0], how: 'fuzzy' }; }
+  }
+  if (n) { let best = null, bs = 0; R.forEach(r => { const v = nameSim(n, normName(r.ten)); if (v > bs) { bs = v; best = r; } }); if (best && bs >= 0.75) return { st: best, how: 'name' }; }
+  return { st: null, how: 'none' };
+}
+function applyMatch(sh) {
+  const d = sh.data; if (!d) return;
+  if (d.sbd_doc === undefined) { d.sbd_doc = d.sbd; d.ten_doc = d.ho_ten; }
+  if (sh.manual && roster().length) return;
+  sh.manual = false;
+  const m = matchStudent(d.sbd_doc, d.ten_doc);
+  if (!m) { sh.match = null; d.sbd = d.sbd_doc; d.ho_ten = d.ten_doc; return; }
+  sh.match = { how: m.how, stt: m.st ? m.st.stt : '' };
+  if (m.st) { d.sbd = m.st.sbd; d.ho_ten = m.st.ten; } else { d.sbd = d.sbd_doc; d.ho_ten = d.ten_doc; }
+}
+function rematchAll(resetManual) { sheets.forEach(s => { if (!s.data) return; if (resetManual) s.manual = false; applyMatch(s); }); }
+function dupSbd() {
+  const c = {}; sheets.forEach(s => { if (s.status === 'done' && s.data && s.match && s.match.how !== 'none') { const k = normSbd(s.data.sbd); if (k) c[k] = (c[k] || 0) + 1; } });
+  return new Set(Object.keys(c).filter(k => c[k] > 1));
+}
+function absent() {
+  const R = roster(); if (!R.length) return [];
+  const have = new Set(sheets.filter(s => s.status === 'done' && s.data && s.match && s.match.how !== 'none').map(s => normSbd(s.data.sbd)));
+  return R.filter(r => !have.has(normSbd(r.sbd)));
+}
+function byOrder(a, b) {
+  const R = roster().length;
+  const k = s => R && s.match && s.match.how !== 'none' && Number(s.match.stt) ? Number(s.match.stt) : 1e6 + sheets.indexOf(s);
+  return k(a) - k(b);
+}
+function absentNote() {
+  const R = roster(); if (!R.length) return '';
+  const ab = absent(), un = sheets.filter(s => s.status === 'done' && s.match?.how === 'none').length;
+  return `<p class="hint">Lớp ${esc(cfg.curClass)}: có bài ${R.length - ab.length}/${R.length} em${ab.length ? ` · <b style="color:var(--ink)">Chưa có bài:</b> ${ab.slice(0, 8).map(r => esc(r.ten)).join(', ')}${ab.length > 8 ? ` và ${ab.length - 8} em nữa` : ''}` : ''}${un ? ` · <b style="color:var(--bad)">${un} phiếu không khớp ai</b>` : ''}</p>`;
+}
+function setClsOpen(open) { cfg.clsOpen = open; $('#clsToggle').setAttribute('aria-expanded', String(open)); $('#clsBody').hidden = !open; }
+function renderClass() {
+  const names = Object.keys(cfg.classes).sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }));
+  if (cfg.curClass && !cfg.classes[cfg.curClass]) cfg.curClass = '';
+  const sel = $('#clsSel');
+  sel.innerHTML = `<option value="">Không dùng danh sách lớp</option>` + names.map(n => `<option value="${esc(n)}"${n === cfg.curClass ? ' selected' : ''}>Lớp ${esc(n)} · ${cfg.classes[n].length} em</option>`).join('');
+  const R = roster();
+  $('#clsSummary').textContent = R.length ? `Lớp ${cfg.curClass} · ${R.length} em · tự nhận học sinh theo SBD` : cfg.curClass ? `Lớp ${cfg.curClass} · chưa có danh sách` : 'Không bắt buộc · nhập danh sách để tự nhận đúng học sinh theo SBD';
+  $('#stepClass').classList.toggle('done', R.length > 0);
+  $('#rosActions').hidden = !cfg.curClass;
+  const L = $('#rosList');
+  if (!cfg.curClass) { L.innerHTML = names.length ? '' : '<div class="empty">Chưa có lớp nào. Bấm <b>+ Lớp mới</b>, đặt tên lớp rồi nhập danh sách từ Excel.</div>'; return; }
+  if (!R.length) { L.innerHTML = '<div class="empty">Lớp chưa có học sinh. Nhập danh sách từ Excel hoặc dán từ Excel.</div>'; return; }
+  const byS = new Map(); sheets.forEach(s => { if (s.status === 'done' && s.data && s.match && s.match.how !== 'none') byS.set(normSbd(s.data.sbd), s); });
+  const anyDone = sheets.some(s => s.status === 'done');
+  const open = $('#rosList details')?.open;
+  L.innerHTML = `<details class="ros"${open ? ' open' : ''}><summary>Xem danh sách ${R.length} em${anyDone ? ` · có bài ${R.filter(r => byS.has(normSbd(r.sbd))).length}/${R.length}` : ''}</summary>
+    <div class="ros-wrap"><table><thead><tr><th>STT</th><th>SBD</th><th>Họ và tên</th><th>Điểm</th></tr></thead><tbody>${R.map(r => {
+      const s = byS.get(normSbd(r.sbd)), g = s && grade(s.data);
+      return `<tr${s ? ` class="has" data-open="${s.id}"` : ''}><td class="mono">${esc(r.stt)}</td><td class="mono">${esc(r.sbd)}</td><td>${esc(r.ten)}</td><td class="mono">${s ? (g ? fmt(g.total) : '?') : '<span class="muted">—</span>'}</td></tr>`;
+    }).join('')}</tbody></table></div></details>`;
+}
+function setRoster(list, src) {
+  const lop = cfg.curClass; if (!lop) return;
+  if (!list.length) { toast(`Không tìm thấy họ tên học sinh trong ${src}. Cần cột "Họ và tên" và cột "SBD".`); return; }
+  const old = cfg.classes[lop] ? cfg.classes[lop].slice() : [];
+  cfg.classes[lop] = list; saveCfg(); rematchAll(true); renderAll();
+  toast(`Đã nhập ${list.length} em vào lớp ${lop}`, { label: 'Hoàn tác', fn: () => { cfg.classes[lop] = old; saveCfg(); rematchAll(true); renderAll(); } });
+}
+async function importRosterFile(file) {
+  try {
+    if (!window.XLSX) await loadScript(XLSX_SRC);
+    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+    const want = normName(cfg.curClass);
+    const order = [...wb.SheetNames].sort((a, b) => (normName(b) === want) - (normName(a) === want));
+    for (const name of order) {
+      const list = rosterFromGrid(XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: false, defval: '' }));
+      if (list.length) { setRoster(list, file.name); return; }
+    }
+    setRoster([], file.name);
+  } catch (e) { toast('Không mở được file: ' + (e.message || 'định dạng lạ')); }
+}
+
+/* ---------- Google Sheet (Apps Script) & Google Drive ---------- */
+const gasOK = () => !inClaude && /^https:\/\/script\.google(usercontent)?\.com\//.test((cfg.gas.url || '').trim());
+async function gasCall(action, payload) {
+  let r;
+  try { r = await fetch(cfg.gas.url.trim(), { method: 'POST', body: JSON.stringify({ action, token: cfg.gas.token || '', ...(payload || {}) }) }); }
+  catch (e) { throw new Error('Không kết nối được Google Sheet. Kiểm tra URL (đuôi /exec) và quyền truy cập "Bất kỳ ai".'); }
+  if (!r.ok) throw new Error(`Google Sheet trả lỗi ${r.status}`);
+  let j; try { j = await r.json(); } catch (e) { throw new Error('URL không trả dữ liệu. Kiểm tra đã triển khai dạng Ứng dụng web, quyền "Bất kỳ ai".'); }
+  if (!j.ok) throw new Error(j.error || 'Google Sheet báo lỗi');
+  return j;
+}
+function renderGas() {
+  $('#gasUrl').value = cfg.gas.url || ''; $('#gasTok').value = cfg.gas.token || '';
+  $('#gsClaudeNote').hidden = !inClaude;
+  ['gasTest', 'gasLoad', 'gasSaveRos'].forEach(id => { $('#' + id).disabled = !gasOK(); });
+  const st = $('#gsState');
+  st.className = 'chip' + (gasOK() ? ' ok' : ''); st.textContent = inClaude ? 'Dùng Google Drive' : gasOK() ? 'Đã nhập URL' : 'Chưa kết nối';
+}
+function gasSay(t) { $('#gasStatus').textContent = t; }
+async function gasBtn(btn, fn) {
+  if (btn.disabled) return; btn.disabled = true;
+  try { await fn(); } catch (e) { gasSay(e.message || 'Lỗi'); toast(e.message || 'Lỗi kết nối Google Sheet'); }
+  finally { btn.disabled = !gasOK(); }
+}
+async function saveScoresGas() {
+  if (!lopName()) throw new Error('Chưa có tên lớp. Chọn lớp ở bước 2 hoặc ghi Lớp trong Thông tin in.');
+  const rows = tableRows();
+  const students = graded().map(({ s, g }) => ({ stt: s.match?.stt || '', sbd: s.data.sbd, ten: s.data.ho_ten, total: g.total })).filter(x => x.sbd || x.ten);
+  return await gasCall('saveScores', { lop: lopName(), bai: baiTitle(), students, header: rows[0], rows: rows.slice(1) });
+}
+const csvCell = v => { const t = String(v ?? ''); return /[",\r\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+async function saveToDrive() {
+  if (!mcpCap) throw new Error('Kết nối Google Drive không dùng được ở đây.');
+  const csv = tableRows().map(r => r.map(csvCell).join(',')).join('\r\n');
+  const title = ['Bảng điểm', cfg.rep.bai, lopName() && 'Lớp ' + lopName(), new Date().toLocaleDateString('vi-VN')].filter(Boolean).join(' – ');
+  let res;
+  try { res = await mcpCap.callTool('Google Drive', 'create_file', { title, textContent: csv, contentMimeType: 'text/csv' }); }
+  catch (e) {
+    const m = {
+      server_not_connected: 'Chưa kết nối Google Drive. Thêm Google Drive trong Cài đặt → Kết nối của claude.ai rồi thử lại.',
+      needs_reauth: 'Kết nối Google Drive đã hết hạn. Kết nối lại trong Cài đặt → Kết nối của claude.ai.',
+      not_in_manifest: 'Thầy chưa cho phép trang dùng Google Drive. Bấm lại và chọn Cho phép.',
+      approval_required: 'Cần thầy cho phép trang tạo file trong Google Drive. Bấm lại và chọn Cho phép.',
+      selection_required: 'Thầy có nhiều kết nối Google Drive, hãy chọn một kết nối khi Claude hỏi.',
+      blocked_by_policy: 'Tổ chức của thầy chặn tạo file Google Drive từ trang này.',
+      server_unavailable: 'Google Drive không phản hồi. File có thể đã được tạo, kiểm tra Drive trước khi thử lại.',
+      tool_error: 'Google Drive báo lỗi: ' + (e?.message || '')
+    }[e?.code];
+    throw new Error(m || 'Không lưu được lên Google Drive. Kiểm tra Drive trước khi thử lại.');
+  }
+  const p = res?.payload && typeof res.payload === 'object' ? res.payload : {};
+  const id = p.id || p.fileId || p.file?.id;
+  return p.webViewLink || p.alternateLink || p.url || (id ? `https://docs.google.com/spreadsheets/d/${id}/edit` : '');
+}
+let keepStatus = false;
+function linkStatus(text, url, label) {
+  const el = $('#expStatus'); if (!el) return; keepStatus = true;
+  el.textContent = text;
+  if (url) { const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label; el.append(a); }
+}
+function copyText(text, ok) {
+  const fallback = () => {
+    const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.append(ta); ta.select(); let done = false; try { done = document.execCommand('copy'); } catch (e) {} ta.remove();
+    toast(done ? ok : 'Trình duyệt chặn sao chép. Thầy lấy file Code.gs em gửi kèm.');
+  };
+  try { navigator.clipboard.writeText(text).then(() => toast(ok), fallback); } catch (e) { fallback(); }
+}
+
+/* ---------- Sự kiện ---------- */
+$('#clsToggle').addEventListener('click', () => { setClsOpen(!cfg.clsOpen); saveCfg(); });
+$('#clsSel').addEventListener('change', e => {
+  cfg.curClass = e.target.value; if (cfg.curClass) cfg.rep.lop = cfg.curClass;
+  saveCfg(); rematchAll(true); renderAll();
+});
+$('#clsNew').addEventListener('click', e => {
+  const box = $('#clsNewBox'); box.hidden = !box.hidden; e.currentTarget.setAttribute('aria-expanded', String(!box.hidden));
+  if (!box.hidden) $('#clsNewName').focus();
+});
+const createClass = () => {
+  const name = $('#clsNewName').value.trim().replace(/^lớp\s+/i, ''); if (!name) { toast('Nhập tên lớp, ví dụ 10A3'); return; }
+  if (!cfg.classes[name]) cfg.classes[name] = [];
+  cfg.curClass = name; cfg.rep.lop = name; $('#clsNewName').value = ''; $('#clsNewBox').hidden = true; $('#clsNew').setAttribute('aria-expanded', 'false');
+  saveCfg(); rematchAll(true); renderAll(); toast(`Đã chọn lớp ${name}. Nhập danh sách học sinh bên dưới.`);
+};
+$('#clsNewOk').addEventListener('click', createClass);
+$('#clsNewName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); createClass(); } });
+$('#clsDel').addEventListener('click', () => {
+  const lop = cfg.curClass; if (!lop) return; const old = cfg.classes[lop];
+  delete cfg.classes[lop]; cfg.curClass = ''; saveCfg(); rematchAll(true); renderAll();
+  toast(`Đã xóa lớp ${lop} khỏi app`, { label: 'Hoàn tác', fn: () => { cfg.classes[lop] = old; cfg.curClass = lop; saveCfg(); rematchAll(true); renderAll(); } });
+});
+$('#rosImp').addEventListener('click', () => $('#rosIn').click());
+$('#rosIn').addEventListener('change', e => { const f = e.target.files?.[0]; if (f) importRosterFile(f).finally(() => { e.target.value = ''; }); });
+$('#rosPasteToggle').addEventListener('click', e => {
+  const box = $('#rosPasteBox'); box.hidden = !box.hidden; e.currentTarget.setAttribute('aria-expanded', String(!box.hidden));
+  if (!box.hidden) $('#rosPasteTa').focus();
+});
+$('#rosPasteGo').addEventListener('click', () => {
+  const txt = $('#rosPasteTa').value; if (!txt.trim()) { toast('Chưa có gì để nhập. Dán bảng từ Excel vào ô trên.'); return; }
+  const list = rosterFromGrid(txt.split(/\r?\n/).map(l => l.split('\t')));
+  setRoster(list, 'nội dung đã dán');
+  if (list.length) { $('#rosPasteTa').value = ''; $('#rosPasteBox').hidden = true; $('#rosPasteToggle').setAttribute('aria-expanded', 'false'); }
+});
+$('#gasUrl').addEventListener('input', e => { cfg.gas.url = e.target.value.trim(); saveCfg(); renderGas(); });
+$('#gasTok').addEventListener('input', e => { cfg.gas.token = e.target.value; saveCfg(); });
+$('#gasTest').addEventListener('click', e => gasBtn(e.currentTarget, async () => {
+  gasSay('Đang kiểm tra…'); const j = await gasCall('ping');
+  gasSay(`Đã kết nối "${j.name}" · ${j.classes.length ? 'có lớp ' + j.classes.join(', ') : 'chưa có lớp nào'}.`);
+  $('#gsState').textContent = 'Đã kết nối';
+}));
+$('#gasLoad').addEventListener('click', e => gasBtn(e.currentTarget, async () => {
+  gasSay('Đang tải danh sách…'); const j = await gasCall('getAll');
+  const names = Object.keys(j.classes || {});
+  if (!names.length) { gasSay('Google Sheet chưa có lớp nào. Nhập danh sách trong app rồi bấm Lưu DS lớp lên Google Sheet.'); return; }
+  names.forEach(n => { cfg.classes[n] = j.classes[n].map((r, i) => ({ stt: String(r.stt || i + 1), sbd: String(r.sbd || r.stt || i + 1), ten: String(r.ten || '').trim() })).filter(r => r.ten); });
+  if (!cfg.curClass || !cfg.classes[cfg.curClass]) { cfg.curClass = names[0]; cfg.rep.lop = names[0]; }
+  saveCfg(); rematchAll(true); renderAll();
+  gasSay(`Đã tải ${names.length} lớp: ${names.join(', ')}.`); toast(`Đã tải ${names.length} lớp từ Google Sheet`);
+}));
+$('#gasSaveRos').addEventListener('click', e => gasBtn(e.currentTarget, async () => {
+  if (!roster().length) { gasSay('Chọn lớp và nhập danh sách trước khi lưu.'); return; }
+  gasSay('Đang lưu…'); const j = await gasCall('saveRoster', { lop: cfg.curClass, students: roster() });
+  gasSay(`Đã lưu lớp ${cfg.curClass} vào sheet "${j.sheet}": thêm ${j.added}, cập nhật ${j.updated} em.`); toast('Đã lưu danh sách lên Google Sheet');
+}));
+$('#gasCopy').addEventListener('click', () => copyText($('#gasCode').textContent, 'Đã sao chép mã Apps Script'));
+
+$('#impBtn').addEventListener('click', () => $('#xlsxIn').click());
+$('#xlsxIn').addEventListener('change', e => { const f = e.target.files?.[0]; if (f) importExcel(f).finally(() => { e.target.value = ''; }); });
+$('#pasteToggle').addEventListener('click', e => {
+  const box = $('#pasteBox'); box.hidden = !box.hidden; e.currentTarget.setAttribute('aria-expanded', String(!box.hidden));
+  if (!box.hidden) $('#pasteTa').focus();
+});
+$('#pasteGo').addEventListener('click', () => {
+  const txt = $('#pasteTa').value; if (!txt.trim()) { toast('Chưa có gì để nhập. Dán bảng từ Excel vào ô trên.'); return; }
+  const aoa = txt.split(/\r?\n/).map(l => l.split('\t'));
+  if (applyImport(aoa, 'nội dung đã dán')) { $('#pasteTa').value = ''; $('#pasteBox').hidden = true; $('#pasteToggle').setAttribute('aria-expanded', 'false'); }
+});
+$('#tplBtn').addEventListener('click', downloadTemplate);
+$('#keyToggle').addEventListener('click', () => { setKeyOpen(!cfg.keyOpen); saveCfg(); });
+['n1', 'n2', 'n3', 'pt1', 'pt3'].forEach(id => $('#' + id).addEventListener('change', e => {
+  const isInt = id.startsWith('n'); let v = Number(e.target.value);
+  const lim = { n1: 80, n2: 10, n3: 12, pt1: 10, pt3: 10 }[id];
+  if (!isFinite(v) || v < 0) v = 0; if (v > lim) v = lim; if (isInt) v = Math.round(v);
+  cfg[id] = v; e.target.value = v; saveCfg();
+  sheets.forEach(s => s.data && padData(s.data));
+  renderKeys(); renderAll();
+}));
+$('#keyList').addEventListener('input', e => {
+  const t = e.target, card = t.closest('.keycard'); if (!card || !t.dataset.k) return;
+  const k = cfg.keys[card.dataset.i]; k[t.dataset.k] = t.value;
+  if (k.sample) { k.sample = false; card.querySelector('.badge')?.remove(); }
+  updValid(card); saveCfg(); keySummary(); renderSheets(); renderResults(); updateBar();
+});
+$('#keyList').addEventListener('click', e => {
+  const b = e.target.closest('[data-del]'); if (!b) return;
+  const i = Number(b.dataset.del), removed = cfg.keys.splice(i, 1)[0];
+  saveCfg(); renderKeys(); renderAll();
+  toast(`Đã xóa mã đề ${removed.code || ''}`, { label: 'Hoàn tác', fn: () => { cfg.keys.splice(i, 0, removed); saveCfg(); renderKeys(); renderAll(); } });
+});
+$('#addKey').addEventListener('click', () => {
+  const last = cfg.keys[cfg.keys.length - 1]; const n = parseInt(last?.code, 10);
+  cfg.keys.push({ code: isFinite(n) ? String(n + 1) : '', p1: '', p2: '', p3: '' });
+  saveCfg(); renderKeys(); renderAll();
+  $(`#k${cfg.keys.length - 1}${cfg.n1 ? 'p1' : 'code'}`)?.focus();
+});
+
+$('#fileIn').addEventListener('change', e => { const f = e.target.files; addFiles(f).finally(() => { e.target.value = ''; }); });
+const drop = $('#drop');
+['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => { if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files); });
+$('#demoBtn').addEventListener('click', addDemo);
+$('#camBtn').addEventListener('click', openScanner);
+$('#camIn').addEventListener('change', e => {
+  const f = e.target.files; if (!f?.length) return;
+  addFiles(f).then(() => { if (!camLive()) toast('Đã thêm phiếu. Bấm Quét phiếu bằng camera để chụp phiếu tiếp theo.'); }).finally(() => { e.target.value = ''; });
+});
+$('#scanClose').addEventListener('click', closeScanner);
+$('#scanShot').addEventListener('click', () => scanCapture(null, true));
+$('#scanAuto').addEventListener('change', e => { cfg.scanAuto = e.target.checked; saveCfg(); });
+$('#scanGrade').addEventListener('change', e => { cfg.scanGrade = e.target.checked; saveCfg(); scanHud(); if (cfg.scanGrade && engineReady() && !running) runAll(); });
+$('#scanTorch').addEventListener('click', async e => {
+  const b = e.currentTarget; scan.torch = !scan.torch;
+  try { await scan.track?.applyConstraints({ advanced: [{ torch: scan.torch }] }); b.setAttribute('aria-pressed', String(scan.torch)); }
+  catch (err) { scan.torch = false; b.setAttribute('aria-pressed', 'false'); }
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden && scan.on) closeScanner(); });
+$('#clearBtn').addEventListener('click', () => {
+  const old = sheets; sheets = []; renderAll();
+  toast(`Đã xóa ${old.length} phiếu`, { label: 'Hoàn tác', fn: () => { sheets = old.concat(sheets); renderAll(); } });
+});
+
+$('#engSeg').addEventListener('click', e => { const b = e.target.closest('[data-eng]'); if (!b || b.disabled) return; cfg.engine = b.dataset.eng; saveCfg(); renderEngine(); updateBar(); });
+$('#tierSeg').addEventListener('click', e => { const b = e.target.closest('[data-tier]'); if (!b) return; cfg.tier = b.dataset.tier; saveCfg(); renderEngine(); updateBar(); });
+$('#splitChk').addEventListener('change', e => { cfg.split = e.target.checked; saveCfg(); });
+$('#gKeys').addEventListener('input', e => {
+  cfg.gKeys = parseKeys(e.target.value);
+  Object.keys(cfg.gKeyModel).forEach(k => { if (!cfg.gKeys.includes(k)) delete cfg.gKeyModel[k]; });
+  saveCfg(); renderEngine(); updateBar();
+});
+$('#gKeys').addEventListener('blur', e => { e.target.value = cfg.gKeys.join('\n'); });
+$('#gAuto').addEventListener('change', e => {
+  cfg.gAuto = e.target.checked; if (!cfg.gAuto && !cfg.gModel.trim()) cfg.gModel = Object.values(cfg.gKeyModel)[0] || 'gemini-2.5-flash';
+  saveCfg(); renderEngine(); updateBar();
+});
+$('#gModel').addEventListener('input', e => { cfg.gModel = e.target.value; saveCfg(); renderEngine(); updateBar(); });
+$('#gNoThink').addEventListener('change', e => { cfg.gNoThink = e.target.checked; saveCfg(); renderEngine(); updateBar(); });
+$('#gTest').addEventListener('click', testGemini);
+$('#gTestOut').addEventListener('click', e => {
+  const b = e.target.closest('[data-gmodel]'); if (!b) return;
+  cfg.gModel = b.dataset.gmodel; cfg.gAuto = false; saveCfg(); renderEngine(); updateBar(); testGemini();
+});
+
+$('#runBtn').addEventListener('click', () => {
+  const pending = sheets.some(s => s.status === 'wait' || s.status === 'error');
+  if (pending) runAll(); else if (graded().length) openSummary(); else $('#stepRes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+$('#stopBtn').addEventListener('click', stopAll);
+
+document.addEventListener('click', e => {
+  const o = e.target.closest('[data-open]'); if (o) { openDetail(Number(o.dataset.open)); return; }
+  if (e.target.id === 'xlsxBtn') exportXlsx().catch(err => toast(err?.message || 'Không tạo được file Excel'));
+  if (e.target.id === 'sumBtn') openSummary();
+  if (e.target.id === 'copyBtn') copyTable();
+});
+
+$('#ovClose').addEventListener('click', closeDetail);
+$('#ov').addEventListener('click', e => { if (e.target.id === 'ov') closeDetail(); });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (scan.on) closeScanner(); else if (!$('#ov').hidden) closeDetail(); else if (!$('#ov2').hidden) closeSummary(); });
+$('#ov2Close').addEventListener('click', closeSummary);
+$('#ov2').addEventListener('click', e => { if (e.target.id === 'ov2') closeSummary(); });
+$('#sumBody').addEventListener('click', e => {
+  const ex = e.target.closest('[data-exp]'); if (ex && !ex.disabled) { doExport(ex.dataset.exp); return; }
+  const nx = e.target.closest('[data-nx]'); if (!nx || nx.disabled) return;
+  if (nx.dataset.nx === 'ai') aiComments(nx);
+  else { graded().forEach(({ s }) => { s.nxAuto = true; ensureNx(s); }); renderSummary(); toast('Đã viết lại nhận xét theo điểm'); }
+});
+$('#sumBody').addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.rep) { cfg.rep[t.dataset.rep] = t.value; saveCfg(); }
+  else if (t.dataset.nxid) { const sh = byId(Number(t.dataset.nxid)); if (sh?.data) { sh.data.nx = t.value; sh.nxAuto = false; } }
+});
+$('#sumBody').addEventListener('change', e => { if (e.target.id === 'sumCode') { sumCode = e.target.value; renderSummary(); } });
+$('#ovBody').addEventListener('input', e => {
+  if (e.target.id !== 'dNx') return; const sh = byId(curId); if (sh?.data) { sh.data.nx = e.target.value; sh.nxAuto = false; }
+});
+$('#ovBody').addEventListener('click', e => {
+  const sh = byId(curId); if (!sh) return;
+  if (e.target.closest('#zoomBox img')) { $('#zoomBox').classList.toggle('big'); return; }
+  const act = e.target.closest('[data-act]');
+  if (act && !act.disabled) {
+    if (act.dataset.act === 'reread') { runAll([sh.id], true); return; }
+    if (act.dataset.act === 'pdf1') {
+      act.disabled = true; const t = act.textContent; act.textContent = 'Đang tạo PDF…';
+      makePdf([sh]).then(b => saveFile(pdfName(sh), b, 'Đã lưu PDF của em')).catch(err => toast(err?.message || 'Không tạo được PDF'))
+        .finally(() => { act.disabled = false; act.textContent = t; });
+      return;
+    }
+    if (act.dataset.act === 'del') {
+      const i = sheets.indexOf(sh); sheets.splice(i, 1); closeDetail(); renderAll();
+      toast('Đã xóa phiếu', { label: 'Hoàn tác', fn: () => { sheets.splice(i, 0, sh); renderAll(); } });
+      return;
+    }
+  }
+  const d = sh.data; if (!d) return;
+  const b1 = e.target.closest('[data-p1]');
+  if (b1) { const i = +b1.dataset.p1; d.p1[i] = d.p1[i] === b1.dataset.l ? '' : b1.dataset.l; sh.edited = true; renderAll(); return; }
+  const b2 = e.target.closest('[data-p2]');
+  if (b2) { const i = +b2.dataset.p2, j = +b2.dataset.j; d.p2[i][j] = d.p2[i][j] === b2.dataset.l ? '' : b2.dataset.l; sh.edited = true; renderAll(); }
+});
+$('#ovBody').addEventListener('change', e => {
+  const sh = byId(curId); if (!sh?.data) return; const t = e.target;
+  if (t.id === 'dStu') {
+    if (t.value === '') { sh.manual = false; applyMatch(sh); }
+    else { const st = roster()[+t.value]; if (st) { sh.manual = true; sh.data.sbd = st.sbd; sh.data.ho_ten = st.ten; sh.match = { how: 'manual', stt: st.stt }; } }
+  }
+  else if (t.dataset.f) {
+    const v = t.value.trim(); sh.data[t.dataset.f] = v;
+    if (t.dataset.f === 'sbd' || t.dataset.f === 'ho_ten') {
+      if (sh.data.sbd_doc === undefined) { sh.data.sbd_doc = sh.data.sbd; sh.data.ten_doc = sh.data.ho_ten; }
+      if (t.dataset.f === 'sbd') sh.data.sbd_doc = v; else sh.data.ten_doc = v;
+      sh.manual = false; applyMatch(sh);
+    }
+  }
+  else if (t.dataset.p3 !== undefined) sh.data.p3[+t.dataset.p3] = t.value.trim();
+  else return;
+  sh.edited = true; renderAll();
+});
+
+/* ---------- Khởi động ---------- */
+$('#camHint').textContent = camLive() ? 'Đặt phiếu lên mặt bàn: app tự chụp khi thấy đủ 4 ô vuông đen ở góc, tự nắn thẳng và chấm ngay. Thầy chỉ việc đổi phiếu.' : 'Trong Claude, mỗi lần bấm chụp một phiếu (ảnh tự nắn thẳng). Quét liên tục tự động dùng bản đưa lên Vercel.';
+renderFmt(); renderKeys(); setKeyOpen(cfg.keyOpen !== false); setClsOpen(cfg.clsOpen !== false); renderGas(); renderEngine(); renderAll();
+})();
+</script>
+
+</body>
+</html>
