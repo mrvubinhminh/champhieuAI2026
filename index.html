@@ -375,6 +375,19 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
 .pdel{min-height:38px;width:34px;border:1px solid var(--line-strong);border-left:0;border-radius:0 99px 99px 0;background:var(--surface);color:var(--muted);font-size:16px}
 .pdel:hover{color:var(--bad)}
 
+.sh-tools{display:grid;gap:10px;padding:10px;border-radius:12px;background:var(--sunken)}
+.fchips{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{min-height:36px;padding:0 12px;border-radius:99px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font-size:13.5px;font-weight:600}
+.fchip b{font-family:var(--f-mono);margin-left:4px}
+.fchip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.fchip.err b{color:var(--bad)} .fchip.err[aria-pressed="true"] b{color:var(--bad-soft)}
+.btn.danger-fill{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.danger-fill:hover{background:var(--bad);filter:brightness(1.08)}
+.th .ck{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;background:var(--surface);border:2px solid var(--line-strong);display:grid;place-items:center;font:700 14px var(--f-body);color:transparent}
+.th.sel{outline:3px solid var(--bad);outline-offset:-3px}
+.th.sel .ck{background:var(--bad);border-color:var(--bad);color:#fff}
+.selmode .th .flag{display:none}
+
 /* Toast */
 .toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
 .toast button{background:none;border:0;color:var(--accent-soft);font-weight:700;min-height:32px;text-decoration:underline}
@@ -525,7 +538,12 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
         <button class="btn link" id="demoBtn" type="button">Chưa có phiếu? Thử với phiếu mẫu</button>
         <button class="btn link danger" id="clearBtn" type="button" hidden>Xóa tất cả phiếu</button>
       </div>
+      <div class="sh-tools" id="shTools" hidden>
+        <div class="fchips" id="shFilter" aria-label="Lọc phiếu"></div>
+        <div class="btnrow" id="shActs"></div>
+      </div>
       <div class="thumbs" id="thumbs"></div>
+      <p class="hint" id="thumbEmpty" hidden>Không có phiếu nào trong mục này.</p>
     </div>
   </div>
 </section>
@@ -1388,7 +1406,10 @@ async function runAll(ids, fresh) {
   renderAll();
   if (halt) toast(halt);
   else if (scan.on) { if (cfg.scanGrade && sheets.some(s => s.status === 'wait')) setTimeout(() => runAll(), 30); }
-  else if (n) toast(`Đã đọc ${n} phiếu trong ${fmt(secs)} giây`);
+  else if (n) {
+    const ne = sheets.filter(s => s.status === 'error').length;
+    toast(`Đã đọc ${n} phiếu trong ${fmt(secs)} giây${ne ? ` · ${ne} phiếu lỗi` : ''}`, ne ? { label: 'Xem phiếu lỗi', fn: () => { shFilter = 'error'; selMode = false; openPane('sheets'); renderSheets(); } } : undefined);
+  }
 }
 function stopAll() { running = false; halt = 'Đã dừng. Bấm Chấm để chấm tiếp các phiếu còn lại.'; ctrls.forEach(c => c.abort()); }
 
@@ -1479,13 +1500,54 @@ function setKeyOpen(open) {
   cfg.keyOpen = open;
 }
 
+/* Lọc, chọn nhiều, xóa phiếu */
+let shFilter = 'all', selMode = false; const selIds = new Set();
+const SH_FILTERS = [
+  ['all', 'Tất cả', () => true],
+  ['error', 'Lỗi', s => s.status === 'error'],
+  ['review', 'Cần xem lại', s => s.status === 'done' && flags(s).length > 0],
+  ['wait', 'Chờ chấm', s => s.status === 'wait'],
+  ['done', 'Đã chấm', s => s.status === 'done']
+];
+const shPass = s => (SH_FILTERS.find(f => f[0] === shFilter) || SH_FILTERS[0])[2](s);
+function deleteSheets(list, what) {
+  const ids = new Set(list.filter(s => s.status !== 'busy').map(s => s.id)); if (!ids.size) return;
+  const removed = sheets.map((s, i) => ({ s, i })).filter(x => ids.has(x.s.id));
+  sheets = sheets.filter(s => !ids.has(s.id)); ids.forEach(id => selIds.delete(id));
+  if (curId != null && ids.has(curId)) closeDetail();
+  renderAll();
+  toast(`Đã xóa ${removed.length} ${what}`, { label: 'Hoàn tác', fn: () => { removed.forEach(({ s, i }) => sheets.splice(Math.min(i, sheets.length), 0, s)); renderAll(); } });
+}
+function renderShTools() {
+  const box = $('#shTools'); box.hidden = !sheets.length;
+  if (!sheets.length) { selMode = false; selIds.clear(); shFilter = 'all'; return; }
+  const counts = Object.fromEntries(SH_FILTERS.map(([k, , f]) => [k, sheets.filter(f).length]));
+  if (shFilter !== 'all' && !counts[shFilter]) shFilter = 'all';
+  $('#shFilter').innerHTML = SH_FILTERS.filter(([k]) => k === 'all' || counts[k]).map(([k, lab]) =>
+    `<button class="fchip${k === 'error' ? ' err' : ''}" type="button" data-filter="${k}" aria-pressed="${shFilter === k}">${lab}<b>${counts[k]}</b></button>`).join('');
+  const err = counts.error, vis = sheets.filter(shPass).filter(s => s.status !== 'busy');
+  [...selIds].forEach(id => { if (!sheets.some(s => s.id === id)) selIds.delete(id); });
+  $('#shActs').innerHTML = selMode
+    ? `<button class="btn danger-fill" type="button" data-shact="delsel" ${selIds.size ? '' : 'disabled'}>Xóa ${selIds.size} phiếu đã chọn</button>
+       <button class="btn" type="button" data-shact="selall">${vis.length && vis.every(s => selIds.has(s.id)) ? 'Bỏ chọn hết' : `Chọn hết ${vis.length} phiếu đang lọc`}</button>
+       <button class="btn" type="button" data-shact="cancel">Xong</button>`
+    : `${err ? `<button class="btn danger-fill" type="button" data-shact="delerr" ${running ? 'disabled' : ''}>Xóa ${err} phiếu lỗi</button>
+        <button class="btn" type="button" data-shact="retry" ${running || !engineReady() ? 'disabled' : ''}>Đọc lại ${err} phiếu lỗi</button>` : ''}
+       <button class="btn" type="button" data-shact="sel">Chọn nhiều phiếu để xóa</button>`;
+  $('#stepSheets').classList.toggle('selmode', selMode);
+}
 function renderSheets() {
-  const T = $('#thumbs');
-  T.innerHTML = sheets.map((s, i) => {
+  renderShTools();
+  const T = $('#thumbs'), vis = sheets.map((s, i) => ({ s, i })).filter(x => shPass(x.s));
+  $('#thumbEmpty').hidden = !sheets.length || vis.length > 0;
+  T.innerHTML = vis.map(({ s, i }) => {
     const g = s.data ? grade(s.data) : null;
     const lab = s.status === 'busy' ? 'Đang đọc…' : s.status === 'error' ? 'Lỗi' : s.status === 'done' ? (g ? fmt(g.total) : '?') : 'Chờ chấm';
-    const fl = s.status === 'done' && flags(s).length;
-    return `<button class="th ${s.status}" type="button" data-open="${s.id}" aria-label="Phiếu ${i + 1}: ${esc(s.name)}, ${esc(lab)}">
+    const fl = s.status === 'done' && flags(s).length, on = selIds.has(s.id);
+    return selMode
+      ? `<button class="th ${s.status}${on ? ' sel' : ''}" type="button" data-sel="${s.id}" aria-pressed="${on}" ${s.status === 'busy' ? 'disabled' : ''} aria-label="Chọn phiếu ${i + 1}: ${esc(s.name)}, ${esc(lab)}">
+      <img src="${s.thumb}" alt=""><span class="pg">${i + 1}</span><span class="ck" aria-hidden="true">✓</span><span class="tb">${esc(lab)}</span></button>`
+      : `<button class="th ${s.status}" type="button" data-open="${s.id}" aria-label="Phiếu ${i + 1}: ${esc(s.name)}, ${esc(lab)}${s.err ? ' – ' + esc(s.err) : ''}">
       <img src="${s.thumb}" alt=""><span class="pg">${i + 1}</span>${fl ? '<span class="flag" title="Cần xem lại"></span>' : ''}<span class="tb">${esc(lab)}</span></button>`;
   }).join('');
   const done = sheets.filter(s => s.status === 'done').length;
@@ -2648,6 +2710,7 @@ function openPane(id) {
 }
 function closePane() {
   if (!openPaneId) return;
+  if (openPaneId === 'sheets' && selMode) { selMode = false; selIds.clear(); renderSheets(); }
   $(PANES[openPaneId]).classList.remove('open'); openPaneId = null; syncLock(); renderTiles();
   paneOpener?.focus?.({ preventScroll: true }); paneOpener = null;
 }
@@ -2688,7 +2751,7 @@ function renderTiles() {
 
 /* ---------- Sự kiện ---------- */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-pane]'); if (t) { openPane(t.dataset.pane); return; }
+  const t = e.target.closest('[data-pane]'); if (t) { if (t.dataset.pane === 'sheets' && sheets.some(x => x.status === 'error')) { shFilter = 'error'; renderSheets(); } openPane(t.dataset.pane); return; }
   if (e.target.closest('[data-close]')) { closePane(); return; }
   if (e.target.closest('[data-sum]')) { if (graded().length) openSummary(); else toast('Chấm xong ít nhất một phiếu rồi mới tổng hợp được.'); return; }
   if (e.target.closest('[data-cam]')) { closePane(); openScanner(); return; }
@@ -2836,6 +2899,25 @@ $('#scanTorch').addEventListener('click', async e => {
   catch (err) { scan.torch = false; b.setAttribute('aria-pressed', 'false'); }
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden && scan.on) closeScanner(); });
+$('#shFilter').addEventListener('click', e => { const b = e.target.closest('[data-filter]'); if (!b) return; shFilter = b.dataset.filter; renderSheets(); });
+$('#thumbs').addEventListener('click', e => {
+  const b = e.target.closest('[data-sel]'); if (!b || b.disabled) return;
+  const id = +b.dataset.sel; selIds.has(id) ? selIds.delete(id) : selIds.add(id); renderSheets();
+});
+$('#shActs').addEventListener('click', e => {
+  const b = e.target.closest('[data-shact]'); if (!b || b.disabled) return;
+  const a = b.dataset.shact;
+  if (a === 'delerr') deleteSheets(sheets.filter(s => s.status === 'error'), 'phiếu lỗi');
+  else if (a === 'retry') runAll(sheets.filter(s => s.status === 'error').map(s => s.id), true);
+  else if (a === 'sel') { selMode = true; selIds.clear(); renderSheets(); }
+  else if (a === 'cancel') { selMode = false; selIds.clear(); renderSheets(); }
+  else if (a === 'selall') {
+    const vis = sheets.filter(shPass).filter(s => s.status !== 'busy');
+    if (vis.every(s => selIds.has(s.id))) vis.forEach(s => selIds.delete(s.id)); else vis.forEach(s => selIds.add(s.id));
+    renderSheets();
+  }
+  else if (a === 'delsel') { const list = sheets.filter(s => selIds.has(s.id)); selMode = false; selIds.clear(); deleteSheets(list, 'phiếu'); }
+});
 $('#clearBtn').addEventListener('click', () => {
   const old = sheets; sheets = []; renderAll();
   toast(`Đã xóa ${old.length} phiếu`, { label: 'Hoàn tác', fn: () => { sheets = old.concat(sheets); renderAll(); } });
