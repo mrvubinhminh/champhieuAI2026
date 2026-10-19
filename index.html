@@ -313,6 +313,46 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
 .scan-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .3s ease-out}
 .scan-flash.on{opacity:.75;transition:none}
 
+/* Màn hình chính dạng ô */
+.hero{display:grid;gap:8px}
+.hero-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hero-btns .btn{min-height:58px;font-size:15.5px;border-radius:14px}
+.up-btn{cursor:pointer;background:var(--surface)}
+.up-btn.over{border-color:var(--accent);background:var(--accent-soft)}
+.cam-btn svg,.up-btn svg{flex:none}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:640px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tile{position:relative;display:grid;gap:10px;align-content:start;text-align:left;padding:14px;min-height:112px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);color:var(--ink);transition:border-color .15s ease-out,transform .1s ease-out}
+.tile:hover{border-color:var(--accent)}
+.tile:active{transform:scale(.98)}
+.t-ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.t-txt{min-width:0}
+.tile b{display:block;font:700 15.5px/1.25 var(--f-display)}
+.tile small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--muted);font-size:12.5px;line-height:1.4;margin-top:3px}
+.tile::after{content:"";position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:50%;background:var(--line-strong)}
+.tile[data-state="ok"]::after{background:var(--ok)}
+.tile[data-state="warn"]::after{background:var(--warn)}
+.tile[data-state="warn"] small{color:var(--warn)}
+.rescard{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;padding:16px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);text-align:left;color:var(--ink)}
+.rescard:hover{border-color:var(--accent)}
+.rc-big{font:700 36px/1 var(--f-mono);color:var(--accent);font-variant-numeric:tabular-nums}
+.rc-big small{display:block;font:500 12px var(--f-body);color:var(--muted);margin-top:5px}
+.rc-mid{min-width:0;display:grid;gap:6px}
+.rc-mid b{font-weight:600;font-size:14.5px}
+.rc-mid span{font-size:12.5px;color:var(--muted)}
+.rc-bars{display:grid;grid-template-columns:repeat(11,1fr);gap:3px;align-items:end;height:30px}
+.rc-bars i{display:block;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px}
+.rc-bars i.zero{background:var(--line)}
+.rc-steps{margin:0;padding-left:18px;font-size:13.5px;color:var(--muted);display:grid;gap:2px}
+.rc-chev{color:var(--muted)}
+.rescard.empty{grid-template-columns:minmax(0,1fr) auto}
+.pane{position:fixed;inset:0;z-index:35;background:var(--scrim);display:none}
+.pane.open{display:block}
+.panel-head .grow{flex:1;min-width:0}
+.panel-head .grow h3{display:block}
+.ph-sub{margin:1px 0 0;font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stack{display:grid;gap:14px;min-width:0}
+
 /* Toast */
 .toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
 .toast button{background:none;border:0;color:var(--accent-soft);font-weight:700;min-height:32px;text-decoration:underline}
@@ -335,13 +375,35 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
 </header>
 
 <main class="wrap">
-  <section class="step" id="stepKey">
-    <button class="step-head" id="keyToggle" aria-expanded="true" aria-controls="keyBody">
-      <span class="num">1</span>
-      <span class="grow"><h2>Đáp án</h2><p id="keySummary"></p></span>
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div class="step-body" id="keyBody">
+  <section class="hero" aria-label="Thêm phiếu">
+    <div class="hero-btns">
+      <button class="btn primary cam-btn" id="camBtn" type="button"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>Quét bằng camera</button>
+      <label class="btn up-btn" id="drop" for="fileIn" role="button" tabindex="0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>Tải PDF / ảnh</label>
+    </div>
+    <input type="file" id="camIn" accept="image/*" capture="environment" hidden>
+    <input type="file" id="fileIn" accept="application/pdf,image/*" multiple hidden>
+    <p class="hint" id="camHint"></p>
+  </section>
+
+  <button class="rescard" type="button" id="resCard" data-pane="res"></button>
+
+  <nav class="tiles" aria-label="Các mục">
+    <button class="tile" type="button" id="tKey" data-pane="key"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="t-txt"><b>Đáp án</b><small id="tKeyS"></small></span></button>
+    <button class="tile" type="button" id="tCls" data-pane="cls"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="t-txt"><b>Lớp &amp; danh sách</b><small id="tClsS"></small></span></button>
+    <button class="tile" type="button" id="tSh" data-pane="sheets"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="t-txt"><b>Phiếu bài làm</b><small id="tShS"></small></span></button>
+    <button class="tile" type="button" id="tAi" data-pane="ai"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9.5 9.5h5v5h-5zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></span><span class="t-txt"><b>AI đọc phiếu</b><small id="tAiS"></small></span></button>
+    <button class="tile" type="button" id="tGs" data-pane="gs"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></span><span class="t-txt"><b>Google Sheet</b><small id="tGsS"></small></span></button>
+    <button class="tile" type="button" id="tSum" data-sum="1"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></span><span class="t-txt"><b>Tổng hợp &amp; xuất</b><small id="tSumS"></small></span></button>
+  </nav>
+</main>
+
+<section class="pane" id="stepKey" data-pane-id="key" role="dialog" aria-modal="true" aria-labelledby="h_key">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="grow"><h3 id="h_key">Đáp án</h3><p class="ph-sub" id="keySummary"></p></div>
+      <button class="btn" type="button" data-close>Xong</button>
+    </div>
+    <div class="panel-body">
       <div class="import">
         <div class="btnrow">
           <button class="btn primary-soft" id="impBtn" type="button">
@@ -368,15 +430,15 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
       <div id="keyList" style="display:grid;gap:10px"></div>
       <button class="btn" id="addKey" type="button">+ Thêm mã đề</button>
     </div>
-  </section>
-
-  <section class="step" id="stepClass">
-    <button class="step-head" id="clsToggle" type="button" aria-expanded="true" aria-controls="clsBody">
-      <span class="num">2</span>
-      <span class="grow"><h2>Lớp &amp; danh sách</h2><p id="clsSummary"></p></span>
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div class="step-body" id="clsBody">
+  </div>
+</section>
+<section class="pane" id="stepClass" data-pane-id="cls" role="dialog" aria-modal="true" aria-labelledby="h_cls">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="grow"><h3 id="h_cls">Lớp &amp; danh sách</h3><p class="ph-sub" id="clsSummary"></p></div>
+      <button class="btn" type="button" data-close>Xong</button>
+    </div>
+    <div class="panel-body">
       <div class="cls-row">
         <label class="field"><span>Lớp đang chấm</span><select id="clsSel"></select></label>
         <button class="btn" id="clsNew" type="button" aria-expanded="false" aria-controls="clsNewBox">+ Lớp mới</button>
@@ -399,57 +461,32 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
         <p class="hint">Cần cột <b>Họ và tên</b> (hoặc tách Họ / Tên) và cột <b>SBD</b>. Không có cột SBD thì app dùng STT làm SBD, học sinh ghi STT vào ô SBD trên phiếu. Nhập lại sẽ thay danh sách cũ của lớp. <button class="btn link inline" id="clsDel" type="button">Xóa lớp này</button></p>
       </div>
       <div id="rosList"></div>
-      <details class="gs" id="gsBox">
-        <summary><span>Kết nối Google Sheet</span><span id="gsState" class="chip">Chưa kết nối</span></summary>
-        <div class="gs-body">
-          <p class="note warn" id="gsClaudeNote" hidden>Trang đang mở trong Claude nên không gọi được Google Sheet (mạng ra ngoài bị chặn). Ở đây thầy dùng nút <b>Lưu lên Google Drive</b> trong Tổng hợp. Kết nối Google Sheet đầy đủ (tải danh sách lớp, ghi sổ điểm) chạy trên bản HTML đưa lên Vercel.</p>
-          <label class="field"><span>URL ứng dụng web Apps Script (đuôi /exec)</span><input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false" inputmode="url"></label>
-          <label class="field"><span>Mật khẩu kết nối (giống MAT_KHAU trong script)</span><input type="password" id="gasTok" autocomplete="off"></label>
-          <div class="btnrow">
-            <button class="btn" id="gasTest" type="button">Kiểm tra kết nối</button>
-            <button class="btn" id="gasLoad" type="button">Tải DS lớp từ Google Sheet</button>
-            <button class="btn" id="gasSaveRos" type="button">Lưu DS lớp lên Google Sheet</button>
-          </div>
-          <p class="hint" id="gasStatus" aria-live="polite"></p>
-          <details class="howto"><summary>Cách cài đặt (5 phút, làm một lần)</summary>
-            <ol>
-              <li>Tạo một Google Sheet mới, ví dụ "Sổ điểm Toán".</li>
-              <li>Vào <b>Tiện ích mở rộng → Apps Script</b>, xóa code mẫu, dán mã sao chép bằng nút bên dưới, bấm Lưu.</li>
-              <li>Sửa dòng <code>MAT_KHAU = ''</code> thành mật khẩu tuỳ ý (nên làm), Lưu lại.</li>
-              <li><b>Triển khai → Tùy chọn triển khai mới →</b> chọn <b>Ứng dụng web</b>; Thực thi: <b>Tôi</b>; Quyền truy cập: <b>Bất kỳ ai</b> → Triển khai → cấp quyền cho tài khoản.</li>
-              <li>Sao chép URL ứng dụng web, dán vào ô trên, nhập mật khẩu, bấm <b>Kiểm tra kết nối</b>.</li>
-            </ol>
-            <p class="hint">App sẽ tạo sheet <b>"Lớp 10A3"</b> (STT, SBD, Họ và tên, mỗi bài kiểm tra một cột điểm) và sheet <b>"10A3 · tên bài"</b> chứa điểm từng phần, nhận xét, bài làm.</p>
-            <button class="btn" id="gasCopy" type="button">Sao chép mã Apps Script</button>
-          </details>
-        </div>
-      </details>
     </div>
-  </section>
-
-  <section class="step" id="stepSheets">
-    <div class="step-head" role="presentation">
-      <span class="num">3</span>
-      <span class="grow"><h2>Phiếu bài làm</h2><p id="sheetSummary">Mỗi trang PDF là một phiếu</p></span>
+  </div>
+</section>
+<section class="pane" id="stepSheets" data-pane-id="sheets" role="dialog" aria-modal="true" aria-labelledby="h_sheets">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="grow"><h3 id="h_sheets">Phiếu bài làm</h3><p class="ph-sub" id="sheetSummary">Mỗi trang PDF là một phiếu</p></div>
+      <button class="btn" type="button" data-close>Xong</button>
     </div>
-    <div class="step-body">
-      <button class="btn primary cam-btn" id="camBtn" type="button">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>
-        Quét phiếu bằng camera</button>
-      <input type="file" id="camIn" accept="image/*" capture="environment" hidden>
-      <p class="hint" id="camHint" style="margin-top:-6px"></p>
-      <label class="drop" id="drop" for="fileIn">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
-        <strong>Chọn file PDF hoặc ảnh phiếu</strong>
-        <span>Chọn được nhiều file một lúc · ảnh chụp bằng điện thoại cũng được</span>
-      </label>
-      <input type="file" id="fileIn" accept="application/pdf,image/*" multiple hidden>
+    <div class="panel-body">
+      <div class="btnrow"><button class="btn primary-soft" type="button" data-cam>Quét thêm bằng camera</button><label class="btn" for="fileIn">Tải thêm PDF / ảnh</label></div>
       <div class="btnrow">
         <button class="btn link" id="demoBtn" type="button">Chưa có phiếu? Thử với phiếu mẫu</button>
         <button class="btn link danger" id="clearBtn" type="button" hidden>Xóa tất cả phiếu</button>
       </div>
       <div class="thumbs" id="thumbs"></div>
-
+    </div>
+  </div>
+</section>
+<section class="pane" id="paneAi" data-pane-id="ai" role="dialog" aria-modal="true" aria-labelledby="h_ai">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="grow"><h3 id="h_ai">AI đọc phiếu</h3><p class="ph-sub" id="aiSummary">Chọn AI và tốc độ đọc</p></div>
+      <button class="btn" type="button" data-close>Xong</button>
+    </div>
+    <div class="panel-body">
       <div class="engine" id="engineBox">
         <div class="eng-row"><span class="lbl">AI đọc phiếu</span>
           <div class="seg" role="radiogroup" aria-label="Chọn AI" id="engSeg">
@@ -473,16 +510,51 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
         <p class="hint" id="engNote"></p>
       </div>
     </div>
-  </section>
-
-  <section class="step" id="stepRes">
-    <div class="step-head" role="presentation">
-      <span class="num">4</span>
-      <span class="grow"><h2>Kết quả</h2><p id="resSummary">Chạm từng phiếu để xem chi tiết và sửa nếu AI đọc nhầm</p></span>
+  </div>
+</section>
+<section class="pane" id="paneGs" data-pane-id="gs" role="dialog" aria-modal="true" aria-labelledby="h_gs">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="grow"><h3 id="h_gs">Google Sheet</h3><p class="ph-sub" id="gsSummary">Lưu danh sách lớp và điểm</p></div><span id="gsState" class="chip">Chưa kết nối</span>
+      <button class="btn" type="button" data-close>Xong</button>
     </div>
-    <div class="step-body" id="resBody"></div>
-  </section>
-</main>
+    <div class="panel-body">
+        <div class="gs-body">
+          <p class="note warn" id="gsClaudeNote" hidden>Trang đang mở trong Claude nên không gọi được Google Sheet (mạng ra ngoài bị chặn). Ở đây thầy dùng nút <b>Lưu lên Google Drive</b> trong Tổng hợp. Kết nối Google Sheet đầy đủ (tải danh sách lớp, ghi sổ điểm) chạy trên bản HTML đưa lên Vercel.</p>
+          <label class="field"><span>URL ứng dụng web Apps Script (đuôi /exec)</span><input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false" inputmode="url"></label>
+          <label class="field"><span>Mật khẩu kết nối (giống MAT_KHAU trong script)</span><input type="password" id="gasTok" autocomplete="off"></label>
+          <div class="btnrow">
+            <button class="btn" id="gasTest" type="button">Kiểm tra kết nối</button>
+            <button class="btn" id="gasLoad" type="button">Tải DS lớp từ Google Sheet</button>
+            <button class="btn" id="gasSaveRos" type="button">Lưu DS lớp lên Google Sheet</button>
+          </div>
+          <p class="hint" id="gasStatus" aria-live="polite"></p>
+          <details class="howto"><summary>Cách cài đặt (5 phút, làm một lần)</summary>
+            <ol>
+              <li>Tạo một Google Sheet mới, ví dụ "Sổ điểm Toán".</li>
+              <li>Vào <b>Tiện ích mở rộng → Apps Script</b>, xóa code mẫu, dán mã sao chép bằng nút bên dưới, bấm Lưu.</li>
+              <li>Sửa dòng <code>MAT_KHAU = ''</code> thành mật khẩu tuỳ ý (nên làm), Lưu lại.</li>
+              <li><b>Triển khai → Tùy chọn triển khai mới →</b> chọn <b>Ứng dụng web</b>; Thực thi: <b>Tôi</b>; Quyền truy cập: <b>Bất kỳ ai</b> → Triển khai → cấp quyền cho tài khoản.</li>
+              <li>Sao chép URL ứng dụng web, dán vào ô trên, nhập mật khẩu, bấm <b>Kiểm tra kết nối</b>.</li>
+            </ol>
+            <p class="hint">App sẽ tạo sheet <b>"Lớp 10A3"</b> (STT, SBD, Họ và tên, mỗi bài kiểm tra một cột điểm) và sheet <b>"10A3 · tên bài"</b> chứa điểm từng phần, nhận xét, bài làm.</p>
+            <button class="btn" id="gasCopy" type="button">Sao chép mã Apps Script</button>
+          </details>
+        </div>
+    </div>
+  </div>
+</section>
+<section class="pane" id="stepRes" data-pane-id="res" role="dialog" aria-modal="true" aria-labelledby="h_res">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="grow"><h3 id="h_res">Kết quả</h3><p class="ph-sub" id="resSummary">Chạm từng phiếu để xem chi tiết và sửa nếu AI đọc nhầm</p></div>
+      <button class="btn" type="button" data-close>Xong</button>
+    </div>
+    <div class="panel-body">
+      <div id="resBody" class="stack"></div>
+    </div>
+  </div>
+</section>
 
 <div class="actionbar">
   <div class="prog"><i id="progFill"></i></div>
@@ -958,6 +1030,7 @@ const engine = () => (cfg.engine === 'gemini' || !claudeOK()) ? 'gemini' : 'clau
 const geminiOK = () => !inClaude && cfg.gKeys.length > 0 && (cfg.gAuto || !!cfg.gModel.trim());
 const engineReady = () => engine() === 'claude' ? claudeOK() : geminiOK();
 (async () => {
+  await new Promise(r => setTimeout(r, 0));   // đợi toàn bộ script khởi tạo xong (bản Vercel không có Claude)
   if (inClaude) {
     try {
       sampleFn = await window.claude.use('sample');
@@ -1278,7 +1351,7 @@ function updValid(card) {
   set('p3', parseP3(k.p3).length, cfg.n3);
 }
 function setKeyOpen(open) {
-  cfg.keyOpen = open; $('#keyToggle').setAttribute('aria-expanded', String(open)); $('#keyBody').hidden = !open;
+  cfg.keyOpen = open;
 }
 
 function renderSheets() {
@@ -1363,6 +1436,7 @@ function updateBar() {
   setBar(`Đã chấm xong ${sheets.length} phiếu`, g.length ? `Điểm TB ${fmt(g.reduce((a, b) => a + b.total, 0) / g.length)}` : '');
 }
 function renderEngine() {
+  setTimeout(renderTiles, 0);
   const e = engine();
   $('#engSeg').querySelectorAll('button').forEach(b => {
     b.setAttribute('aria-checked', String(b.dataset.eng === e));
@@ -1395,17 +1469,17 @@ function renderEngine() {
       : 'Lấy key miễn phí tại aistudio.google.com/apikey. Key chỉ lưu trên máy này. Bấm Kiểm tra key để biết key còn dùng được và tốc độ trả lời.';
   }
 }
-function renderAll() { keySummary(); renderClass(); renderSheets(); renderResults(); updateBar(); if (curId != null) renderDetail(); scanHud(); }
+function renderAll() { keySummary(); renderClass(); renderSheets(); renderResults(); updateBar(); if (curId != null) renderDetail(); scanHud(); renderTiles(); }
 
 /* ---------- Chi tiết phiếu ---------- */
 let curId = null, lastFocus = null;
 function openDetail(id) {
   curId = id; lastFocus = document.activeElement;
-  $('#ov').hidden = false; document.body.classList.add('lock');
+  $('#ov').hidden = false; syncLock();
   renderDetail(); $('#ovBody').scrollTop = 0; $('#ovClose').focus();
 }
 function closeDetail() {
-  $('#ov').hidden = true; document.body.classList.remove('lock'); curId = null;
+  $('#ov').hidden = true; curId = null; syncLock();
   lastFocus?.focus?.();
 }
 function renderDetail() {
@@ -1734,10 +1808,10 @@ async function makePdf(list, onProg) {
 let sumCode = '', busyExp = false;
 function openSummary() {
   graded().forEach(x => ensureNx(x.s));
-  $('#ov2').hidden = false; document.body.classList.add('lock');
+  $('#ov2').hidden = false; syncLock();
   renderSummary(); $('#sumBody').scrollTop = 0; $('#ov2Close').focus();
 }
-function closeSummary() { $('#ov2').hidden = true; if ($('#ov').hidden) document.body.classList.remove('lock'); renderAll(); }
+function closeSummary() { $('#ov2').hidden = true; syncLock(); renderAll(); }
 function renderSummary() {
   if ($('#ov2').hidden) return;
   const L = graded(), R = cfg.rep, rk = ranks();
@@ -1820,7 +1894,7 @@ async function doExport(kind) {
   document.querySelectorAll('[data-exp]').forEach(b => { b.disabled = true; });
   try {
     if (kind === 'xlsx') { say('Đang tạo file Excel…'); await exportXlsx(); }
-    else if (kind === 'gsetup') { closeSummary(); setClsOpen(true); $('#gsBox').open = true; $('#gsBox').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    else if (kind === 'gsetup') { closeSummary(); openPane('gs'); }
     else if (kind === 'gsheet') {
       say('Đang ghi lên Google Sheet…');
       const r = await saveScoresGas();
@@ -2100,7 +2174,7 @@ function scanHud() {
 function scanSay(t, ok) { const m = $('#scanMsg'); m.textContent = t; m.classList.toggle('ok', !!ok); }
 async function openScanner() {
   if (!camLive()) { $('#camIn').click(); return; }
-  const el = $('#scan'); el.hidden = false; document.body.classList.add('lock');
+  const el = $('#scan'); el.hidden = false; syncLock();
   $('#scanAuto').checked = cfg.scanAuto; $('#scanGrade').checked = cfg.scanGrade;
   Object.assign(scan, { on: true, prev: null, stable: 0, lost: 0, armed: true, shotQuad: null, busy: false, n: 0, ids: [], torch: false });
   $('#scanLast').style.visibility = 'hidden'; scanHud(); scanSay('Đang mở camera…');
@@ -2126,11 +2200,11 @@ function closeScanner() {
   scan.on = false; cancelAnimationFrame(scan.raf);
   scan.stream?.getTracks().forEach(t => t.stop()); scan.stream = null; scan.track = null;
   $('#scanVid').srcObject = null; $('#scan').hidden = true;
-  if ($('#ov').hidden && $('#ov2').hidden) document.body.classList.remove('lock');
+  syncLock();
   try { if (!running) wakeLock?.release(); } catch (e) {}
   renderAll();
   if (scan.n) toast(`Đã quét ${scan.n} phiếu${cfg.scanGrade ? '' : '. Bấm Chấm để AI đọc'}`);
-  if (scan.n && !cfg.scanGrade) $('#stepSheets').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (scan.n && !cfg.scanGrade) openPane('sheets');
 }
 function drawOverlay(r) {
   const cv = $('#scanOv'), v = $('#scanVid'), dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -2301,7 +2375,7 @@ function absentNote() {
   const ab = absent(), un = sheets.filter(s => s.status === 'done' && s.match?.how === 'none').length;
   return `<p class="hint">Lớp ${esc(cfg.curClass)}: có bài ${R.length - ab.length}/${R.length} em${ab.length ? ` · <b style="color:var(--ink)">Chưa có bài:</b> ${ab.slice(0, 8).map(r => esc(r.ten)).join(', ')}${ab.length > 8 ? ` và ${ab.length - 8} em nữa` : ''}` : ''}${un ? ` · <b style="color:var(--bad)">${un} phiếu không khớp ai</b>` : ''}</p>`;
 }
-function setClsOpen(open) { cfg.clsOpen = open; $('#clsToggle').setAttribute('aria-expanded', String(open)); $('#clsBody').hidden = !open; }
+function setClsOpen(open) { cfg.clsOpen = open; }
 function renderClass() {
   const names = Object.keys(cfg.classes).sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }));
   if (cfg.curClass && !cfg.classes[cfg.curClass]) cfg.curClass = '';
@@ -2356,6 +2430,7 @@ async function gasCall(action, payload) {
   return j;
 }
 function renderGas() {
+  setTimeout(renderTiles, 0);
   $('#gasUrl').value = cfg.gas.url || ''; $('#gasTok').value = cfg.gas.token || '';
   $('#gsClaudeNote').hidden = !inClaude;
   ['gasTest', 'gasLoad', 'gasSaveRos'].forEach(id => { $('#' + id).disabled = !gasOK(); });
@@ -2413,8 +2488,71 @@ function copyText(text, ok) {
   try { navigator.clipboard.writeText(text).then(() => toast(ok), fallback); } catch (e) { fallback(); }
 }
 
+/* ---------- Màn hình ô & bảng mở ra ---------- */
+const PANES = { key: '#stepKey', cls: '#stepClass', sheets: '#stepSheets', ai: '#paneAi', gs: '#paneGs', res: '#stepRes' };
+let openPaneId = null, paneOpener = null;
+function syncLock() {
+  const any = !$('#ov').hidden || !$('#ov2').hidden || !$('#scan').hidden || !!openPaneId;
+  document.body.classList.toggle('lock', any);
+}
+function openPane(id) {
+  if (!PANES[id]) return;
+  if (openPaneId && openPaneId !== id) $(PANES[openPaneId]).classList.remove('open');
+  paneOpener = paneOpener || document.activeElement;
+  const el = $(PANES[id]); el.classList.add('open'); openPaneId = id; syncLock();
+  el.querySelector('.panel-body').scrollTop = 0;
+  el.querySelector('[data-close]')?.focus({ preventScroll: true });
+}
+function closePane() {
+  if (!openPaneId) return;
+  $(PANES[openPaneId]).classList.remove('open'); openPaneId = null; syncLock(); renderTiles();
+  paneOpener?.focus?.({ preventScroll: true }); paneOpener = null;
+}
+function renderTiles() {
+  const set = (id, text, state) => { const t = $('#t' + id); if (!t) return; $('#t' + id + 'S').textContent = text; t.dataset.state = state || ''; };
+  const sample = cfg.keys.some(k => k.sample), full = cfg.keys.every(keyComplete);
+  const parts = [cfg.n1 && cfg.n1, cfg.n2 && cfg.n2, cfg.n3 && cfg.n3].filter(Boolean).join(' + ');
+  set('Key', sample ? `Đang là đáp án ví dụ · ${parts} câu` : full ? `${parts} câu · ${cfg.keys.length} mã đề` : 'Còn thiếu câu, bấm để kiểm tra', sample || !full ? 'warn' : 'ok');
+  const R = roster();
+  set('Cls', R.length ? `Lớp ${cfg.curClass} · ${R.length} em` : cfg.curClass ? `Lớp ${cfg.curClass} · chưa có danh sách` : 'Không bắt buộc · tự nhận học sinh theo SBD', R.length ? 'ok' : '');
+  const n = sheets.length, done = sheets.filter(x => x.status === 'done').length, err = sheets.filter(x => x.status === 'error').length;
+  set('Sh', n ? `${n} phiếu · đã chấm ${done}${err ? ` · ${err} lỗi` : ''}` : 'Chưa có phiếu', n ? (done === n ? 'ok' : 'warn') : '');
+  set('Ai', engineProbe ? 'Đang kết nối…' : engineReady()
+    ? (engine() === 'claude' ? `Claude · ${cfg.tier === 'quick' ? 'Nhanh' : 'Kỹ hơn'}` : `Gemini · ${cfg.gKeys.length} key${cfg.gNoThink !== false ? ' · tắt suy nghĩ' : ''}`)
+    : (engine() === 'gemini' ? 'Chưa nhập key Gemini' : 'Chưa sẵn sàng'), engineReady() ? 'ok' : 'warn');
+  set('Gs', inClaude ? (mcpCap ? 'Lưu bảng điểm qua Google Drive' : 'Dùng trên bản Vercel') : gasOK() ? 'Đã nhập URL kết nối' : 'Chưa kết nối', inClaude ? (mcpCap ? 'ok' : '') : gasOK() ? 'ok' : '');
+  const G = graded();
+  set('Sum', G.length ? `${G.length} bài · Excel, PDF, nhận xét` : 'Chấm xong để xuất file', G.length ? 'ok' : '');
+  // thẻ kết quả
+  const card = $('#resCard'), mx = maxScore() || 10;
+  if (!G.length) {
+    card.classList.add('empty');
+    card.innerHTML = `<div class="rc-mid"><b>${n ? `${n} phiếu chờ chấm` : 'Chưa có bài nào được chấm'}</b>
+      <ol class="rc-steps"><li>Kiểm tra <b>Đáp án</b></li><li>Quét hoặc tải phiếu</li><li>Bấm <b>Chấm</b> ở thanh dưới cùng</li></ol></div>
+      <svg class="rc-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
+    return;
+  }
+  card.classList.remove('empty');
+  const tot = G.map(x => x.g.total), avg = tot.reduce((a, b) => a + b, 0) / tot.length;
+  const bins = Array(11).fill(0); tot.forEach(t => { bins[Math.max(0, Math.min(10, Math.floor(t / mx * 10 + 1e-9)))]++; });
+  const top = Math.max(1, ...bins), review = sheets.filter(x => x.status === 'done' && flags(x).length).length, ab = absent().length;
+  card.innerHTML = `<div class="rc-big">${fmt(avg)}<small>điểm TB</small></div>
+    <div class="rc-mid"><b>${G.length} bài · cao ${fmt(Math.max(...tot))} · thấp ${fmt(Math.min(...tot))}</b>
+      <div class="rc-bars" aria-hidden="true">${bins.map(b => `<i class="${b ? '' : 'zero'}" style="height:${b ? Math.max(12, b / top * 100) : 6}%"></i>`).join('')}</div>
+      <span>${review ? `<b style="color:var(--warn)">${review} phiếu cần xem lại</b>` : 'Không có phiếu cần xem lại'}${ab ? ` · ${ab} em chưa có bài` : ''}</span></div>
+    <svg class="rc-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
+}
+
 /* ---------- Sự kiện ---------- */
-$('#clsToggle').addEventListener('click', () => { setClsOpen(!cfg.clsOpen); saveCfg(); });
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-pane]'); if (t) { openPane(t.dataset.pane); return; }
+  if (e.target.closest('[data-close]')) { closePane(); return; }
+  if (e.target.closest('[data-sum]')) { if (graded().length) openSummary(); else toast('Chấm xong ít nhất một phiếu rồi mới tổng hợp được.'); return; }
+  if (e.target.closest('[data-cam]')) { closePane(); openScanner(); return; }
+  if (e.target.classList?.contains('pane')) closePane();
+});
+$('#drop').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#fileIn').click(); } });
+
 $('#clsSel').addEventListener('change', e => {
   cfg.curClass = e.target.value; if (cfg.curClass) cfg.rep.lop = cfg.curClass;
   saveCfg(); rematchAll(true); renderAll();
@@ -2483,7 +2621,6 @@ $('#pasteGo').addEventListener('click', () => {
   if (applyImport(aoa, 'nội dung đã dán')) { $('#pasteTa').value = ''; $('#pasteBox').hidden = true; $('#pasteToggle').setAttribute('aria-expanded', 'false'); }
 });
 $('#tplBtn').addEventListener('click', downloadTemplate);
-$('#keyToggle').addEventListener('click', () => { setKeyOpen(!cfg.keyOpen); saveCfg(); });
 ['n1', 'n2', 'n3', 'pt1', 'pt3'].forEach(id => $('#' + id).addEventListener('change', e => {
   const isInt = id.startsWith('n'); let v = Number(e.target.value);
   const lim = { n1: 80, n2: 10, n3: 12, pt1: 10, pt3: 10 }[id];
@@ -2560,7 +2697,7 @@ $('#gTestOut').addEventListener('click', e => {
 
 $('#runBtn').addEventListener('click', () => {
   const pending = sheets.some(s => s.status === 'wait' || s.status === 'error');
-  if (pending) runAll(); else if (graded().length) openSummary(); else $('#stepRes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (pending) runAll(); else if (graded().length) openSummary(); else openPane('res');
 });
 $('#stopBtn').addEventListener('click', stopAll);
 
@@ -2573,7 +2710,7 @@ document.addEventListener('click', e => {
 
 $('#ovClose').addEventListener('click', closeDetail);
 $('#ov').addEventListener('click', e => { if (e.target.id === 'ov') closeDetail(); });
-document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (scan.on) closeScanner(); else if (!$('#ov').hidden) closeDetail(); else if (!$('#ov2').hidden) closeSummary(); });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (scan.on) closeScanner(); else if (!$('#ov').hidden) closeDetail(); else if (!$('#ov2').hidden) closeSummary(); else if (openPaneId) closePane(); });
 $('#ov2Close').addEventListener('click', closeSummary);
 $('#ov2').addEventListener('click', e => { if (e.target.id === 'ov2') closeSummary(); });
 $('#sumBody').addEventListener('click', e => {
@@ -2635,7 +2772,7 @@ $('#ovBody').addEventListener('change', e => {
 });
 
 /* ---------- Khởi động ---------- */
-$('#camHint').textContent = camLive() ? 'Đặt phiếu lên mặt bàn: app tự chụp khi thấy đủ 4 ô vuông đen ở góc, tự nắn thẳng và chấm ngay. Thầy chỉ việc đổi phiếu.' : 'Trong Claude, mỗi lần bấm chụp một phiếu (ảnh tự nắn thẳng). Quét liên tục tự động dùng bản đưa lên Vercel.';
+$('#camHint').textContent = camLive() ? 'Camera tự chụp khi thấy 4 ô vuông đen ở góc phiếu, đổi phiếu là chụp tiếp.' : 'Trong Claude mỗi lần chụp một phiếu; quét liên tục tự động dùng bản đưa lên Vercel.';
 renderFmt(); renderKeys(); setKeyOpen(cfg.keyOpen !== false); setClsOpen(cfg.clsOpen !== false); renderGas(); renderEngine(); renderAll();
 })();
 </script>
