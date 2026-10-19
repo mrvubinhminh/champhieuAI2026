@@ -272,6 +272,7 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
 .gs-body{display:grid;gap:10px;padding-top:6px}
 .howto{border-top:1px solid var(--line);padding-top:6px}
 .howto ol{margin:6px 0 10px;padding-left:20px;display:grid;gap:6px;font-size:14px}
+.syn{margin:6px 0;padding-left:18px;display:grid;gap:6px;font-size:14px}
 .howto code{font-family:var(--f-mono);font-size:12.5px;background:var(--sunken);padding:1px 5px;border-radius:5px}
 .absent{font-size:14px;line-height:1.6}
 .exp.muted-card{border-style:dashed}
@@ -427,6 +428,14 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
         <label class="field"><span>Điểm/câu P.III</span><input type="number" id="pt3" min="0" step="0.05" inputmode="decimal"></label>
       </div>
       <p class="hint">Phần II chấm theo thang của Bộ: đúng 1 ý 0,1 · 2 ý 0,25 · 3 ý 0,5 · 4 ý 1 điểm. Phiếu chỉ có trắc nghiệm ABCD thì để Phần II, III bằng 0.</p>
+      <details class="howto"><summary>Câu sai đề hoặc có nhiều đáp án đúng?</summary>
+        <ul class="syn">
+          <li><b>Phần I:</b> gõ <code>[AB]</code> để chấp nhận cả A và B; gõ <code>*</code> để cho điểm cả lớp. Ví dụ <code>ABC*DA[BC]…</code></li>
+          <li><b>Phần II:</b> gõ <code>*</code> vào đúng vị trí ý bị sai đề, ví dụ <code>ĐS*Đ</code> là ý c cho điểm mọi em.</li>
+          <li><b>Phần III:</b> gõ <code>2,5|2,6</code> để chấp nhận cả hai đáp số; gõ <code>*</code> để cho điểm cả lớp.</li>
+        </ul>
+        <p class="hint">Sửa đáp án lúc nào cũng được: điểm của mọi bài đã chấm được tính lại ngay, không cần AI đọc lại phiếu.</p>
+      </details>
       <div id="keyList" style="display:grid;gap:10px"></div>
       <button class="btn" id="addKey" type="button">+ Thêm mã đề</button>
     </div>
@@ -812,13 +821,29 @@ migrateCfg();
 function saveCfg() { try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch (e) {} }
 
 /* ---------- Đáp án ---------- */
-const parseP1 = s => String(s || '').toUpperCase().replace(/[^ABCD]/g, '').split('').filter(Boolean);
+// Phần I: 'A' một đáp án · '[AB]' chấp nhận A hoặc B · '*' cho điểm mọi em (câu sai đề)
+function parseP1(s) {
+  const t = String(s || '').toUpperCase(), out = [];
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if ('ABCD'.includes(c) || c === '*') out.push(c);
+    else if (c === '[' || c === '(') {
+      const j = t.indexOf(c === '[' ? ']' : ')', i);
+      if (j > i) { const g = [...new Set(t.slice(i + 1, j).replace(/[^ABCD]/g, ''))].sort().join(''); if (g) out.push(g); i = j; }
+    }
+  }
+  return out;
+}
+const okP1 = (stu, key) => !!key && (key === '*' || (stu.length === 1 && key.includes(stu)));
+const keyLabel = k => k === '*' ? 'Mọi đáp án' : String(k ?? '').includes('|') ? String(k).split('|').join(' hoặc ') : (k && k.length > 1 && /^[ABCD]+$/.test(k) ? k.split('').join('/') : (k ?? ''));
 function parseP2(s) {
-  const t = String(s || '').replace(/[a-dA-D]\s*[).:]/g, '').replace(/[^ĐđDdTtSsFf]/g, '').toUpperCase().replace(/[DT]/g, 'Đ').replace(/F/g, 'S');
+  const t = String(s || '').replace(/[a-dA-D]\s*[).:]/g, '').replace(/[^ĐđDdTtSsFf*]/g, '').toUpperCase().replace(/[DT]/g, 'Đ').replace(/F/g, 'S');
   const out = []; for (let i = 0; i < t.length; i += 4) out.push(t.slice(i, i + 4).split('')); return out;
 }
-const parseP3 = s => String(s || '').split(/[\s;|]+/).filter(Boolean);
-const normNum = v => String(v ?? '').trim().replace(/\s/g, '').replace(/,/g, '.').replace(/^\+/, '');
+// Phần III: '2,5|2,6' chấp nhận nhiều đáp số · '*' cho điểm mọi em
+const parseP3 = s => String(s || '').replace(/\s*\|\s*/g, '|').split(/[\s;]+/).filter(Boolean);
+const okP3 = (stu, key) => !!key && (key === '*' || String(key).split('|').some(k => sameP3(stu, k)));
+const normNum = v => String(v ?? '').trim().replace(/\s/g, '').replace(/[−–—]/g, '-').replace(/,/g, '.').replace(/^\+/, '');
 function sameP3(a, b) {
   const x = normNum(a), y = normNum(b); if (!x || !y) return false;
   const nx = Number(x), ny = Number(y);
@@ -836,15 +861,15 @@ function grade(d) {
   const k = keyFor(d.ma_de); if (!k) return null;
   const K1 = parseP1(k.p1), K2 = parseP2(k.p2), K3 = parseP3(k.p3);
   let c1 = 0; const r1 = [];
-  for (let i = 0; i < cfg.n1; i++) { const ok = !!K1[i] && d.p1[i] === K1[i]; if (ok) c1++; r1.push(ok); }
+  for (let i = 0; i < cfg.n1; i++) { const ok = okP1(d.p1[i] || '', K1[i]); if (ok) c1++; r1.push(ok); }
   let s2 = 0; const rr2 = [];
   for (let i = 0; i < cfg.n2; i++) {
     let n = 0; const row = [];
-    for (let j = 0; j < 4; j++) { const kv = (K2[i] || [])[j]; const ok = !!kv && (d.p2[i] || [])[j] === kv; if (ok) n++; row.push(ok); }
+    for (let j = 0; j < 4; j++) { const kv = (K2[i] || [])[j]; const ok = kv === '*' || (!!kv && (d.p2[i] || [])[j] === kv); if (ok) n++; row.push(ok); }
     s2 += P2PTS[n]; rr2.push({ row, n, pts: P2PTS[n] });
   }
   let c3 = 0; const r3 = [];
-  for (let i = 0; i < cfg.n3; i++) { const ok = sameP3(d.p3[i], K3[i]); if (ok) c3++; r3.push(ok); }
+  for (let i = 0; i < cfg.n3; i++) { const ok = okP3(d.p3[i], K3[i]); if (ok) c3++; r3.push(ok); }
   const sc1 = r2(c1 * cfg.pt1), sc3 = r2(c3 * cfg.pt3);
   return { k, K1, K2, K3, c1, r1, s2: r2(s2), rr2, c3, r3, sc1, sc3, total: r2(sc1 + s2 + sc3) };
 }
@@ -1525,8 +1550,8 @@ function renderDetail() {
     for (let i = 0; i < cfg.n1; i++) {
       const st = g ? (g.r1[i] ? 'ok' : 'bad') : '';
       h += `<div class="qrow ${st}"><span class="qn">${i + 1}</span>${'ABCD'.split('').map(L =>
-        `<button type="button" class="bub${d.p1[i] === L ? ' on' : ''}${g && g.K1[i] === L ? ' key' : ''}" data-p1="${i}" data-l="${L}" aria-label="Câu ${i + 1} ${L}" aria-pressed="${d.p1[i] === L}">${L}</button>`).join('')}
-        <span class="mk" aria-label="${st === 'ok' ? 'đúng' : st === 'bad' ? 'sai' : ''}">${d.p1[i] === 'X' ? '<span title="Tô nhiều ô">⁑</span>' : st === 'ok' ? '✓' : st === 'bad' ? '✕' : ''}</span></div>`;
+        `<button type="button" class="bub${d.p1[i] === L ? ' on' : ''}${g && g.K1[i] && g.K1[i] !== '*' && g.K1[i].includes(L) ? ' key' : ''}" data-p1="${i}" data-l="${L}" aria-label="Câu ${i + 1} ${L}" aria-pressed="${d.p1[i] === L}">${L}</button>`).join('')}
+        <span class="mk" aria-label="${st === 'ok' ? 'đúng' : st === 'bad' ? 'sai' : ''}">${g && g.K1[i] === '*' ? '<span title="Cho điểm cả lớp">★</span>' : d.p1[i] === 'X' ? '<span title="Tô nhiều ô">⁑</span>' : st === 'ok' ? '✓' : st === 'bad' ? '✕' : ''}</span></div>`;
     }
     h += `</div></div>`;
   }
@@ -1552,7 +1577,7 @@ function renderDetail() {
       const st = g ? (g.r3[i] ? 'ok' : 'bad') : '';
       h += `<div class="qrow ${st}"><span class="qn" style="width:auto">Câu ${i + 1}</span>
         <input type="text" id="dp3_${i}" data-p3="${i}" value="${esc(d.p3[i])}" inputmode="decimal" autocomplete="off" aria-label="Đáp số học sinh câu ${i + 1}">
-        <span class="kv">Đáp án <b>${esc(g ? (g.K3[i] ?? '—') : '—')}</b></span><span class="mk">${st === 'ok' ? '✓' : st === 'bad' ? '✕' : ''}</span></div>`;
+        <span class="kv">Đáp án <b>${esc(g ? (keyLabel(g.K3[i]) || '—') : '—')}</b></span><span class="mk">${st === 'ok' ? '✓' : st === 'bad' ? '✕' : ''}</span></div>`;
     }
     h += `</div></div>`;
   }
@@ -1725,7 +1750,7 @@ function drawP2(x, y, d, g) {
     const ry = y + (i + 1) * rh, rr = g.rr2[i];
     cell(x, String(i + 1), colX[0] + cols[0] / 2, ry + 30, cols[0], PC.muted, `700 20px ${FM}`);
     for (let j = 0; j < 4; j++) {
-      const c = j + 1, em = (d.p2[i] || [])[j] || '–', kv = (g.K2[i] || [])[j] || '?', good = rr.row[j];
+      const c = j + 1, em = (d.p2[i] || [])[j] || '–', kv = (g.K2[i] || [])[j] || '?', good = rr.row[j];  // kv '*' = cho điểm
       x.fillStyle = good ? PC.okBg : PC.badBg; x.fillRect(colX[c], ry, cols[c], rh);
       cell(x, good ? `${em} ✓` : `${em} → ${kv}`, colX[c] + cols[c] / 2, ry + 30, cols[c], good ? PC.ok : PC.bad, `700 21px ${FM}`);
     }
@@ -1765,9 +1790,9 @@ async function drawReport(sh) {
     if (cfg.n3) parts.push(`Phần III: ${g.c3}/${cfg.n3} câu (${fmt(g.sc3)} đ)`);
     x.fillStyle = PC.ink; x.font = `500 22px ${FB}`; x.fillText(fitText(x, parts.join('    ·    '), RW - 2 * RM), RM, y);
     y += 30;
-    if (cfg.n1) { y = secTitle(x, y, 'Phần I · Trắc nghiệm nhiều lựa chọn', `${g.c1}/${cfg.n1} câu đúng`); y = drawRowTable(x, y, cfg.n1, ['Câu', 'Em chọn', 'Đáp án'], i => d.p1[i], i => g.K1[i], i => g.r1[i]); }
+    if (cfg.n1) { y = secTitle(x, y, 'Phần I · Trắc nghiệm nhiều lựa chọn', `${g.c1}/${cfg.n1} câu đúng`); y = drawRowTable(x, y, cfg.n1, ['Câu', 'Em chọn', 'Đáp án'], i => d.p1[i], i => keyLabel(g.K1[i]), i => g.r1[i]); }
     if (cfg.n2) { y = secTitle(x, y, 'Phần II · Đúng/Sai', `${fmt(g.s2)}/${cfg.n2} điểm`); y = drawP2(x, y, d, g); }
-    if (cfg.n3) { y = secTitle(x, y, 'Phần III · Trả lời ngắn', `${g.c3}/${cfg.n3} câu đúng`); y = drawRowTable(x, y, cfg.n3, ['Câu', 'Em ghi', 'Đáp án'], i => d.p3[i], i => g.K3[i], i => g.r3[i]); }
+    if (cfg.n3) { y = secTitle(x, y, 'Phần III · Trả lời ngắn', `${g.c3}/${cfg.n3} câu đúng`); y = drawRowTable(x, y, cfg.n3, ['Câu', 'Em ghi', 'Đáp án'], i => d.p3[i], i => keyLabel(g.K3[i]), i => g.r3[i]); }
   }
   if (d.nx) {
     x.font = `400 24px ${FB}`; const lines = wrapLines(x, d.nx, RW - 2 * RM - 48).slice(0, 5);
@@ -1847,6 +1872,7 @@ function renderSummary() {
     ${sheets.filter(s => s.status === 'done' && s.match?.how === 'none').length ? `<p class="hint" style="color:var(--bad)">${sheets.filter(s => s.status === 'done' && s.match?.how === 'none').length} phiếu không khớp học sinh nào. Mở phiếu đó để chọn đúng em.</p>` : ''}</section>` : ''}
   <section class="card"><h4>Nhận xét từng em</h4>
     <p class="hint">Đã tự điền theo kết quả bài làm. Thầy sửa trực tiếp, hoặc để AI viết lời nhận xét tự nhiên hơn cho cả lớp.</p>
+    ${L.some(x => x.s.nxAiVer !== undefined && x.s.nxAiVer !== keyVer && !x.s.nxAuto) ? `<p class="note warn">Có nhận xét AI viết trước khi thầy sửa đáp án (có thể nhắc sai số câu). Bấm <b>AI viết nhận xét</b> hoặc <b>Viết lại theo điểm</b> để cập nhật.</p>` : ''}
     <div class="btnrow">
       <button class="btn" type="button" data-nx="ai" ${engineReady() ? '' : 'disabled'}>AI viết nhận xét cho cả lớp</button>
       <button class="btn" type="button" data-nx="auto">Viết lại theo điểm</button>
@@ -1880,7 +1906,7 @@ async function aiComments(btn) {
         'Chỉ trả về JSON array, ví dụ: [{"id":3,"nx":"..."}]'
       ].join('\n');
       const arr = await aiJSON(prompt);
-      (Array.isArray(arr) ? arr : []).forEach(it => { const sh = byId(Number(it?.id)); if (sh?.data && typeof it.nx === 'string' && it.nx.trim()) { sh.data.nx = it.nx.trim(); sh.nxAuto = false; done++; } });
+      (Array.isArray(arr) ? arr : []).forEach(it => { const sh = byId(Number(it?.id)); if (sh?.data && typeof it.nx === 'string' && it.nx.trim()) { sh.data.nx = it.nx.trim(); sh.nxAuto = false; sh.nxAiVer = keyVer; done++; } });
     }
     toast(`AI đã viết nhận xét cho ${done} em. Thầy đọc lại và sửa nếu cần.`);
   } catch (e) {
@@ -1947,6 +1973,7 @@ function classify(raw) {
   s = s.replace(/[−–—]/g, '-');
   const u = s.toUpperCase(), u2 = u.replace(/^\(|[.)]$/g, '');
   if (/^[ABCD]$/.test(u2)) return { t: 'abcd', v: u2 };
+  if (/^[\[(][ABCD\s,/]{2,}[\])]$/.test(u)) return { t: 'abcd', v: '[' + [...new Set(u.replace(/[^ABCD]/g, ''))].sort().join('') + ']' };
   if (/^(Đ|T|ĐÚNG|DUNG|TRUE)$/.test(u)) return { t: 'ds', v: ['Đ'] };
   if (/^(S|F|SAI|FALSE)$/.test(u)) return { t: 'ds', v: ['S'] };
   const compact = u.replace(/[\s,;\-\/|.]/g, '');
@@ -2008,7 +2035,7 @@ function applyImport(aoa, src) {
   const changed = n1 !== cfg.n1 || n2 !== cfg.n2 || n3 !== cfg.n3;
   Object.assign(cfg, { n1, n2, n3 });
   cfg.keys = res.map(k => {
-    const g = []; for (let i = 0; i < k.ds.length; i += 4) g.push(k.ds.slice(i, i + 4).join(''));
+    const g = []; for (let i = 0; i < k.ds.length; i += 4) g.push(k.ds.slice(i, i + 4).join(''));  // [AB] giữ nguyên trong p1
     return { code: k.code, p1: k.p1.join(''), p2: g.join(' '), p3: k.p3.join(' ') };
   });
   sheets.forEach(s => s.data && padData(s.data));
@@ -2045,7 +2072,7 @@ async function downloadTemplate() {
     const codes = K.length > 1 || K[0].code ? K : [{ code: '101', p1: [], p2: [], p3: [] }];
     if (codes.length === 1 && !codes[0].p1.length) codes.push({ code: String((parseInt(codes[0].code, 10) || 101) + 1), p1: [], p2: [], p3: [] });
     const aoa = [['Câu', ...codes.map(k => k.code)]];
-    for (let i = 0; i < cfg.n1; i++) aoa.push([String(i + 1), ...codes.map(k => k.p1[i] || '')]);
+    for (let i = 0; i < cfg.n1; i++) aoa.push([String(i + 1), ...codes.map(k => { const v = k.p1[i] || ''; return v.length > 1 ? `[${v}]` : v; })]);
     for (let i = 0; i < cfg.n2; i++) aoa.push([`II.${i + 1}`, ...codes.map(k => (k.p2[i] || []).join(''))]);
     for (let i = 0; i < cfg.n3; i++) aoa.push([`III.${i + 1}`, ...codes.map(k => k.p3[i] || '')]);
     const ws = XLSX.utils.aoa_to_sheet(aoa); ws['!cols'] = [{ wch: 7 }, ...codes.map(() => ({ wch: 9 }))];
@@ -2488,6 +2515,19 @@ function copyText(text, ok) {
   try { navigator.clipboard.writeText(text).then(() => toast(ok), fallback); } catch (e) { fallback(); }
 }
 
+/* ---------- Sửa đáp án sau khi đã chấm ---------- */
+let keyVer = 0, keyToastT = null;
+function keyChanged() {
+  keyVer++;
+  renderAll();
+  clearTimeout(keyToastT);
+  keyToastT = setTimeout(() => {
+    const n = graded().length; if (!n) return;
+    const stale = graded().filter(x => x.s.nxAiVer !== undefined && x.s.nxAiVer !== keyVer && !x.s.nxAuto).length;
+    toast(`Đã tính lại điểm ${n} bài theo đáp án mới${stale ? `. ${stale} nhận xét AI viết theo đáp án cũ, nên viết lại trong Tổng hợp` : ''}`);
+  }, 900);
+}
+
 /* ---------- Màn hình ô & bảng mở ra ---------- */
 const PANES = { key: '#stepKey', cls: '#stepClass', sheets: '#stepSheets', ai: '#paneAi', gs: '#paneGs', res: '#stepRes' };
 let openPaneId = null, paneOpener = null;
@@ -2627,13 +2667,13 @@ $('#tplBtn').addEventListener('click', downloadTemplate);
   if (!isFinite(v) || v < 0) v = 0; if (v > lim) v = lim; if (isInt) v = Math.round(v);
   cfg[id] = v; e.target.value = v; saveCfg();
   sheets.forEach(s => s.data && padData(s.data));
-  renderKeys(); renderAll();
+  renderKeys(); keyChanged();
 }));
 $('#keyList').addEventListener('input', e => {
   const t = e.target, card = t.closest('.keycard'); if (!card || !t.dataset.k) return;
   const k = cfg.keys[card.dataset.i]; k[t.dataset.k] = t.value;
   if (k.sample) { k.sample = false; card.querySelector('.badge')?.remove(); }
-  updValid(card); saveCfg(); keySummary(); renderSheets(); renderResults(); updateBar();
+  updValid(card); saveCfg(); keyChanged();
 });
 $('#keyList').addEventListener('click', e => {
   const b = e.target.closest('[data-del]'); if (!b) return;
