@@ -388,6 +388,18 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
 .th.sel .ck{background:var(--bad);border-color:var(--bad);color:#fff}
 .selmode .th .flag{display:none}
 
+#tSum{grid-column:1/-1;min-height:0}
+.sy-f{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.sy-status{font-size:14px;color:var(--muted);display:grid;gap:4px}
+.sy-status b{color:var(--ink)}
+.sy-dev{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.sy-dev:last-child{border-bottom:0}
+.sy-dot{width:10px;height:10px;border-radius:50%;background:var(--line-strong)}
+.sy-dot.live{background:var(--ok)}
+.sy-dev small{display:block;color:var(--muted);font-size:12.5px}
+.sy-dev .mono{font-weight:700}
+.th .from{position:absolute;left:5px;top:24px;font:600 10.5px var(--f-body);background:var(--accent-soft);color:var(--accent);padding:1px 5px;border-radius:5px;max-width:calc(100% - 10px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 /* Toast */
 .toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
 .toast button{background:none;border:0;color:var(--accent-soft);font-weight:700;min-height:32px;text-decoration:underline}
@@ -428,6 +440,7 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
     <button class="tile" type="button" id="tSh" data-pane="sheets"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="t-txt"><b>Phiếu bài làm</b><small id="tShS"></small></span></button>
     <button class="tile" type="button" id="tAi" data-pane="ai"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9.5 9.5h5v5h-5zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></span><span class="t-txt"><b>AI đọc phiếu</b><small id="tAiS"></small></span></button>
     <button class="tile" type="button" id="tGs" data-pane="gs"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></span><span class="t-txt"><b>Google Sheet</b><small id="tGsS"></small></span></button>
+    <button class="tile" type="button" id="tSync" data-pane="sync"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/></svg></span><span class="t-txt"><b>Đồng bộ nhiều máy</b><small id="tSyncS"></small></span></button>
     <button class="tile" type="button" id="tSum" data-sum="1"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></span><span class="t-txt"><b>Tổng hợp &amp; xuất</b><small id="tSumS"></small></span></button>
   </nav>
 </main>
@@ -611,6 +624,38 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
     </div>
   </div>
 </section>
+<section class="pane" id="paneSync" data-pane-id="sync" role="dialog" aria-modal="true" aria-labelledby="h_sync">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="grow"><h3 id="h_sync">Đồng bộ nhiều máy</h3><p class="ph-sub" id="syncSummary">Nhiều máy cùng quét, cùng chấm một bài</p></div>
+      <span id="syChip" class="chip">Chưa bật</span>
+      <button class="btn" type="button" data-close>Xong</button>
+    </div>
+    <div class="panel-body">
+      <p class="note warn" id="syNote" hidden></p>
+      <div class="fmt sy-f">
+        <label class="field"><span>Mã phiên chấm (các máy nhập giống nhau)</span><input type="text" id="syCode" placeholder="VD: 10A3-GK1" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+        <label class="field"><span>Tên máy này</span><input type="text" id="syName" placeholder="VD: Điện thoại thầy Lực" autocomplete="off"></label>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary-soft" id="syStart" type="button">Bắt đầu đồng bộ</button>
+        <button class="btn" id="syStop" type="button" hidden>Dừng đồng bộ</button>
+        <button class="btn" id="syNow" type="button" hidden>Đồng bộ ngay</button>
+      </div>
+      <div class="sy-status" id="syStatus" aria-live="polite"></div>
+      <div id="syDevices"></div>
+      <details class="howto"><summary>Cách dùng</summary>
+        <ol>
+          <li>Trên máy thứ nhất: kiểm tra Đáp án, Lớp, rồi nhập một mã phiên (ví dụ <code>10A3-GK1</code>) và bấm <b>Bắt đầu đồng bộ</b>.</li>
+          <li>Trên các máy còn lại: mở cùng app, nhập <b>đúng mã phiên đó</b>, bấm Bắt đầu. Máy mới tự nhận đáp án, cấu trúc điểm và danh sách lớp của phiên.</li>
+          <li>Mỗi máy quét một xấp phiếu. Phiếu chấm xong ở máy nào cũng hiện trên mọi máy, kể cả phần thầy sửa tay và nhận xét.</li>
+          <li>Sửa đáp án trên một máy thì các máy khác nhận đáp án mới và tự tính lại điểm.</li>
+        </ol>
+        <p class="hint" id="syHow"></p>
+      </details>
+    </div>
+  </div>
+</section>
 <section class="pane" id="stepRes" data-pane-id="res" role="dialog" aria-modal="true" aria-labelledby="h_res">
   <div class="panel">
     <div class="panel-head">
@@ -689,6 +734,7 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
  * CẤU TRÚC SHEET:
  *  - "Lớp 10A3": STT | SBD | Họ và tên | <tên bài 1> | <tên bài 2> | …  (sổ điểm, mỗi bài một cột)
  *  - "10A3 · <tên bài>": bảng chi tiết của từng bài (điểm từng phần, xếp loại, nhận xét, bài làm).
+ *  - "_dongbo": dữ liệu đồng bộ giữa nhiều máy (app tự quản lý, không cần sửa).
  */
 const MAT_KHAU = ''; // ví dụ: 'toan10a3'. Để trống = không cần mật khẩu.
 
@@ -706,10 +752,12 @@ function doPost(e) {
     const b = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     if (MAT_KHAU && b.token !== MAT_KHAU) return out_({ ok: false, error: 'Sai mật khẩu kết nối' });
     switch (b.action) {
-      case 'ping': return out_({ ok: true, name: SpreadsheetApp.getActive().getName(), url: SpreadsheetApp.getActive().getUrl(), classes: listClasses_() });
+      case 'ping': return out_({ ok: true, ver: 2, name: SpreadsheetApp.getActive().getName(), url: SpreadsheetApp.getActive().getUrl(), classes: listClasses_() });
       case 'getAll': return out_({ ok: true, classes: getAll_() });
       case 'saveRoster': return out_(saveRoster_(b.lop, b.students || []));
       case 'saveScores': return out_(saveScores_(b));
+      case 'syncPush': return out_(syncPush_(b));
+      case 'syncPull': return out_(syncPull_(b));
       default: return out_({ ok: false, error: 'Lệnh không hợp lệ: ' + b.action });
     }
   } catch (err) {
@@ -843,6 +891,70 @@ function saveScores_(b) {
   }
   return { ok: true, sheet: sh.getName(), detail: detail, saved: saved, added: u.added, url: ss.getUrl() + '#gid=' + sh.getSheetId() };
 }
+
+/* ---------- Đồng bộ nhiều máy ----------
+ * Mỗi dòng của sheet "_dongbo": phiên | mã phiếu | ts (giờ máy gửi) | srv (thứ tự máy chủ) | đã xóa | dữ liệu | ảnh
+ * Máy gửi: syncPush { session, recs: [{ sid, ts, del, json, img }] }
+ * Máy nhận (mỗi 10 giây): syncPull { session, since } → các dòng có srv > since
+ */
+const SYNC_SHEET = '_dongbo';
+function syncSheet_() {
+  const ss = SpreadsheetApp.getActive();
+  let sh = ss.getSheetByName(SYNC_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(SYNC_SHEET);
+    sh.getRange(1, 1, 1, 7).setValues([['phien', 'ma_phieu', 'ts', 'srv', 'da_xoa', 'du_lieu', 'anh']]).setFontWeight('bold');
+    sh.setFrozenRows(1);
+    try { sh.hideSheet(); } catch (e) {}
+  }
+  return sh;
+}
+function nextSrv_() {
+  const p = PropertiesService.getScriptProperties();
+  const v = Math.max(Date.now(), Number(p.getProperty('srv') || 0) + 1);
+  p.setProperty('srv', String(v));
+  return v;
+}
+function syncPush_(b) {
+  const ses = String(b.session || '').trim();
+  if (!ses) return { ok: false, error: 'Thiếu mã phiên' };
+  const recs = b.recs || [];
+  const sh = syncSheet_();
+  const n = Math.max(0, sh.getLastRow() - 1);
+  const keys = n ? sh.getRange(2, 1, n, 3).getValues() : [];
+  const idx = {};
+  keys.forEach((r, i) => { idx[r[0] + '|' + r[1]] = { row: i + 2, ts: Number(r[2]) || 0 }; });
+  const add = [];
+  let srv = 0, saved = 0;
+  recs.forEach(r => {
+    const k = ses + '|' + r.sid, cur = idx[k], ts = Number(r.ts) || 0;
+    if (cur && cur.ts > ts) return;                           // bản trên máy chủ mới hơn
+    srv = nextSrv_();
+    const row = [ses, String(r.sid), ts, srv, r.del ? 1 : 0, r.del ? '' : String(r.json || '').slice(0, 49000), r.del ? '' : String(r.img || '').slice(0, 49000)];
+    if (cur) sh.getRange(cur.row, 1, 1, 7).setValues([row]);
+    else { add.push(row); idx[k] = { row: -1, ts: ts }; }
+    saved++;
+  });
+  if (add.length) sh.getRange(sh.getLastRow() + 1, 1, add.length, 7).setValues(add);
+  return { ok: true, saved: saved, srv: srv };
+}
+function syncPull_(b) {
+  const ses = String(b.session || '').trim(), since = Number(b.since) || 0;
+  const sh = syncSheet_();
+  const n = Math.max(0, sh.getLastRow() - 1);
+  if (!n) return { ok: true, recs: [], srv: since };
+  const meta = sh.getRange(2, 1, n, 5).getValues();
+  const hit = [];
+  let max = since;
+  meta.forEach((r, i) => { if (r[0] === ses && Number(r[3]) > since) { hit.push(i); if (Number(r[3]) > max) max = Number(r[3]); } });
+  if (!hit.length) return { ok: true, recs: [], srv: max };
+  const body = hit.length > 15 ? sh.getRange(2, 6, n, 2).getValues() : null;
+  const recs = hit.map(i => {
+    const r = meta[i], bb = body ? body[i] : sh.getRange(i + 2, 6, 1, 2).getValues()[0];
+    return { sid: String(r[1]), ts: Number(r[2]) || 0, srv: Number(r[3]) || 0, del: Number(r[4]) === 1, json: bb[0], img: bb[1] };
+  });
+  return { ok: true, recs: recs, srv: max };
+}
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -858,7 +970,7 @@ const DEFAULT = {
   keys: [{ code: '101', p1: 'ABCDDCBAACBD', p2: 'ĐSĐS SSĐĐ ĐĐSS SĐSĐ', p3: '2,5 -3 12 0,75 40 1,2', sample: true }],
   engine: 'claude', tier: 'quick', split: true, gKey: '', gKeys: [], gAuto: true, gKeyModel: {}, gModel: 'gemini-2.5-flash', keyOpen: true,
   rep: { truong: 'Trường THPT Nguyễn Hữu Cảnh', bai: '', lop: '', gv: 'Vũ Tiến Lực' },
-  classes: {}, curClass: '', clsOpen: true, gas: { url: '', token: '' }, gNoThink: true, gThinkIdx: {}, scanAuto: true, scanGrade: true
+  classes: {}, curClass: '', clsOpen: true, gas: { url: '', token: '' }, gNoThink: true, gThinkIdx: {}, scanAuto: true, scanGrade: true, sync: { code: '', on: false, name: '' }
 };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const r2 = x => Math.round(x * 100) / 100;
@@ -869,7 +981,7 @@ function loadCfg() {
   try {
     const s = JSON.parse(localStorage.getItem(LS));
     if (s && Array.isArray(s.keys) && s.keys.length) {
-      const c = { ...DEFAULT, ...s, rep: { ...DEFAULT.rep, ...(s.rep || {}) }, gas: { ...DEFAULT.gas, ...(s.gas || {}) }, classes: s.classes || {} };
+      const c = { ...DEFAULT, ...s, rep: { ...DEFAULT.rep, ...(s.rep || {}) }, gas: { ...DEFAULT.gas, ...(s.gas || {}) }, sync: { ...DEFAULT.sync, ...(s.sync || {}) }, classes: s.classes || {} };
       if (s.scoreMode === undefined) {   // cấu hình cũ: quy đổi sang tổng điểm tương đương, điểm không đổi
         c.scoreMode = 'part'; c.t1 = r2(c.n1 * c.pt1); c.t2 = c.n2; c.t3 = r2(c.n3 * c.pt3);
       }
@@ -1015,8 +1127,15 @@ async function addCanvas(c, name) {
   t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
   const full = await canvasBlob(c);
   const [top, bot] = await Promise.all([canvasBlob(crop(c, 0, 0.56)), canvasBlob(crop(c, 0.44, 1))]);
-  sheets.push({ id: ++uid, name, full, top, bot, url: URL.createObjectURL(full), thumb: t.toDataURL('image/jpeg', 0.7),
-    status: 'wait', data: null, err: '' });
+  sheets.push({ id: ++uid, sid: newSid(), name, full, top, bot, url: URL.createObjectURL(full), thumb: t.toDataURL('image/jpeg', 0.7),
+    simg: syncImg(c), status: 'wait', data: null, err: '' });
+}
+function newSid() { try { return crypto.randomUUID().replace(/-/g, '').slice(0, 20); } catch (e) { return Date.now().toString(36) + Math.random().toString(36).slice(2, 10); } }
+function syncImg(c) {   // ảnh 560px gửi cho máy khác, gọn dưới 45.000 ký tự
+  const w = Math.min(560, c.width), x = document.createElement('canvas'); x.width = w; x.height = Math.round(c.height * w / c.width);
+  x.getContext('2d').drawImage(c, 0, 0, x.width, x.height);
+  for (const q of [0.62, 0.5, 0.4, 0.3]) { const u = x.toDataURL('image/jpeg', q); if (u.length < 45000) return u; }
+  return '';
 }
 function whiteCanvas(w, h) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
@@ -1123,7 +1242,7 @@ async function addDemo() {
 }
 
 /* ---------- AI ---------- */
-let sampleFn = null, maxImgs = 0, engineProbe = true, downloadsCap = null, mcpCap = null;
+let sampleFn = null, maxImgs = 0, engineProbe = true, downloadsCap = null, mcpCap = null, dbCap = null;
 const inClaude = !!(window.claude && window.claude.use);
 const claudeOK = () => !!sampleFn && maxImgs > 0;
 const engine = () => (cfg.engine === 'gemini' || !claudeOK()) ? 'gemini' : 'claude';
@@ -1138,8 +1257,10 @@ const engineReady = () => engine() === 'claude' ? claudeOK() : geminiOK();
     } catch (e) { sampleFn = null; }
     try { downloadsCap = await window.claude.use('downloads'); } catch (e) {}
     try { mcpCap = await window.claude.use('mcp'); } catch (e) { mcpCap = null; }
+    try { dbCap = await window.claude.use('db'); } catch (e) { dbCap = null; }
   }
-  engineProbe = false; renderEngine(); updateBar();
+  engineProbe = false; renderEngine(); updateBar(); renderSync();
+  if (cfg.sync.on && cfg.sync.code) startSync(cfg.sync.code, true);
 })();
 
 function buildPrompt(nImg) {
@@ -1178,7 +1299,7 @@ function tolerantJSON(t) {
 }
 const toB64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
 async function readClaude(sh, signal, fresh) {
-  const imgs = cfg.split && maxImgs >= 2 ? [sh.top, sh.bot] : [sh.full];
+  const imgs = cfg.split && maxImgs >= 2 && sh.top ? [sh.top, sh.bot] : [sh.full];
   const opt = { images: imgs, modelTier: cfg.tier, signal };
   if (fresh) opt.cache = false;
   return await sampleFn.json(buildPrompt(imgs.length), opt);
@@ -1302,7 +1423,7 @@ async function geminiGen(parts, opt = {}) {
 }
 const geminiText = j => (j.candidates?.[0]?.content?.parts || []).filter(p => !p.thought).map(p => p.text || '').join('');
 async function readGemini(sh, signal) {
-  const imgs = cfg.split ? [sh.top, sh.bot] : [sh.full];
+  const imgs = cfg.split && sh.top ? [sh.top, sh.bot] : [sh.full];
   const parts = [{ text: buildPrompt(imgs.length) }];
   for (const b of imgs) parts.push({ inline_data: { mime_type: 'image/jpeg', data: await toB64(b) } });
   const { j } = await geminiGen(parts, { signal });
@@ -1548,7 +1669,7 @@ function renderSheets() {
       ? `<button class="th ${s.status}${on ? ' sel' : ''}" type="button" data-sel="${s.id}" aria-pressed="${on}" ${s.status === 'busy' ? 'disabled' : ''} aria-label="Chọn phiếu ${i + 1}: ${esc(s.name)}, ${esc(lab)}">
       <img src="${s.thumb}" alt=""><span class="pg">${i + 1}</span><span class="ck" aria-hidden="true">✓</span><span class="tb">${esc(lab)}</span></button>`
       : `<button class="th ${s.status}" type="button" data-open="${s.id}" aria-label="Phiếu ${i + 1}: ${esc(s.name)}, ${esc(lab)}${s.err ? ' – ' + esc(s.err) : ''}">
-      <img src="${s.thumb}" alt=""><span class="pg">${i + 1}</span>${fl ? '<span class="flag" title="Cần xem lại"></span>' : ''}<span class="tb">${esc(lab)}</span></button>`;
+      <img src="${s.thumb}" alt=""><span class="pg">${i + 1}</span>${s.byName && s.by !== SY.dev ? `<span class="from">${esc(s.byName)}</span>` : ''}${fl ? '<span class="flag" title="Cần xem lại"></span>' : ''}<span class="tb">${esc(lab)}</span></button>`;
   }).join('');
   const done = sheets.filter(s => s.status === 'done').length;
   $('#sheetSummary').textContent = sheets.length ? `${sheets.length} phiếu · đã đọc ${done}` : 'Mỗi trang PDF là một phiếu';
@@ -1656,7 +1777,7 @@ function renderEngine() {
       : 'Lấy key miễn phí tại aistudio.google.com/apikey. Key chỉ lưu trên máy này. Bấm Kiểm tra key để biết key còn dùng được và tốc độ trả lời.';
   }
 }
-function renderAll() { keySummary(); renderClass(); renderSheets(); renderResults(); updateBar(); if (curId != null) renderDetail(); scanHud(); renderTiles(); }
+function renderAll() { keySummary(); renderClass(); renderSheets(); renderResults(); updateBar(); if (curId != null) renderDetail(); scanHud(); renderTiles(); if (SY.on) renderSync(); syncSoon(); }
 
 /* ---------- Chi tiết phiếu ---------- */
 let curId = null, lastFocus = null;
@@ -1677,7 +1798,7 @@ function renderDetail() {
   let h = `<div class="zoom${zoomBig ? ' big' : ''}" id="zoomBox"><img src="${sh.url}" alt="Ảnh phiếu ${esc(sh.name)}"></div>
     <p class="hint" style="margin-top:-8px">${esc(sh.name)} · chạm ảnh để phóng to</p>`;
   const actions = `<div class="btnrow">
-      <button class="btn" type="button" data-act="reread" ${running || !engineReady() ? 'disabled' : ''}>${d ? 'Cho AI đọc lại' : 'Đọc phiếu này'}</button>
+      <button class="btn" type="button" data-act="reread" ${running || !engineReady() || !sh.full ? 'disabled' : ''}>${d ? 'Cho AI đọc lại' : 'Đọc phiếu này'}</button>
       ${d && grade(d) ? '<button class="btn" type="button" data-act="pdf1">PDF kết quả của em</button>' : ''}
       <button class="btn danger" type="button" data-act="del" ${running ? 'disabled' : ''}>Xóa phiếu</button></div>`;
   if (!d) {
@@ -2693,8 +2814,215 @@ function keyChanged() {
   }, 900);
 }
 
+/* ---------- Đồng bộ nhiều máy ----------
+ * Trong Claude: kho dữ liệu của trang (phien/<mã> = cấu hình, phien/<mã>/phieu/<sid> = từng phiếu), nhận thay đổi tức thì.
+ * Bản Vercel: Google Apps Script (sheet _dongbo), gửi ngay khi có thay đổi, nhận mỗi 10 giây.
+ * Mỗi phiếu chấm xong/lỗi là một bản ghi; bản mới hơn (ts) thắng. Phiếu chờ chấm chỉ ở máy đã quét.
+ */
+const SY = { on: false, code: '', mode: '', dev: '', lastSig: new Map(), cfgSig: '', cfgTs: 0, gotCfg: false, since: 0,
+  timer: null, poll: null, busy: false, again: false, unsub: [], devs: new Map(), last: 0, err: '', recvN: 0, recvT: null };
+try { SY.dev = localStorage.getItem('cham-phieu-ai-dev') || ''; if (!SY.dev) { SY.dev = newSid().slice(0, 10); localStorage.setItem('cham-phieu-ai-dev', SY.dev); } } catch (e) { SY.dev = newSid().slice(0, 10); }
+const syncMode = () => inClaude ? (dbCap ? 'db' : '') : (gasOK() ? 'gas' : '');
+const devName = () => (cfg.sync.name || '').trim() || 'Máy ' + SY.dev.slice(0, 4).toUpperCase();
+const normCode = v => String(v || '').trim().toUpperCase().replace(/\s+/g, '-').replace(/[^A-Z0-9._-]/g, '').slice(0, 40);
+const SYNC_CFG_KEYS = ['keys', 'n1', 'n2', 'n3', 'scoreMode', 't1', 't2', 't3', 'pt1', 'pt2', 'pt3', 'curClass', 'rep'];
+function cfgPayload() { const o = {}; SYNC_CFG_KEYS.forEach(k => { o[k] = cfg[k]; }); o.roster = roster(); return o; }
+const syncable = sh => (sh.status === 'done' || sh.status === 'error') && !!sh.sid;
+const sheetSig = sh => JSON.stringify([sh.status, sh.err || '', sh.name, sh.data, sh.match || null, !!sh.manual, !!sh.nxAuto]);
+function recOf(sh) {
+  return { sid: sh.sid, ts: sh.ts, by: sh.by || SY.dev, byName: sh.byName || devName(), name: sh.name, status: sh.status, err: sh.err || '',
+    data: sh.data, match: sh.match || null, manual: !!sh.manual, nxAuto: !!sh.nxAuto, thumb: sh.thumb };
+}
+function dataUrlBlob(u) {
+  try { const [h, b] = u.split(','), bin = atob(b), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Blob([a], { type: (h.match(/data:([^;]+)/) || [])[1] || 'image/jpeg' }); }
+  catch (e) { return null; }
+}
+function seeDev(by, name, ts) {
+  if (!by) return; const d = SY.devs.get(by) || { name: '', last: 0 };
+  if (name) d.name = name; if (ts > d.last) d.last = ts; SY.devs.set(by, d);
+}
+function syncDevCount() { const ids = new Set([SY.dev]); sheets.forEach(s => { if (s.by) ids.add(s.by); }); SY.devs.forEach((v, k) => ids.add(k)); return ids.size; }
+function noteRecv(by, name) {
+  SY.recvN++; clearTimeout(SY.recvT);
+  SY.recvT = setTimeout(() => { if (SY.recvN) toast(`Nhận ${SY.recvN} phiếu từ ${name || 'máy khác'}`); SY.recvN = 0; }, 1500);
+}
+function applyRemoteSheet(rec) {
+  const ts = Number(rec.ts) || 0; seeDev(rec.by, rec.byName, ts);
+  let sh = sheets.find(x => x.sid === rec.sid);
+  if (rec.del) {
+    if (sh && !((sh.ts || 0) > ts) && sh.status !== 'busy') { sheets = sheets.filter(x => x !== sh); if (curId === sh.id) closeDetail(); }
+    SY.lastSig.delete(rec.sid); return !!sh;
+  }
+  if (sh && ((sh.ts || 0) >= ts || sh.status === 'busy')) return false;
+  const fresh = !sh;
+  if (!sh) {
+    const img = rec.img || rec.thumb || '';
+    sh = { id: ++uid, sid: rec.sid, thumb: rec.thumb || img, url: img, full: img ? dataUrlBlob(img) : null, top: null, bot: null, simg: rec.img || '' };
+    sheets.push(sh);
+  }
+  Object.assign(sh, { name: rec.name || 'Phiếu', status: rec.status === 'error' ? 'error' : 'done', err: rec.err || '', data: rec.data || null,
+    match: rec.match || null, manual: !!rec.manual, nxAuto: !!rec.nxAuto, ts, by: rec.by, byName: rec.byName });
+  if (sh.data) { padData(sh.data); applyMatch(sh); }
+  SY.lastSig.set(sh.sid, sheetSig(sh));
+  if (fresh && rec.by !== SY.dev) noteRecv(rec.by, rec.byName);
+  return true;
+}
+function applyRemoteCfg(c, ts, by, byName) {
+  seeDev(by, byName, ts);
+  if (!c || ts <= SY.cfgTs) return false;
+  SYNC_CFG_KEYS.forEach(k => { if (c[k] !== undefined) cfg[k] = c[k]; });
+  if (c.curClass && Array.isArray(c.roster)) cfg.classes[c.curClass] = c.roster;
+  SY.cfgTs = ts; SY.cfgSig = JSON.stringify(cfgPayload());
+  saveCfg(); sheets.forEach(x => x.data && padData(x.data)); rematchAll(false);
+  renderFmt(); renderKeys(); keyVer++;
+  if (by !== SY.dev) toast(`Đã nhận đáp án và cấu hình từ ${byName || 'máy khác'}`);
+  return true;
+}
+function syncSoon() { if (!SY.on) return; clearTimeout(SY.timer); SY.timer = setTimeout(syncFlush, 1200); }
+async function syncFlush() {
+  if (!SY.on) return;
+  if (SY.busy) { SY.again = true; return; }
+  if (!SY.gotCfg) return;   // chờ biết cấu hình của phiên trước khi gửi
+  SY.busy = true;
+  try {
+    const now = Date.now(), out = [];
+    let cfgOut = null;
+    const cs = JSON.stringify(cfgPayload());
+    if (cs !== SY.cfgSig) { SY.cfgSig = cs; SY.cfgTs = Math.max(now, SY.cfgTs + 1); cfgOut = { ts: SY.cfgTs, by: SY.dev, byName: devName(), cfg: JSON.parse(cs) }; }
+    const present = new Set();
+    for (const sh of sheets) {
+      if (!sh.sid) continue; present.add(sh.sid);
+      if (!syncable(sh)) continue;
+      const sig = sheetSig(sh);
+      if (SY.lastSig.get(sh.sid) === sig) continue;
+      SY.lastSig.set(sh.sid, sig);
+      if (!sh.by) { sh.by = SY.dev; sh.byName = devName(); }
+      sh.ts = Math.max(now, (sh.ts || 0) + 1);
+      out.push({ ...recOf(sh), img: sh.simg || '' });
+    }
+    for (const sid of [...SY.lastSig.keys()]) if (!present.has(sid)) { SY.lastSig.delete(sid); out.push({ sid, ts: now, del: true, by: SY.dev }); }
+    if (!cfgOut && !out.length) return;
+    if (SY.mode === 'db') await dbPush(cfgOut, out); else await gasPush(cfgOut, out);
+    SY.last = Date.now(); SY.err = '';
+  } catch (e) {
+    SY.err = e?.message || 'Không gửi được'; SY.lastSig.clear(); SY.cfgSig = '';   // gửi lại toàn bộ ở lần sau
+  } finally {
+    SY.busy = false; renderSync(); renderTiles();
+    if (SY.again) { SY.again = false; syncSoon(); }
+  }
+}
+/* — Kho dữ liệu của trang (trong Claude) — */
+const dbPath = (...p) => ['phien', SY.code, ...p].join('/');
+async function dbPush(cfgOut, recs) {
+  if (cfgOut) await dbCap.doc(dbPath()).set(cfgOut);
+  for (const r of recs) {
+    const ref = dbCap.doc(dbPath('phieu', r.sid));
+    if (r.del) await ref.delete(); else await ref.set(JSON.parse(JSON.stringify(r)));
+  }
+}
+function dbErr(e) {
+  SY.err = e?.code === 'revoked' ? 'Mất quyền truy cập kho dữ liệu' : e?.code === 'quota_exceeded' ? 'Kho dữ liệu đã đầy' : 'Mất kết nối đồng bộ, bấm Đồng bộ ngay để nối lại';
+  renderSync(); renderTiles();
+}
+function dbSubscribe() {
+  SY.unsub.push(dbCap.doc(dbPath()).onSnapshot(snap => {
+    if (snap.metadata.fromCache && !snap.exists) return;
+    if (snap.exists) { const d = snap.data(); applyRemoteCfg(d.cfg, Number(d.ts) || 0, d.by, d.byName); }
+    if (!SY.gotCfg) { SY.gotCfg = true; if (!snap.exists) SY.cfgSig = ''; syncSoon(); }
+    SY.last = Date.now(); renderAll(); renderSync();
+  }, dbErr));
+  SY.unsub.push(dbCap.collection(dbPath('phieu')).onSnapshot(snap => {
+    let ch = false;
+    snap.docChanges().forEach(c => {
+      if (c.type === 'removed') { if (!c.doc.metadata.hasPendingWrites) ch = applyRemoteSheet({ sid: c.doc.id, del: true, ts: Date.now() }) || ch; }
+      else { const d = c.doc.data(); if (d) ch = applyRemoteSheet({ ...d, sid: c.doc.id }) || ch; }
+    });
+    SY.last = Date.now(); SY.err = '';
+    if (ch) renderAll(); else { renderSync(); renderTiles(); }
+  }, dbErr));
+}
+/* — Google Apps Script (bản Vercel) — */
+async function gasPush(cfgOut, recs) {
+  const out = recs.map(r => r.del ? { sid: r.sid, ts: r.ts, del: true } : { sid: r.sid, ts: r.ts, json: JSON.stringify({ ...r, img: undefined }), img: r.img || '' });
+  if (cfgOut) out.unshift({ sid: '__cfg', ts: cfgOut.ts, json: JSON.stringify(cfgOut), img: '' });
+  for (let i = 0; i < out.length; i += 12) {
+    try { await gasCall('syncPush', { session: SY.code, recs: out.slice(i, i + 12) }); }
+    catch (e) { if (/không hợp lệ: syncPush/i.test(e.message)) throw new Error('Mã Apps Script trên Google Sheet là bản cũ. Sao chép mã mới (ô Google Sheet) rồi triển khai lại phiên bản mới'); throw e; }
+  }
+}
+async function gasPull() {
+  if (!SY.on || SY.mode !== 'gas') return;
+  let j;
+  try { j = await gasCall('syncPull', { session: SY.code, since: SY.since }); }
+  catch (e) {
+    SY.err = /không hợp lệ: syncPull/i.test(e.message) ? 'Mã Apps Script là bản cũ, cần cập nhật (xem ô Google Sheet)' : (e.message || 'Không nhận được dữ liệu');
+    renderSync(); renderTiles(); return;
+  }
+  let ch = false, sawCfg = false;
+  for (const r of j.recs || []) {
+    let o = {}; try { o = r.json ? JSON.parse(r.json) : {}; } catch (e) {}
+    if (r.sid === '__cfg') { sawCfg = true; ch = applyRemoteCfg(o.cfg, Number(r.ts) || 0, o.by, o.byName) || ch; continue; }
+    ch = applyRemoteSheet(r.del ? { sid: r.sid, del: true, ts: r.ts } : { ...o, sid: r.sid, ts: r.ts, img: r.img }) || ch;
+  }
+  SY.since = Math.max(SY.since, Number(j.srv) || 0);
+  if (!SY.gotCfg) { SY.gotCfg = true; if (!sawCfg) SY.cfgSig = ''; }
+  SY.last = Date.now(); SY.err = '';
+  if (ch) renderAll(); else { renderSync(); renderTiles(); syncSoon(); }
+}
+async function startSync(code, quiet) {
+  code = normCode(code);
+  if (code.length < 2) { toast('Nhập mã phiên chấm, ví dụ 10A3-GK1'); return; }
+  const mode = syncMode();
+  if (!mode) { renderSync(); if (!quiet) toast(inClaude ? 'Kho dữ liệu của trang chưa sẵn sàng ở đây.' : 'Cần kết nối Google Sheet trước (ô Google Sheet).'); return; }
+  stopSync(true);
+  Object.assign(SY, { on: true, code, mode, cfgSig: JSON.stringify(cfgPayload()), cfgTs: 0, gotCfg: false, since: 0, err: '', devs: new Map() });
+  SY.lastSig = new Map(); sheets.forEach(x => { if (syncable(x) && x.sid && x.ts) SY.lastSig.set(x.sid, ''); });
+  cfg.sync.code = code; cfg.sync.on = true; saveCfg();
+  if (mode === 'db') { try { dbSubscribe(); } catch (e) { dbErr(e); } }
+  else { await gasPull(); SY.poll = setInterval(gasPull, 10000); }
+  renderSync(); renderTiles();
+  if (!quiet) toast(`Đang đồng bộ phiên ${code}`);
+}
+function stopSync(keep) {
+  SY.unsub.forEach(u => { try { u(); } catch (e) {} }); SY.unsub = [];
+  clearInterval(SY.poll); clearTimeout(SY.timer); SY.poll = null; SY.on = false;
+  if (!keep) { cfg.sync.on = false; saveCfg(); renderSync(); renderTiles(); toast('Đã dừng đồng bộ. Phiếu trên máy này vẫn giữ nguyên.'); }
+}
+function renderSync() {
+  const mode = syncMode();
+  const code = $('#syCode'), nm = $('#syName');
+  if (document.activeElement !== code) code.value = SY.on ? SY.code : (cfg.sync.code || '');
+  if (document.activeElement !== nm) nm.value = cfg.sync.name || '';
+  nm.placeholder = 'VD: ' + devName();
+  if (!code.value && !SY.on) code.placeholder = 'VD: ' + (normCode([cfg.curClass, cfg.rep.bai && cfg.rep.bai.split(/[·\-–]/)[0]].filter(Boolean).join('-')) || '10A3-GK1');
+  const note = $('#syNote');
+  note.hidden = !!mode;
+  note.innerHTML = inClaude ? 'Kho dữ liệu của trang chưa sẵn sàng. Thầy tải lại trang rồi thử lại.'
+    : 'Bản này đồng bộ qua Google Sheet. Thầy kết nối Google Sheet trước (ô <b>Google Sheet</b>), các máy dùng cùng URL và mật khẩu. <button class="btn link inline" type="button" data-pane="gs">Mở Google Sheet</button>';
+  $('#syStart').hidden = SY.on; $('#syStop').hidden = !SY.on; $('#syNow').hidden = !SY.on; $('#syStart').disabled = !mode;
+  code.disabled = SY.on;
+  $('#syHow').textContent = mode === 'db' || (inClaude && !mode)
+    ? 'Trong Claude, dữ liệu nằm trong kho của trang này và cập nhật gần như tức thì. Máy khác mở cùng trang bằng tài khoản của thầy, hoặc tài khoản được chia sẻ quyền Chỉnh sửa (nút Chia sẻ).'
+    : 'Bản Vercel gửi ngay khi có thay đổi và nhận dữ liệu mới mỗi 10 giây qua Google Sheet (sheet ẩn _dongbo).';
+  const chip = $('#syChip');
+  chip.className = 'chip' + (SY.on ? (SY.err ? ' warn' : ' ok') : '');
+  chip.textContent = SY.on ? (SY.err ? 'Lỗi đồng bộ' : (SY.mode === 'db' ? 'Trực tiếp' : 'Mỗi 10 giây')) : 'Chưa bật';
+  $('#syncSummary').textContent = SY.on ? `Phiên ${SY.code}` : 'Nhiều máy cùng quét, cùng chấm một bài';
+  const st = $('#syStatus');
+  if (!SY.on) { st.innerHTML = ''; $('#syDevices').innerHTML = ''; return; }
+  const n = sheets.filter(syncable).length;
+  st.innerHTML = `<span>Phiên <b>${esc(SY.code)}</b> · ${n} phiếu đã chấm · ${SY.last ? 'cập nhật lúc <b>' + new Date(SY.last).toLocaleTimeString('vi-VN') + '</b>' : 'đang kết nối…'}</span>`
+    + (SY.err ? `<span style="color:var(--warn)">${esc(SY.err)}</span>` : '');
+  const devs = new Map();
+  devs.set(SY.dev, { name: devName() + ' (máy này)', n: 0, last: Date.now() });
+  sheets.forEach(x => { if (!syncable(x)) return; const k = x.by || SY.dev; const d = devs.get(k) || { name: x.byName || 'Máy khác', n: 0, last: 0 }; d.n++; d.last = Math.max(d.last, x.ts || 0); devs.set(k, d); });
+  SY.devs.forEach((v, k) => { if (!devs.has(k)) devs.set(k, { name: v.name || 'Máy khác', n: 0, last: v.last }); else if (k !== SY.dev && v.last > devs.get(k).last) devs.get(k).last = v.last; });
+  $('#syDevices').innerHTML = [...devs.entries()].map(([k, d]) => `<div class="sy-dev"><span class="sy-dot${k === SY.dev || Date.now() - d.last < 5 * 60000 ? ' live' : ''}"></span>
+    <div><b>${esc(d.name)}</b><small>${k === SY.dev ? 'Đang dùng' : d.last ? 'Hoạt động lúc ' + new Date(d.last).toLocaleTimeString('vi-VN') : ''}</small></div><span class="mono">${d.n} phiếu</span></div>`).join('');
+}
+
 /* ---------- Màn hình ô & bảng mở ra ---------- */
-const PANES = { key: '#stepKey', cls: '#stepClass', sheets: '#stepSheets', ai: '#paneAi', gs: '#paneGs', res: '#stepRes' };
+const PANES = { key: '#stepKey', cls: '#stepClass', sheets: '#stepSheets', ai: '#paneAi', gs: '#paneGs', sync: '#paneSync', res: '#stepRes' };
 let openPaneId = null, paneOpener = null;
 function syncLock() {
   const any = !$('#ov').hidden || !$('#ov2').hidden || !$('#scan').hidden || !!openPaneId;
@@ -2728,6 +3056,7 @@ function renderTiles() {
     : (engine() === 'gemini' ? 'Chưa nhập key Gemini' : 'Chưa sẵn sàng'), engineReady() ? 'ok' : 'warn');
   set('Gs', inClaude ? (mcpCap ? 'Lưu bảng điểm qua Google Drive' : 'Dùng trên bản Vercel') : gasOK() ? 'Đã nhập URL kết nối' : 'Chưa kết nối', inClaude ? (mcpCap ? 'ok' : '') : gasOK() ? 'ok' : '');
   const G = graded();
+  set('Sync', SY.on ? `${SY.code} · ${syncDevCount()} máy${SY.err ? ' · lỗi' : ''}` : 'Chưa bật · nhiều máy cùng chấm', SY.on ? (SY.err ? 'warn' : 'ok') : '');
   set('Sum', G.length ? `${G.length} bài · Excel, PDF, nhận xét` : 'Chấm xong để xuất file', G.length ? 'ok' : '');
   // thẻ kết quả
   const card = $('#resCard'), mx = maxScore() || 10;
@@ -3020,6 +3349,19 @@ $('#ovBody').addEventListener('change', e => {
   sh.edited = true; renderAll();
 });
 
+$('#syStart').addEventListener('click', () => { cfg.sync.name = $('#syName').value.trim(); saveCfg(); startSync($('#syCode').value || $('#syCode').placeholder.replace(/^VD:\s*/, '')); });
+$('#syStop').addEventListener('click', () => stopSync(false));
+$('#syNow').addEventListener('click', () => {
+  if (!SY.on) return;
+  if (SY.mode === 'db' && SY.err) { const c = SY.code; stopSync(true); startSync(c, true); return; }
+  SY.lastSig.clear(); syncFlush(); if (SY.mode === 'gas') gasPull();
+});
+$('#syName').addEventListener('change', e => {
+  cfg.sync.name = e.target.value.trim(); saveCfg();
+  sheets.forEach(x => { if (x.by === SY.dev || !x.by) x.byName = devName(); });
+  if (SY.on) { SY.lastSig.clear(); syncSoon(); } renderSync();
+});
+$('#syCode').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#syStart').click(); } });
 /* ---------- Khởi động ---------- */
 $('#camHint').textContent = camLive() ? 'Camera tự chụp khi thấy 4 ô vuông đen ở góc phiếu, đổi phiếu là chụp tiếp.' : 'Trong Claude mỗi lần chụp một phiếu; quét liên tục tự động dùng bản đưa lên Vercel.';
 renderFmt(); renderKeys(); setKeyOpen(cfg.keyOpen !== false); setClsOpen(cfg.clsOpen !== false); renderGas(); renderEngine(); renderAll();
