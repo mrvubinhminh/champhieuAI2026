@@ -354,6 +354,27 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
 .ph-sub{margin:1px 0 0;font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stack{display:grid;gap:14px;min-width:0}
 
+.fmt3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.score-box{display:grid;gap:12px;padding:12px;border-radius:12px;border:1px solid var(--line)}
+.score-box .seg button{padding:0 12px;font-size:13.5px}
+.score-info{display:grid;gap:4px;font-size:13.5px;color:var(--muted);line-height:1.5}
+.score-info b{color:var(--ink);font-family:var(--f-mono);font-weight:700}
+.score-info .tot{color:var(--ink);font-weight:600}
+.score-info .tot.warn{color:var(--warn)}
+
+.sec-h{display:flex;gap:10px;align-items:center;padding-top:4px}
+.sec-h b{display:block;font:700 16.5px/1.25 var(--f-display)}
+.sec-h small{display:block;font-size:12.5px;color:var(--muted)}
+#stepKey .sec-h + .presets{margin-top:-4px}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.pwrap{display:inline-flex;align-items:center}
+.pchip{min-height:38px;padding:0 14px;border-radius:99px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font-size:13.5px;font-weight:600}
+.pchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.pchip.add{border-style:dashed;color:var(--accent)}
+.pwrap .pchip.mine{border-radius:99px 0 0 99px}
+.pdel{min-height:38px;width:34px;border:1px solid var(--line-strong);border-left:0;border-radius:0 99px 99px 0;background:var(--surface);color:var(--muted);font-size:16px}
+.pdel:hover{color:var(--bad)}
+
 /* Toast */
 .toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
 .toast button{background:none;border:0;color:var(--accent-soft);font-weight:700;min-height:32px;text-decoration:underline}
@@ -405,6 +426,33 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
       <button class="btn" type="button" data-close>Xong</button>
     </div>
     <div class="panel-body">
+      <div class="sec-h"><span class="num">1</span><div><b>Cấu trúc đề và điểm</b><small>Chọn trước khi nhập đáp án · AI đọc phiếu theo đúng số câu này</small></div></div>
+      <div class="presets" id="presets"></div>
+      <div class="fmt fmt3">
+        <label class="field"><span>Phần I (câu)</span><input type="number" id="n1" min="0" max="80" inputmode="numeric"></label>
+        <label class="field"><span>Phần II (câu)</span><input type="number" id="n2" min="0" max="10" inputmode="numeric"></label>
+        <label class="field"><span>Phần III (câu)</span><input type="number" id="n3" min="0" max="12" inputmode="numeric"></label>
+      </div>
+      <div class="score-box">
+        <div class="eng-row"><span class="lbl">Cách tính điểm</span>
+          <div class="seg" role="radiogroup" aria-label="Cách tính điểm" id="modeSeg">
+            <button type="button" role="radio" data-mode="part" aria-checked="true">Tổng điểm từng phần</button>
+            <button type="button" role="radio" data-mode="item" aria-checked="false">Điểm từng câu</button>
+          </div></div>
+        <div class="fmt fmt3" id="partFields">
+          <label class="field"><span>Tổng điểm P.I</span><input type="number" id="t1" min="0" step="0.25" inputmode="decimal"></label>
+          <label class="field"><span>Tổng điểm P.II</span><input type="number" id="t2" min="0" step="0.25" inputmode="decimal"></label>
+          <label class="field"><span>Tổng điểm P.III</span><input type="number" id="t3" min="0" step="0.25" inputmode="decimal"></label>
+        </div>
+        <div class="fmt fmt3" id="itemFields" hidden>
+          <label class="field"><span>Điểm/câu P.I</span><input type="number" id="pt1" min="0" step="0.05" inputmode="decimal"></label>
+          <label class="field"><span>Điểm/câu P.II</span><input type="number" id="pt2" min="0" step="0.05" inputmode="decimal"></label>
+          <label class="field"><span>Điểm/câu P.III</span><input type="number" id="pt3" min="0" step="0.05" inputmode="decimal"></label>
+        </div>
+        <div class="score-info" id="scoreInfo" aria-live="polite"></div>
+      </div>
+      <p class="hint">Phiếu chỉ có trắc nghiệm ABCD thì để Phần II, III bằng 0.</p>
+      <div class="sec-h"><span class="num">2</span><div><b>Nhập đáp án</b><small>Từ file Excel, dán từ Excel, hoặc gõ trực tiếp vào từng mã đề</small></div></div>
       <div class="import">
         <div class="btnrow">
           <button class="btn primary-soft" id="impBtn" type="button">
@@ -420,14 +468,6 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
         </div>
         <p class="hint">Đọc được bảng <b>mỗi cột một mã đề</b> (dòng đầu ghi mã đề) hoặc <b>mỗi dòng một mã đề</b>. Đáp án theo thứ tự Phần I → Phần II (ĐSĐS trong một ô hoặc từng ý) → Phần III; app tự nhận số câu. <button class="btn link inline" id="tplBtn" type="button">Tải file Excel mẫu</button></p>
       </div>
-      <div class="fmt">
-        <label class="field"><span>Phần I (câu)</span><input type="number" id="n1" min="0" max="80" inputmode="numeric"></label>
-        <label class="field"><span>Phần II (câu)</span><input type="number" id="n2" min="0" max="10" inputmode="numeric"></label>
-        <label class="field"><span>Phần III (câu)</span><input type="number" id="n3" min="0" max="12" inputmode="numeric"></label>
-        <label class="field"><span>Điểm/câu P.I</span><input type="number" id="pt1" min="0" step="0.05" inputmode="decimal"></label>
-        <label class="field"><span>Điểm/câu P.III</span><input type="number" id="pt3" min="0" step="0.05" inputmode="decimal"></label>
-      </div>
-      <p class="hint">Phần II chấm theo thang của Bộ: đúng 1 ý 0,1 · 2 ý 0,25 · 3 ý 0,5 · 4 ý 1 điểm. Phiếu chỉ có trắc nghiệm ABCD thì để Phần II, III bằng 0.</p>
       <details class="howto"><summary>Câu sai đề hoặc có nhiều đáp án đúng?</summary>
         <ul class="syn">
           <li><b>Phần I:</b> gõ <code>[AB]</code> để chấp nhận cả A và B; gõ <code>*</code> để cho điểm cả lớp. Ví dụ <code>ABC*DA[BC]…</code></li>
@@ -796,7 +836,7 @@ const $ = s => document.querySelector(s);
 const LS = 'cham-phieu-ai-v1';
 const P2PTS = [0, 0.1, 0.25, 0.5, 1];
 const DEFAULT = {
-  n1: 12, n2: 4, n3: 6, pt1: 0.25, pt3: 0.5,
+  n1: 12, n2: 4, n3: 6, pt1: 0.25, pt2: 1, pt3: 0.5, scoreMode: 'part', t1: 3, t2: 4, t3: 3,
   keys: [{ code: '101', p1: 'ABCDDCBAACBD', p2: 'ĐSĐS SSĐĐ ĐĐSS SĐSĐ', p3: '2,5 -3 12 0,75 40 1,2', sample: true }],
   engine: 'claude', tier: 'quick', split: true, gKey: '', gKeys: [], gAuto: true, gKeyModel: {}, gModel: 'gemini-2.5-flash', keyOpen: true,
   rep: { truong: 'Trường THPT Nguyễn Hữu Cảnh', bai: '', lop: '', gv: 'Vũ Tiến Lực' },
@@ -808,7 +848,16 @@ const fmt = x => (Math.round(x * 100) / 100).toLocaleString('vi-VN', { maximumFr
 
 let cfg = loadCfg();
 function loadCfg() {
-  try { const s = JSON.parse(localStorage.getItem(LS)); if (s && Array.isArray(s.keys) && s.keys.length) return { ...DEFAULT, ...s, rep: { ...DEFAULT.rep, ...(s.rep || {}) }, gas: { ...DEFAULT.gas, ...(s.gas || {}) }, classes: s.classes || {} }; } catch (e) {}
+  try {
+    const s = JSON.parse(localStorage.getItem(LS));
+    if (s && Array.isArray(s.keys) && s.keys.length) {
+      const c = { ...DEFAULT, ...s, rep: { ...DEFAULT.rep, ...(s.rep || {}) }, gas: { ...DEFAULT.gas, ...(s.gas || {}) }, classes: s.classes || {} };
+      if (s.scoreMode === undefined) {   // cấu hình cũ: quy đổi sang tổng điểm tương đương, điểm không đổi
+        c.scoreMode = 'part'; c.t1 = r2(c.n1 * c.pt1); c.t2 = c.n2; c.t3 = r2(c.n3 * c.pt3);
+      }
+      return c;
+    }
+  } catch (e) {}
   return JSON.parse(JSON.stringify(DEFAULT));
 }
 function migrateCfg() {
@@ -850,15 +899,23 @@ function sameP3(a, b) {
   if (x !== '' && y !== '' && !isNaN(nx) && !isNaN(ny)) return Math.abs(nx - ny) < 1e-9;
   return x.toLowerCase() === y.toLowerCase();
 }
-const maxScore = () => r2(cfg.n1 * cfg.pt1 + cfg.n2 + cfg.n3 * cfg.pt3);
+// Điểm mỗi câu: chia đều tổng điểm phần (mặc định) hoặc nhập điểm từng câu
+function ptPer() {
+  if (cfg.scoreMode === 'item') return { p1: +cfg.pt1 || 0, p2: cfg.pt2 === undefined ? 1 : (+cfg.pt2 || 0), p3: +cfg.pt3 || 0 };
+  return { p1: cfg.n1 ? (+cfg.t1 || 0) / cfg.n1 : 0, p2: cfg.n2 ? (+cfg.t2 || 0) / cfg.n2 : 0, p3: cfg.n3 ? (+cfg.t3 || 0) / cfg.n3 : 0 };
+}
+const maxScore = () => { const p = ptPer(); return r2(cfg.n1 * p.p1 + cfg.n2 * p.p2 + cfg.n3 * p.p3); };
+const maxP2 = () => r2(cfg.n2 * ptPer().p2);
 function keyFor(made) {
   if (cfg.keys.length === 1) return cfg.keys[0];
-  const m = String(made || '').replace(/\D/g, '');
+  const nz = v => String(v || '').replace(/\D/g, '').replace(/^0+(?=\d)/, '');   // 001 = 01 = 1
+  const m = nz(made);
   if (!m) return null;
-  return cfg.keys.find(k => String(k.code).replace(/\D/g, '') === m) || null;
+  return cfg.keys.find(k => nz(k.code) === m) || null;
 }
 function grade(d) {
   const k = keyFor(d.ma_de); if (!k) return null;
+  const P = ptPer();
   const K1 = parseP1(k.p1), K2 = parseP2(k.p2), K3 = parseP3(k.p3);
   let c1 = 0; const r1 = [];
   for (let i = 0; i < cfg.n1; i++) { const ok = okP1(d.p1[i] || '', K1[i]); if (ok) c1++; r1.push(ok); }
@@ -866,11 +923,11 @@ function grade(d) {
   for (let i = 0; i < cfg.n2; i++) {
     let n = 0; const row = [];
     for (let j = 0; j < 4; j++) { const kv = (K2[i] || [])[j]; const ok = kv === '*' || (!!kv && (d.p2[i] || [])[j] === kv); if (ok) n++; row.push(ok); }
-    s2 += P2PTS[n]; rr2.push({ row, n, pts: P2PTS[n] });
+    const pts = P.p2 * P2PTS[n]; s2 += pts; rr2.push({ row, n, pts });   // 1 ý 10%, 2 ý 25%, 3 ý 50%, 4 ý 100%
   }
   let c3 = 0; const r3 = [];
   for (let i = 0; i < cfg.n3; i++) { const ok = okP3(d.p3[i], K3[i]); if (ok) c3++; r3.push(ok); }
-  const sc1 = r2(c1 * cfg.pt1), sc3 = r2(c3 * cfg.pt3);
+  const sc1 = r2(c1 * P.p1), sc3 = r2(c3 * P.p3);
   return { k, K1, K2, K3, c1, r1, s2: r2(s2), rr2, c3, r3, sc1, sc3, total: r2(sc1 + s2 + sc3) };
 }
 
@@ -1340,7 +1397,7 @@ let toastTimer;
 function toast(msg, action) {
   const t = $('#toast'); t.innerHTML = ''; const s = document.createElement('span'); s.textContent = msg; t.append(s);
   if (action) { const b = document.createElement('button'); b.type = 'button'; b.textContent = action.label; b.addEventListener('click', () => { action.fn(); t.hidden = true; }); t.append(b); }
-  t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, action ? 6000 : 3200);
+  t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, action ? 9000 : 3200);
 }
 
 function keySummary() {
@@ -1352,7 +1409,50 @@ function keySummary() {
 function keyComplete(k) {
   return parseP1(k.p1).length === cfg.n1 && parseP2(k.p2).filter(r => r.length === 4).length === cfg.n2 && parseP3(k.p3).length === cfg.n3;
 }
-function renderFmt() { ['n1', 'n2', 'n3', 'pt1', 'pt3'].forEach(id => { $('#' + id).value = cfg[id]; }); }
+const BUILTIN_PRESETS = [
+  { id: 'thpt', name: 'THPT 2025 · 12+4+6 · 3/4/3 đ', n1: 12, n2: 4, n3: 6, scoreMode: 'part', t1: 3, t2: 4, t3: 3 },
+  { id: 'tn40', name: '40 câu ABCD · 10 đ', n1: 40, n2: 0, n3: 0, scoreMode: 'part', t1: 10, t2: 0, t3: 0 },
+  { id: 'tn20', name: '20 câu ABCD · 10 đ', n1: 20, n2: 0, n3: 0, scoreMode: 'part', t1: 10, t2: 0, t3: 0 }
+];
+const PKEYS = ['n1', 'n2', 'n3', 'scoreMode', 't1', 't2', 't3', 'pt1', 'pt2', 'pt3'];
+const near = (a, b) => Math.abs((+a || 0) - (+b || 0)) < 1e-9;
+function presetMatch(p) {
+  if (!['n1', 'n2', 'n3'].every(k => cfg[k] === p[k])) return false;
+  const mode = p.scoreMode || 'part'; if ((cfg.scoreMode || 'part') !== mode) return false;
+  return mode === 'item' ? ['pt1', 'pt2', 'pt3'].every(k => near(cfg[k], p[k])) : ['t1', 't2', 't3'].filter((k, i) => cfg['n' + (i + 1)]).every(k => near(cfg[k], p[k]));
+}
+function structName() {
+  const parts = [cfg.n1, cfg.n2, cfg.n3].join('+');
+  return cfg.scoreMode === 'item' ? `${parts} · điểm từng câu` : `${parts} · ${[cfg.t1, cfg.t2, cfg.t3].map(v => fmt(+v || 0)).join('/')} đ`;
+}
+function renderPresets() {
+  const mine = Array.isArray(cfg.presets) ? cfg.presets : [];
+  const chip = (p, key, del) => `<span class="pwrap"><button class="pchip${del !== undefined ? ' mine' : ''}" type="button" data-preset="${key}" aria-pressed="${presetMatch(p)}">${esc(p.name)}</button>${del !== undefined ? `<button class="pdel" type="button" data-pdel="${del}" aria-label="Xóa mẫu ${esc(p.name)}">×</button>` : ''}</span>`;
+  const matched = [...BUILTIN_PRESETS, ...mine].some(presetMatch);
+  $('#presets').innerHTML = BUILTIN_PRESETS.map(p => chip(p, p.id)).join('') + mine.map((p, i) => chip(p, 'm' + i, i)).join('')
+    + (matched ? '' : `<button class="pchip add" type="button" data-psave>+ Lưu "${esc(structName())}" làm mẫu</button>`);
+}
+function applyPreset(p) {
+  PKEYS.forEach(k => { if (p[k] !== undefined) cfg[k] = p[k]; });
+  saveCfg(); sheets.forEach(x => x.data && padData(x.data)); renderKeys(); renderFmt(); keyChanged();
+}
+const fmt4 = x => (+x || 0).toLocaleString('vi-VN', { maximumFractionDigits: 4 });
+function renderFmt() {
+  ['n1', 'n2', 'n3', 'pt1', 'pt2', 'pt3', 't1', 't2', 't3'].forEach(id => { const el = $('#' + id); if (document.activeElement !== el) el.value = cfg[id]; });
+  const part = cfg.scoreMode !== 'item';
+  $('#modeSeg').querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String((b.dataset.mode === 'part') === part)));
+  $('#partFields').hidden = !part; $('#itemFields').hidden = part;
+  renderScoreInfo(); renderPresets();
+}
+function renderScoreInfo() {
+  const P = ptPer(), mx = maxScore(), L = [];
+  if (cfg.n1) L.push(`Phần I: ${cfg.scoreMode !== 'item' ? `${fmt4(cfg.t1)} ÷ ${cfg.n1} = ` : ''}<b>${fmt4(P.p1)}</b> đ/câu`);
+  if (cfg.n2) L.push(`Phần II: ${cfg.scoreMode !== 'item' ? `${fmt4(cfg.t2)} ÷ ${cfg.n2} = ` : ''}<b>${fmt4(P.p2)}</b> đ/câu · đúng 1 ý 10% = <b>${fmt4(P.p2 * 0.1)}</b> · 2 ý 25% = <b>${fmt4(P.p2 * 0.25)}</b> · 3 ý 50% = <b>${fmt4(P.p2 * 0.5)}</b> · 4 ý = <b>${fmt4(P.p2)}</b>`);
+  if (cfg.n3) L.push(`Phần III: ${cfg.scoreMode !== 'item' ? `${fmt4(cfg.t3)} ÷ ${cfg.n3} = ` : ''}<b>${fmt4(P.p3)}</b> đ/câu`);
+  const off = Math.abs(mx - 10) > 1e-9;
+  L.push(`<span class="tot${off ? ' warn' : ''}">Tổng tối đa: ${fmt(mx)} điểm${off ? ' (khác 10, thầy kiểm tra lại)' : ''}</span>`);
+  $('#scoreInfo').innerHTML = L.join('<br>');
+}
 function renderKeys() {
   const L = $('#keyList');
   L.innerHTML = cfg.keys.map((k, i) => `
@@ -1606,7 +1706,7 @@ function analyse(d, g) {
   for (let i = 0; i < cfg.n3; i++) { if (!g.r3[i]) wrong.push(`III.${i + 1}`); if (!d.p3[i]) blank++; }
   const parts = [];
   if (cfg.n1) parts.push({ name: 'trắc nghiệm nhiều lựa chọn', short: `P.I ${g.c1}/${cfg.n1} câu`, r: g.c1 / cfg.n1 });
-  if (cfg.n2) parts.push({ name: 'Đúng/Sai', short: `P.II ${fmt(g.s2)}/${cfg.n2} điểm`, r: g.s2 / cfg.n2 });
+  if (cfg.n2) parts.push({ name: 'Đúng/Sai', short: `P.II ${fmt(g.s2)}/${fmt(maxP2())} điểm`, r: maxP2() ? g.s2 / maxP2() : 0 });
   if (cfg.n3) parts.push({ name: 'trả lời ngắn', short: `P.III ${g.c3}/${cfg.n3} câu`, r: g.c3 / cfg.n3 });
   return { wrong, blank, parts };
 }
@@ -1791,7 +1891,7 @@ async function drawReport(sh) {
     x.fillStyle = PC.ink; x.font = `500 22px ${FB}`; x.fillText(fitText(x, parts.join('    ·    '), RW - 2 * RM), RM, y);
     y += 30;
     if (cfg.n1) { y = secTitle(x, y, 'Phần I · Trắc nghiệm nhiều lựa chọn', `${g.c1}/${cfg.n1} câu đúng`); y = drawRowTable(x, y, cfg.n1, ['Câu', 'Em chọn', 'Đáp án'], i => d.p1[i], i => keyLabel(g.K1[i]), i => g.r1[i]); }
-    if (cfg.n2) { y = secTitle(x, y, 'Phần II · Đúng/Sai', `${fmt(g.s2)}/${cfg.n2} điểm`); y = drawP2(x, y, d, g); }
+    if (cfg.n2) { y = secTitle(x, y, 'Phần II · Đúng/Sai', `${fmt(g.s2)}/${fmt(maxP2())} điểm`); y = drawP2(x, y, d, g); }
     if (cfg.n3) { y = secTitle(x, y, 'Phần III · Trả lời ngắn', `${g.c3}/${cfg.n3} câu đúng`); y = drawRowTable(x, y, cfg.n3, ['Câu', 'Em ghi', 'Đáp án'], i => d.p3[i], i => keyLabel(g.K3[i]), i => g.r3[i]); }
   }
   if (d.nx) {
@@ -1974,22 +2074,24 @@ function classify(raw) {
   const u = s.toUpperCase(), u2 = u.replace(/^\(|[.)]$/g, '');
   if (/^[ABCD]$/.test(u2)) return { t: 'abcd', v: u2 };
   if (/^[\[(][ABCD\s,/]{2,}[\])]$/.test(u)) return { t: 'abcd', v: '[' + [...new Set(u.replace(/[^ABCD]/g, ''))].sort().join('') + ']' };
+  if (u === '*') return { t: 'any', v: '*' };                       // cho điểm cả lớp
   if (/^(Đ|T|ĐÚNG|DUNG|TRUE)$/.test(u)) return { t: 'ds', v: ['Đ'] };
   if (/^(S|F|SAI|FALSE)$/.test(u)) return { t: 'ds', v: ['S'] };
   const compact = u.replace(/[\s,;\-\/|.]/g, '');
-  if (compact.length >= 2 && compact.length <= 4 && /^[ĐDSTF]+$/.test(compact)) return { t: 'ds', v: compact.replace(/[DT]/g, 'Đ').replace(/F/g, 'S').split('') };
+  if (compact.length >= 2 && compact.length <= 4 && /^[ĐDSTF*]+$/.test(compact) && /[ĐDSTF]/.test(compact)) return { t: 'ds', v: compact.replace(/[DT]/g, 'Đ').replace(/F/g, 'S').split('') };
+  if (/^[+-]?\d+([.,]\d+)?(\s*\|\s*[+-]?\d+([.,]\d+)?)+$/.test(s)) return { t: 'num', v: s.replace(/\s/g, '').replace(/\./g, ',') };
   if (/^[+-]?\d+([.,]\d+)?$/.test(s)) return { t: 'num', v: s.replace(/^\+/, '').replace('.', ',') };
   return null;
 }
 function splitTokens(toks) {
   let i = 0; const p1 = [];
-  while (i < toks.length && toks[i].t === 'abcd') { p1.push(toks[i].v); i++; }
+  while (i < toks.length && (toks[i].t === 'abcd' || toks[i].t === 'any')) { p1.push(toks[i].v); i++; }
   // "D" của Phần II (Đúng) bị đọc lẫn vào cuối Phần I
   if (cfg.n1 > 0 && cfg.n2 > 0 && p1.length > cfg.n1 && p1.slice(cfg.n1).every(v => v === 'D')) { i -= p1.length - cfg.n1; p1.length = cfg.n1; }
   const ds = [];
-  while (i < toks.length && (toks[i].t === 'ds' || (toks[i].t === 'abcd' && toks[i].v === 'D'))) { ds.push(...(toks[i].t === 'ds' ? toks[i].v : ['Đ'])); i++; }
+  while (i < toks.length && (toks[i].t === 'ds' || (toks[i].t === 'any' && ds.length % 4) || (toks[i].t === 'abcd' && toks[i].v === 'D'))) { ds.push(...(toks[i].t === 'ds' ? toks[i].v : toks[i].t === 'any' ? ['*'] : ['Đ'])); i++; }
   const p3 = [];
-  for (; i < toks.length; i++) if (toks[i].t === 'num') p3.push(toks[i].v);
+  for (; i < toks.length; i++) if (toks[i].t === 'num' || toks[i].t === 'any') p3.push(toks[i].v);
   return { p1, ds, p3 };
 }
 const tokensOf = cells => cells.map(classify).filter(Boolean);
@@ -2032,8 +2134,7 @@ function applyImport(aoa, src) {
   if (!res.length) { toast(`Không nhận ra bảng đáp án trong ${src}. Thầy tải file mẫu để xem cách xếp.`); return false; }
   const old = JSON.parse(JSON.stringify({ keys: cfg.keys, n1: cfg.n1, n2: cfg.n2, n3: cfg.n3 }));
   const n1 = Math.max(...res.map(k => k.p1.length)), n2 = Math.max(...res.map(k => Math.ceil(k.ds.length / 4))), n3 = Math.max(...res.map(k => k.p3.length));
-  const changed = n1 !== cfg.n1 || n2 !== cfg.n2 || n3 !== cfg.n3;
-  Object.assign(cfg, { n1, n2, n3 });
+  const changed = n1 !== cfg.n1 || n2 !== cfg.n2 || n3 !== cfg.n3;   // giữ cấu trúc thầy đã chọn, chỉ đề nghị đổi
   cfg.keys = res.map(k => {
     const g = []; for (let i = 0; i < k.ds.length; i += 4) g.push(k.ds.slice(i, i + 4).join(''));  // [AB] giữ nguyên trong p1
     return { code: k.code, p1: k.p1.join(''), p2: g.join(' '), p3: k.p3.join(' ') };
@@ -2041,7 +2142,9 @@ function applyImport(aoa, src) {
   sheets.forEach(s => s.data && padData(s.data));
   saveCfg(); renderFmt(); renderKeys(); setKeyOpen(true); renderAll();
   const undo = () => { Object.assign(cfg, old); sheets.forEach(s => s.data && padData(s.data)); saveCfg(); renderFmt(); renderKeys(); renderAll(); };
-  toast(`Đã nhập ${res.length} mã đề: ${res.map(k => k.code).slice(0, 6).join(', ')}${res.length > 6 ? '…' : ''}${changed ? ` · ${n1}+${n2}+${n3} câu` : ''}`, { label: 'Hoàn tác', fn: undo });
+  const useFile = () => { Object.assign(cfg, { n1, n2, n3 }); sheets.forEach(s => s.data && padData(s.data)); saveCfg(); renderKeys(); renderFmt(); keyChanged(); };
+  toast(`Đã nhập ${res.length} mã đề: ${res.map(k => k.code).slice(0, 6).join(', ')}${res.length > 6 ? '…' : ''}${changed ? `. File có ${n1}+${n2}+${n3} câu, khác cấu trúc đang chọn ${cfg.n1}+${cfg.n2}+${cfg.n3}` : ''}`,
+    changed ? { label: 'Dùng theo file', fn: useFile } : { label: 'Hoàn tác', fn: undo });
   return true;
 }
 async function importExcel(file) {
@@ -2552,7 +2655,7 @@ function renderTiles() {
   const set = (id, text, state) => { const t = $('#t' + id); if (!t) return; $('#t' + id + 'S').textContent = text; t.dataset.state = state || ''; };
   const sample = cfg.keys.some(k => k.sample), full = cfg.keys.every(keyComplete);
   const parts = [cfg.n1 && cfg.n1, cfg.n2 && cfg.n2, cfg.n3 && cfg.n3].filter(Boolean).join(' + ');
-  set('Key', sample ? `Đang là đáp án ví dụ · ${parts} câu` : full ? `${parts} câu · ${cfg.keys.length} mã đề` : 'Còn thiếu câu, bấm để kiểm tra', sample || !full ? 'warn' : 'ok');
+  set('Key', sample ? `Đáp án ví dụ · ${structName()}` : full ? `${structName()} · ${cfg.keys.length} mã đề` : `${structName()} · còn thiếu câu`, sample || !full ? 'warn' : 'ok');
   const R = roster();
   set('Cls', R.length ? `Lớp ${cfg.curClass} · ${R.length} em` : cfg.curClass ? `Lớp ${cfg.curClass} · chưa có danh sách` : 'Không bắt buộc · tự nhận học sinh theo SBD', R.length ? 'ok' : '');
   const n = sheets.length, done = sheets.filter(x => x.status === 'done').length, err = sheets.filter(x => x.status === 'error').length;
@@ -2661,14 +2764,38 @@ $('#pasteGo').addEventListener('click', () => {
   if (applyImport(aoa, 'nội dung đã dán')) { $('#pasteTa').value = ''; $('#pasteBox').hidden = true; $('#pasteToggle').setAttribute('aria-expanded', 'false'); }
 });
 $('#tplBtn').addEventListener('click', downloadTemplate);
-['n1', 'n2', 'n3', 'pt1', 'pt3'].forEach(id => $('#' + id).addEventListener('change', e => {
+['n1', 'n2', 'n3', 'pt1', 'pt2', 'pt3', 't1', 't2', 't3'].forEach(id => $('#' + id).addEventListener('change', e => {
   const isInt = id.startsWith('n'); let v = Number(e.target.value);
-  const lim = { n1: 80, n2: 10, n3: 12, pt1: 10, pt3: 10 }[id];
+  const lim = { n1: 80, n2: 10, n3: 12, pt1: 10, pt2: 10, pt3: 10, t1: 100, t2: 100, t3: 100 }[id];
   if (!isFinite(v) || v < 0) v = 0; if (v > lim) v = lim; if (isInt) v = Math.round(v);
   cfg[id] = v; e.target.value = v; saveCfg();
   sheets.forEach(s => s.data && padData(s.data));
-  renderKeys(); keyChanged();
+  renderKeys(); renderFmt(); keyChanged();
 }));
+$('#presets').addEventListener('click', e => {
+  const s = e.target.closest('[data-psave]');
+  if (s) {
+    cfg.presets = Array.isArray(cfg.presets) ? cfg.presets : [];
+    const p = { name: structName() }; PKEYS.forEach(k => { p[k] = cfg[k]; });
+    cfg.presets.push(p); saveCfg(); renderPresets(); toast(`Đã lưu mẫu "${p.name}"`); return;
+  }
+  const d = e.target.closest('[data-pdel]');
+  if (d) {
+    const i = +d.dataset.pdel, old = cfg.presets.splice(i, 1)[0]; saveCfg(); renderPresets();
+    toast(`Đã xóa mẫu "${old.name}"`, { label: 'Hoàn tác', fn: () => { cfg.presets.splice(i, 0, old); saveCfg(); renderPresets(); } });
+    return;
+  }
+  const b = e.target.closest('[data-preset]'); if (!b) return;
+  const k = b.dataset.preset, p = k[0] === 'm' ? (cfg.presets || [])[+k.slice(1)] : BUILTIN_PRESETS.find(x => x.id === k);
+  if (p) { applyPreset(p); toast(`Cấu trúc: ${p.name}`); }
+});
+$('#modeSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-mode]'); if (!b || cfg.scoreMode === b.dataset.mode) return;
+  const P = ptPer();   // giữ nguyên điểm khi đổi cách nhập
+  if (b.dataset.mode === 'item') { cfg.pt1 = r2(P.p1 * 10000) / 10000; cfg.pt2 = r2(P.p2 * 10000) / 10000; cfg.pt3 = r2(P.p3 * 10000) / 10000; }
+  else { cfg.t1 = r2(cfg.n1 * P.p1); cfg.t2 = r2(cfg.n2 * P.p2); cfg.t3 = r2(cfg.n3 * P.p3); }
+  cfg.scoreMode = b.dataset.mode; saveCfg(); renderFmt(); keyChanged();
+});
 $('#keyList').addEventListener('input', e => {
   const t = e.target, card = t.closest('.keycard'); if (!card || !t.dataset.k) return;
   const k = cfg.keys[card.dataset.i]; k[t.dataset.k] = t.value;
