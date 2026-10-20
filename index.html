@@ -20,6 +20,7 @@
   --accent:#2443c4; --accent-ink:#ffffff; --accent-soft:#e4e9fb;
   --omr:#d0603f; --omr-soft:#fbe8e1;
   --ok:#11703f; --ok-soft:#e0f1e7; --bad:#bd2529; --bad-soft:#fbe5e3; --warn:#8f5300; --warn-soft:#fcefd5;
+  --ch1:#2443c4; --chref:#828998;
   --scrim:rgb(14 18 28/.5);
   --shadow:0 1px 2px rgb(20 28 47/.06),0 6px 20px rgb(20 28 47/.07);
   --f-display:"Bricolage Grotesque","Be Vietnam Pro",system-ui,sans-serif;
@@ -33,6 +34,7 @@
   --accent:#8199ff; --accent-ink:#0b1020; --accent-soft:#1f2950;
   --omr:#ec8d6f; --omr-soft:#3a2219;
   --ok:#55cf8f; --ok-soft:#14301f; --bad:#ff8077; --bad-soft:#3b1a1a; --warn:#f1b65c; --warn-soft:#352710;
+  --ch1:#4f6ff0; --chref:#7c8394;
   --scrim:rgb(0 0 0/.6); --shadow:0 1px 2px rgb(0 0 0/.3),0 6px 20px rgb(0 0 0/.3);
   color-scheme:dark}}
 :root[data-theme="dark"]{
@@ -41,6 +43,7 @@
   --accent:#8199ff; --accent-ink:#0b1020; --accent-soft:#1f2950;
   --omr:#ec8d6f; --omr-soft:#3a2219;
   --ok:#55cf8f; --ok-soft:#14301f; --bad:#ff8077; --bad-soft:#3b1a1a; --warn:#f1b65c; --warn-soft:#352710;
+  --ch1:#4f6ff0; --chref:#7c8394;
   --scrim:rgb(0 0 0/.6); --shadow:0 1px 2px rgb(0 0 0/.3),0 6px 20px rgb(0 0 0/.3);
   color-scheme:dark}
 
@@ -84,7 +87,7 @@ main{display:grid;gap:14px}
 .fmt{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
 .field{display:grid;gap:5px;min-width:0}
 .field>span{font-size:13px;font-weight:500;color:var(--muted);display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
-input[type=text],input[type=number],input[type=password],textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface);color:var(--ink)}
+input[type=text],input[type=number],input[type=password],input[type=date],textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface);color:var(--ink)}
 textarea{resize:vertical;font-family:var(--f-mono);font-size:15px;letter-spacing:.06em;line-height:1.45}
 input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
 .hint{margin:0;font-size:13px;color:var(--muted)}
@@ -448,6 +451,75 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
   h1{font-size:24px}
 }
 @media (prefers-reduced-motion:reduce){*,*::after{animation:none!important;transition:none!important}}
+
+/* Quản lý lớp, sổ điểm */
+.gtabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%}
+.gtabs button{padding:0 6px;font-size:13.5px;min-height:42px}
+.gtabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.clsgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.clscard{display:grid;gap:2px;text-align:left;padding:12px 14px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);min-height:44px;color:var(--ink)}
+.clscard b{font:700 17px var(--f-display)}
+.clscard small{font-size:12.5px;color:var(--muted)}
+.clscard:hover{border-color:var(--accent);background:var(--accent-soft)}
+.mini{min-height:34px;min-width:44px;padding:0 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);font:600 13px var(--f-body);color:var(--ink)}
+.mini:hover{border-color:var(--accent)}
+.mini.danger{color:var(--bad)}
+.ros td.ract{white-space:nowrap;text-align:right}
+.ract .mini+.mini{margin-left:4px}
+.ros tr.editing td{background:var(--accent-soft)}
+.ros input.cellin{width:100%;min-width:56px;min-height:36px;padding:0 6px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit}
+.addrow .f-stt{flex:0 0 72px;min-width:72px}
+.addrow .f-sbd{flex:0 0 120px;min-width:110px}
+.gtc{border:1px solid var(--line);border-radius:12px;background:var(--surface);display:grid;min-width:0}
+.gtc.open{border-color:var(--line-strong)}
+.gtc-h{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 14px;border:0;background:none;text-align:left;width:100%;border-radius:12px;color:var(--ink)}
+.gtc-h:hover{background:var(--sunken)}
+.gtc-t{min-width:0}
+.gtc-t b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gtc-t small{display:block;color:var(--muted);font-size:12.5px}
+.gtc-avg{font:700 22px/1.1 var(--f-mono);text-align:right}
+.gtc-avg small{display:block;font:500 11px var(--f-body);color:var(--muted)}
+.kb{display:inline-block;font:700 11.5px/1.2 var(--f-mono);padding:3px 7px;border-radius:6px;background:var(--sunken);color:var(--muted);letter-spacing:.02em}
+.kb.k-gk{background:var(--accent-soft);color:var(--accent)}
+.kb.k-ck{background:var(--accent);color:var(--accent-ink)}
+.hist{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:0 14px 12px}
+.hb{display:grid;grid-template-rows:auto 40px auto;justify-items:center;gap:2px;font-size:11.5px;color:var(--muted)}
+.hb-bar{width:70%;max-width:44px;align-self:end;background:var(--ch1);border-radius:4px 4px 0 0}
+.hb-n{font:600 12px var(--f-mono);color:var(--ink)}
+.gtc-d{display:grid;gap:12px;padding:12px 14px 14px;border-top:1px solid var(--line);min-width:0}
+.gb-wrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:10px;-webkit-overflow-scrolling:touch}
+.gb{border-collapse:separate;border-spacing:0;font-size:14px;min-width:100%}
+.gb th,.gb td{border-bottom:1px solid var(--line);padding:3px 4px;text-align:center;white-space:nowrap;background:var(--surface)}
+.gb thead th{position:sticky;top:0;z-index:2;background:var(--sunken);font-size:12px;color:var(--muted);font-weight:600;vertical-align:bottom;padding:6px}
+.gb .c-ten{position:sticky;left:0;z-index:1;text-align:left;min-width:150px;max-width:200px;white-space:normal;border-right:1px solid var(--line);padding:6px 8px}
+.gb thead .c-ten{z-index:3}
+.gb .c-t{min-width:66px;max-width:104px;white-space:normal}
+.gb .th-n{color:var(--ink);font-size:12px;line-height:1.25;margin:3px 0 1px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gb .c-t small{display:block;font-weight:500}
+.gb .c-avg{font:700 14px var(--f-mono);background:var(--sunken);padding:6px 8px}
+.gb tfoot td{background:var(--sunken);font:600 13px var(--f-mono);position:sticky;bottom:0;padding:6px 4px}
+.gb tfoot .c-ten{font:600 13px var(--f-body);z-index:2}
+.gb input.sc-in{width:3.8em;min-height:36px;padding:0 2px;border:1px solid transparent;border-radius:6px;background:none;text-align:center;font:500 14px var(--f-mono);letter-spacing:0;color:var(--ink)}
+.gb input.sc-in:hover{border-color:var(--line-strong)}
+.gb input.sc-in:focus{border-color:var(--accent);background:var(--surface);outline:none;box-shadow:0 0 0 2px var(--accent-soft)}
+.gb .c-sc.lo input.sc-in{color:var(--bad);font-weight:700}
+.gb .c-sc.hi input.sc-in{color:var(--ok);font-weight:700}
+.ch-leg{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink)}
+.ch-leg i{display:inline-block;width:16px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.ch{display:block;max-width:100%;height:auto;overflow:visible}
+.ch-grid{stroke:var(--line);stroke-width:1}
+.ch-ax{fill:var(--muted);font:12px var(--f-body)}
+.ch-end{fill:var(--ink);font:600 12px var(--f-mono)}
+.ch-line{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.ch-dot{stroke:var(--surface);stroke-width:2}
+.ch-hit{fill:transparent;cursor:crosshair}
+.ch-hit:hover{fill:var(--sunken)}
+.watch{display:grid;gap:6px}
+.wrow{display:grid;gap:2px;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);min-height:44px;color:var(--ink)}
+.wrow small{color:var(--muted);font-size:12.5px}
+.wrow small.bad-t{color:var(--bad)}
+.wrow:hover,.wrow.on{border-color:var(--accent);background:var(--accent-soft)}
+@media (max-width:520px){.gtabs button{font-size:12.5px;padding:0 2px}.gb .c-ten{min-width:124px}}
 </style>
 
 <header class="wrap top">
@@ -473,7 +545,7 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
 
   <nav class="tiles" aria-label="Các mục">
     <button class="tile" type="button" id="tKey" data-pane="key"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="t-txt"><b>Đáp án</b><small id="tKeyS"></small></span></button>
-    <button class="tile" type="button" id="tCls" data-pane="cls"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="t-txt"><b>Lớp &amp; danh sách</b><small id="tClsS"></small></span></button>
+    <button class="tile" type="button" id="tCls" data-pane="cls"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="t-txt"><b>Quản lý lớp</b><small id="tClsS"></small></span></button>
     <button class="tile" type="button" id="tSh" data-pane="sheets"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="t-txt"><b>Phiếu bài làm</b><small id="tShS"></small></span></button>
     <button class="tile" type="button" id="tAi" data-pane="ai"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9.5 9.5h5v5h-5zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></span><span class="t-txt"><b>AI đọc phiếu</b><small id="tAiS"></small></span></button>
     <button class="tile" type="button" id="tGs" data-pane="gs"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></span><span class="t-txt"><b>Google Sheet</b><small id="tGsS"></small></span></button>
@@ -549,7 +621,7 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
 <section class="pane" id="stepClass" data-pane-id="cls" role="dialog" aria-modal="true" aria-labelledby="h_cls">
   <div class="panel">
     <div class="panel-head">
-      <div class="grow"><h3 id="h_cls">Lớp &amp; danh sách</h3><p class="ph-sub" id="clsSummary"></p></div>
+      <div class="grow"><h3 id="h_cls">Quản lý lớp</h3><p class="ph-sub" id="clsSummary"></p></div>
       <button class="btn" type="button" data-close>Xong</button>
     </div>
     <div class="panel-body">
@@ -561,6 +633,14 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
         <label class="field"><span>Tên lớp mới</span><input type="text" id="clsNewName" placeholder="VD: 10A3" autocomplete="off"></label>
         <button class="btn primary-soft" id="clsNewOk" type="button">Tạo lớp</button>
       </div>
+      <div id="clsCards" class="gdyn"></div>
+      <div class="seg gtabs" role="tablist" id="gTabs" aria-label="Quản lý lớp" hidden>
+        <button type="button" role="tab" data-gtab="hs">Học sinh</button>
+        <button type="button" role="tab" data-gtab="bai">Bài kiểm tra</button>
+        <button type="button" role="tab" data-gtab="so">Sổ điểm</button>
+        <button type="button" role="tab" data-gtab="tb">Tiến bộ</button>
+      </div>
+      <div id="gt_hs" class="stack" hidden>
       <div class="import" id="rosActions" hidden>
         <div class="btnrow">
           <button class="btn primary-soft" id="rosImp" type="button">Nhập danh sách từ Excel</button>
@@ -572,9 +652,16 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
           <textarea id="rosPasteTa" rows="4" spellcheck="false" autocomplete="off" placeholder="STT	SBD	Họ và tên&#10;1	100101	Nguyễn Văn An"></textarea>
           <button class="btn" id="rosPasteGo" type="button">Nhập danh sách đã dán</button>
         </div>
-        <p class="hint">Cần cột <b>Họ và tên</b> (hoặc tách Họ / Tên) và cột <b>SBD</b>. Không có cột SBD thì app dùng STT làm SBD, học sinh ghi STT vào ô SBD trên phiếu. Nhập lại sẽ thay danh sách cũ của lớp. <button class="btn link inline" id="clsDel" type="button">Xóa lớp này</button></p>
+        <p class="hint">Cần cột <b>Họ và tên</b> (hoặc tách Họ / Tên) và cột <b>SBD</b>. Không có cột SBD thì app dùng STT làm SBD, học sinh ghi STT vào ô SBD trên phiếu. Nhập lại sẽ thay danh sách cũ, điểm trong sổ vẫn giữ (khớp theo SBD hoặc họ tên). <button class="btn link inline" id="clsDel" type="button">Xóa lớp này</button></p>
       </div>
-      <div id="rosList"></div>
+      <div id="rosList" class="gdyn stack"></div>
+      </div>
+      <div id="gt_bai" class="stack gdyn" hidden></div>
+      <div id="gt_so" class="stack gdyn" hidden></div>
+      <div id="gt_tb" class="stack gdyn" hidden></div>
+      <p class="hint" id="gbStore"></p>
+      <input type="file" id="gbIn" accept=".json,application/json" hidden>
+      <datalist id="gbLops"></datalist>
     </div>
   </div>
 </section>
@@ -805,6 +892,7 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
 
       <div id="vt_xuat" class="stack" hidden>
         <div id="vanStats"></div>
+        <div id="vanGb"></div>
         <div class="exp-grid">
           <button class="exp" type="button" data-vexp="pdfzip"><b>PDF nhận xét từng em (.zip)</b><span>Mỗi em một file: điểm từng câu, nhận xét, lỗi cần sửa, đoạn viết lại mẫu, ý kiến giám khảo</span></button>
           <button class="exp" type="button" data-vexp="pdfall"><b>PDF nhận xét cả lớp</b><span>Một file để in hoặc lưu hồ sơ</span></button>
@@ -1163,6 +1251,7 @@ function migrateCfg() {
   if (cfg.gKey && !cfg.gKeys.length) cfg.gKeys = [cfg.gKey.trim()];
   cfg.gKey = ''; if (typeof cfg.gKeyModel !== 'object' || !cfg.gKeyModel) cfg.gKeyModel = {};
   if (cfg.gAuto === undefined) cfg.gAuto = true;
+  if (!cfg.clsTs || typeof cfg.clsTs !== 'object') cfg.clsTs = {};
 }
 migrateCfg();
 function saveCfg() { try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch (e) {} }
@@ -1231,6 +1320,466 @@ function grade(d) {
 
 /* ---------- Phiếu ---------- */
 let sheets = [];
+const GB = { mode: '', ready: false, synced: false, err: '', tests: new Map(), col: null, rts: new Map() };
+let gTab = 'hs', gOpen = '', gSel = '', gEdit = -1, gAdd = false, gTay = false;
+
+/* ================= Quản lý lớp · sổ điểm nhiều bài kiểm tra ================= */
+const KIEU = { tx: { s: 'TX', w: 1, n: 'Thường xuyên' }, gk: { s: 'GK', w: 2, n: 'Giữa kì' }, ck: { s: 'CK', w: 3, n: 'Cuối kì' } };
+const LOAI = { tn: 'Trắc nghiệm', van: 'Tự luận Văn', toan: 'Tự luận Toán', tay: 'Nhập tay' };
+const BINS = ['Kém', 'Yếu', 'TB', 'Khá', 'Giỏi'];
+const kieuOf = t => KIEU[t?.kieu] ? t.kieu : 'tx';
+const todayISO = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+const fmtD = s => { const m = String(s || '').match(/^(\d{4})-(\d\d)-(\d\d)/); return m ? `${m[3]}/${m[2]}` : ''; };
+const fmtDY = s => { const m = String(s || '').match(/^(\d{4})-(\d\d)-(\d\d)/); return m ? `${m[3]}/${m[2]}/${m[1]}` : 'chưa ghi ngày'; };
+const f1 = x => x == null || !isFinite(x) ? '—' : (Math.round(x * 10) / 10).toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const normT = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[đĐ]/g, 'd').toLowerCase().replace(/\s+/g, ' ').trim();
+const cleanLop = s => String(s || '').trim().replace(/^lớp\s+/i, '').trim();
+const stKey = st => normSbd(st.sbd) ? 's' + normSbd(st.sbd) : 'n' + normName(st.ten);
+const lastName = t => String(t || '').trim().split(/\s+/).pop();
+const attrQ = v => String(v).replace(/["\\]/g, '\\$&');
+const gbNewId = () => 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function clsId(lop) {
+  const s = String(lop); let h = 2166136261;
+  for (const ch of s) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  return (s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[đĐ]/g, 'd').replace(/[^A-Za-z0-9]+/g, '_').slice(0, 40) || 'lop') + '-' + h.toString(36);
+}
+function guessKieu(ten) {
+  const t = normT(ten);
+  if (/giua\s*(hoc\s*)?ki|giua\s*hk|\bgk\s*[12i]?\b|\bgki+\b/.test(t)) return 'gk';
+  if (/cuoi\s*(hoc\s*)?ki|cuoi\s*hk|\bck\s*[12i]?\b|\bcki+\b|\bhoc\s*ki\s*[12i]\b|\bhk\s*[12i]\b|cuoi\s*nam/.test(t)) return 'ck';
+  return 'tx';
+}
+const kieuOpts = v => Object.entries(KIEU).map(([k, o]) => `<option value="${k}"${k === v ? ' selected' : ''}>${o.n} (hệ số ${o.w})</option>`).join('');
+
+/* — Kho sổ điểm: kho dữ liệu riêng của thầy trong Claude, hoặc IndexedDB của trình duyệt — */
+const GB_LS = 'cham-phieu-ai-sodiem';
+let gbIdb = null;
+const gbChain = new Map();
+function gbIdbOpen() {
+  return new Promise((res, rej) => {
+    try {
+      const r = indexedDB.open('cham-phieu-ai', 1);
+      r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains('sodiem')) r.result.createObjectStore('sodiem', { keyPath: 'id' }); };
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error('blocked'));
+    } catch (e) { rej(e); }
+  });
+}
+function gbIdbReq(mode, fn) {
+  return new Promise((res, rej) => {
+    const tx = gbIdb.transaction('sodiem', mode), r = fn(tx.objectStore('sodiem'));
+    tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
+  });
+}
+async function gbLocalLoad() {
+  try { gbIdb = await gbIdbOpen(); return (await gbIdbReq('readonly', st => st.getAll())) || []; }
+  catch (e) { gbIdb = null; try { return JSON.parse(localStorage.getItem(GB_LS) || '[]'); } catch (e2) { return []; } }
+}
+function gbLsSave() { try { localStorage.setItem(GB_LS, JSON.stringify([...GB.tests.values()])); } catch (e) { throw new Error('Bộ nhớ trình duyệt đã đầy'); } }
+async function gbWrite(id) {
+  const t = GB.tests.get(id);
+  if (GB.mode === 'db') { if (t) await GB.col.doc('T-' + id).set(t); else await GB.col.doc('T-' + id).delete(); return; }
+  if (gbIdb) { await gbIdbReq('readwrite', st => t ? st.put(t) : st.delete(id)); return; }
+  gbLsSave();
+}
+function gbQueue(id) {
+  const p = (gbChain.get(id) || Promise.resolve()).then(() => gbWrite(id)).then(() => { GB.err = ''; return true; }, e => { gbFail(e); return false; });
+  gbChain.set(id, p); return p;
+}
+function gbFail(e) {
+  GB.err = e?.code === 'quota_exceeded' ? 'Kho sổ điểm đã đầy, xóa bớt bài cũ' : e?.code === 'revoked' ? 'Mất quyền truy cập kho sổ điểm' : 'Chưa lưu được sổ điểm: ' + (e?.message || 'lỗi kết nối');
+  toast(GB.err); gbRender();
+}
+async function gbInit() {
+  if (dbCap && userCap) {
+    let uid = null; try { uid = await userCap.id(); } catch (e) {}
+    if (uid) {
+      try {
+        GB.col = dbCap.collection('data/users/' + uid); GB.mode = 'db';
+        GB.col.onSnapshot(gbSnap, e => { GB.err = e?.code === 'revoked' ? 'Mất quyền truy cập kho sổ điểm' : 'Mất kết nối kho sổ điểm, tải lại trang để nối lại'; gbRender(); });
+        setTimeout(() => { if (!GB.ready) { GB.ready = true; gbRender(); } }, 8000);
+        return;
+      } catch (e) { GB.col = null; }
+    }
+  }
+  GB.mode = 'local';
+  (await gbLocalLoad()).forEach(t => { if (t && t.id && t.lop) GB.tests.set(t.id, t); });
+  GB.ready = true; gbRender();
+}
+function gbSnap(snap) {
+  let cls = false;
+  snap.docChanges().forEach(c => {
+    const id = c.doc.id;
+    if (id.startsWith('T-')) {
+      if (c.type === 'removed') { if (!c.doc.metadata?.hasPendingWrites) GB.tests.delete(id.slice(2)); }
+      else { const d = c.doc.data(); if (d && d.id && d.lop) GB.tests.set(d.id, d); }
+    } else if (id.startsWith('L-') && c.type !== 'removed') {
+      const d = c.doc.data(); if (d && d.lop) { GB.rts.set(d.lop, +d.ts || 0); cls = gbClassIn(d) || cls; }
+    }
+  });
+  if (!snap.metadata.fromCache) { GB.err = ''; if (!GB.synced) { GB.synced = true; gbClassesOut(); } GB.ready = true; }
+  if (cls) { rematchAll(true); renderAll(); } else gbRender();
+}
+function gbClassIn(d) {
+  const lt = cfg.clsTs[d.lop] || 0, ts = +d.ts || 0; if (ts <= lt) return false;
+  cfg.clsTs[d.lop] = ts;
+  if (d.del) { if (cfg.classes[d.lop]) { delete cfg.classes[d.lop]; if (cfg.curClass === d.lop) cfg.curClass = ''; } }
+  else cfg.classes[d.lop] = Array.isArray(d.ds) ? d.ds : [];
+  saveCfg(); return true;
+}
+function gbClassOut(lop) {
+  if (!lop) return;
+  cfg.clsTs[lop] = Math.max(Date.now(), (cfg.clsTs[lop] || 0) + 1); saveCfg();
+  if (GB.mode !== 'db' || !GB.col) return;
+  const ds = cfg.classes[lop], ts = cfg.clsTs[lop];
+  GB.col.doc('L-' + clsId(lop)).set(JSON.parse(JSON.stringify({ lop, ds: ds || [], del: !ds, ts }))).then(() => GB.rts.set(lop, ts)).catch(gbFail);
+}
+function gbClassesOut() { Object.keys(cfg.classes).forEach(lop => { const r = GB.rts.get(lop); if (r === undefined || (cfg.clsTs[lop] || 0) > r) gbClassOut(lop); }); }
+function gbPut(t) {
+  t = JSON.parse(JSON.stringify({ ...t, ts: Date.now() }));
+  GB.tests.set(t.id, t); gbRender();
+  return gbQueue(t.id);
+}
+function gbDel(id) { GB.tests.delete(id); gbRender(); return gbQueue(id); }
+function gbRender() {
+  renderTiles(); renderClass();
+  if (!$('#ov2').hidden) gbCardRefresh('tn');
+  if ($('#gbs_van')) gbCardRefresh('van');
+}
+
+/* — Truy vấn — */
+const gbTests = lop => [...GB.tests.values()].filter(t => t.lop === lop)
+  .sort((a, b) => String(a.ngay || '').localeCompare(String(b.ngay || '')) || (a.created || 0) - (b.created || 0));
+const gbClassNames = () => [...new Set([...Object.keys(cfg.classes), ...[...GB.tests.values()].map(t => t.lop)])].filter(Boolean)
+  .sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }));
+function gbIndex(t) {
+  const bs = new Map(), bn = new Map();
+  (t.hs || []).forEach(h => { const s = normSbd(h.sbd), n = normName(h.ten); if (s && !bs.has(s)) bs.set(s, h); if (n && !bn.has(n)) bn.set(n, h); });
+  return { bs, bn };
+}
+function gbGet(ix, st) { const s = normSbd(st.sbd), n = normName(st.ten); return (s && ix.bs.get(s)) || (n && ix.bn.get(n)) || null; }
+function gbStudents(lop, T) {
+  const R = (cfg.classes[lop] || []).map(r => ({ stt: r.stt, sbd: r.sbd, ten: r.ten }));
+  const S = new Set(R.map(r => normSbd(r.sbd)).filter(Boolean)), N = new Set(R.map(r => normName(r.ten)).filter(Boolean)), ex = [];
+  (T || gbTests(lop)).forEach(t => (t.hs || []).forEach(h => {
+    const s = normSbd(h.sbd), n = normName(h.ten);
+    if ((!s && !n) || (s && S.has(s)) || (n && N.has(n))) return;
+    if (s) S.add(s); if (n) N.add(n); ex.push({ stt: '', sbd: h.sbd || '', ten: h.ten || '', extra: true });
+  }));
+  return R.concat(ex.sort((a, b) => a.ten.localeCompare(b.ten, 'vi')));
+}
+function gbStat(t) {
+  const ds = (t.hs || []).map(h => h.d).filter(v => v != null && isFinite(v)), n = ds.length, bins = [0, 0, 0, 0, 0];
+  if (!n) return { n: 0, avg: null, max: null, min: null, pass: 0, bins };
+  ds.forEach(v => bins[v >= 8 ? 4 : v >= 6.5 ? 3 : v >= 5 ? 2 : v >= 3.5 ? 1 : 0]++);
+  return { n, avg: ds.reduce((a, b) => a + b, 0) / n, max: Math.max(...ds), min: Math.min(...ds), pass: ds.filter(v => v >= 5).length / n, bins };
+}
+function gbAvg(vals, T) {   // TT22: (ΣTX + 2·GK + 3·CK) / (số TX + 2·số GK + 3·số CK)
+  let s = 0, w = 0;
+  vals.forEach((d, j) => { if (d != null && isFinite(d)) { const k = KIEU[kieuOf(T[j])].w; s += d * k; w += k; } });
+  return w ? Math.round(s / w * 10) / 10 : null;
+}
+const gbSame = (lop, ten, loai) => gbTests(lop).find(t => t.loai === loai && normT(t.ten) === normT(ten)) || null;
+
+/* — Lấy điểm từ bài vừa chấm — */
+function gbDedupe(hs) {
+  const seen = new Set();
+  return hs.filter(h => { const k = stKey(h); if (k === 'n' || seen.has(k)) return false; seen.add(k); return true; });
+}
+function gbSrc(ctx) {
+  if (ctx === 'tn') {
+    const L = graded(), mx = maxScore() || 10, codes = [...new Set(L.map(x => x.g.k.code))];
+    const hs = gbDedupe(L.map(({ s, g }) => ({ sbd: String(s.data.sbd || ''), ten: String(s.data.ho_ten || ''), stt: String(s.match && s.match.how !== 'none' ? s.match.stt || '' : ''),
+      d: r2(g.total / mx * 10), goc: r2(g.total), nx: String(s.data.nx || '').slice(0, 400) })));
+    const qs = codes.length === 1 ? qStats(codes[0]).items.map(x => ({ lab: x.lab, p: Math.round(x.pct * 100) })) : [];
+    return { loai: 'tn', max: r2(mx), hs, qs };
+  }
+  const de = vDe(), D = de ? vanDone().filter(e => e.deId === de.id || !e.deId) : [], mx = vMax(de) || 10;
+  const hs = gbDedupe(D.map(e => { const t = vTotal(e) || 0; return { sbd: String(e.sbd || ''), ten: String(vName(e) || ''), stt: String(e.stt || ''), d: r2(t / mx * 10), goc: r2(t), nx: String(e.g?.nhan_xet_chung || '').slice(0, 400) }; }));
+  const qs = D.length && de?.outline?.length ? de.outline.map(c => ({ lab: String(c.id), p: Math.round(D.reduce((a, e) => a + vScore(e, c), 0) / D.length / (c.toi_da || 1) * 100) })) : [];
+  return { loai: isToan() ? 'toan' : 'van', max: r2(mx), hs, qs };
+}
+
+/* — Thẻ "Lưu vào sổ điểm lớp" (Tổng hợp trắc nghiệm và tab Xuất tự luận) — */
+const gbDraft = {};
+function gbDraftGet(ctx) {
+  const deId = ctx === 'van' ? (vDe()?.id || '') : '';
+  let d = gbDraft[ctx];
+  if (!d || d.deId !== deId) d = gbDraft[ctx] = { deId, lop: '', ten: '', kieu: 'tx', ngay: todayISO(), setLop: false, setTen: false, setKieu: false };
+  if (!d.setTen) d.ten = ctx === 'tn' ? baiTitle() : (vDe()?.name || 'Bài tự luận');
+  if (!d.setKieu) d.kieu = guessKieu(d.ten);
+  if (!d.setLop) d.lop = cfg.curClass || cfg.rep.lop || '';
+  return d;
+}
+function gbCardHtml(ctx) {
+  const d = gbDraftGet(ctx), a = `data-ctx="${ctx}"`;
+  return `<section class="card gbsave" id="gbs_${ctx}"><h4>Lưu vào sổ điểm lớp <span id="gbsN_${ctx}"></span></h4>
+    <div class="repgrid">
+      <label class="field"><span>Lớp</span><input type="text" id="gbf_lop_${ctx}" data-gbf="lop" ${a} list="gbLops" value="${esc(d.lop)}" placeholder="VD: 10A3" autocomplete="off"></label>
+      <label class="field"><span>Tên bài kiểm tra</span><input type="text" id="gbf_ten_${ctx}" data-gbf="ten" ${a} value="${esc(d.ten)}" autocomplete="off"></label>
+      <label class="field"><span>Loại điểm</span><select id="gbf_kieu_${ctx}" data-gbf="kieu" ${a}>${kieuOpts(d.kieu)}</select></label>
+      <label class="field"><span>Ngày kiểm tra</span><input type="date" id="gbf_ngay_${ctx}" data-gbf="ngay" ${a} value="${esc(d.ngay)}"></label>
+    </div>
+    <p class="hint" id="gbsH_${ctx}"></p>
+    <div class="btnrow"><button class="btn primary-soft" type="button" id="gbsB_${ctx}" data-gbsave="${ctx}">Lưu vào sổ điểm</button><button class="btn" type="button" id="gbsG_${ctx}" data-gbgo="${ctx}" hidden>Mở sổ điểm lớp</button></div></section>`;
+}
+function gbCardRefresh(ctx) {
+  if (!$('#gbs_' + ctx)) return;
+  const d = gbDraftGet(ctx), n = gbSrc(ctx).hs.length, lop = cleanLop(d.lop), loai = ctx === 'tn' ? 'tn' : (isToan() ? 'toan' : 'van');
+  const old = lop ? gbSame(lop, d.ten, loai) : null;
+  $('#gbsN_' + ctx).textContent = `${n} em`;
+  const b = $('#gbsB_' + ctx); b.disabled = !n || !GB.ready; b.textContent = old ? 'Cập nhật sổ điểm' : 'Lưu vào sổ điểm';
+  $('#gbsH_' + ctx).innerHTML = !GB.ready ? 'Đang mở sổ điểm…'
+    : !lop ? 'Nhập tên lớp. Lớp chưa có sẽ được tạo, danh sách lấy từ các bài vừa chấm.'
+    : old ? `Lớp ${esc(lop)} đã có bài <b>${esc(old.ten)}</b>. Lưu lại sẽ thay bằng điểm mới, giữ những ô thầy đã sửa tay trong sổ.`
+    : `Thêm điểm ${n} em thành một cột mới trong sổ điểm lớp ${esc(lop)}${gbTests(lop).length ? ` (đã có ${gbTests(lop).length} bài)` : ''}, quy về thang 10.`;
+  $('#gbsG_' + ctx).hidden = !lop || !gbTests(lop).length;
+}
+function gbField(e) {
+  const el = e.target, f = el.dataset?.gbf; if (!f) return;
+  const ctx = el.dataset.ctx, d = gbDraftGet(ctx);
+  d[f] = el.value; d['set' + f[0].toUpperCase() + f.slice(1)] = true;
+  if (f === 'ten' && !d.setKieu) { d.kieu = guessKieu(d.ten); const s = $(`#gbf_kieu_${ctx}`); if (s) s.value = d.kieu; }
+  gbCardRefresh(ctx);
+}
+async function gbSave(ctx) {
+  const d = gbDraftGet(ctx), lop = cleanLop(d.lop), src = gbSrc(ctx);
+  if (!lop) { toast('Nhập tên lớp, ví dụ 10A3'); $(`#gbf_lop_${ctx}`)?.focus(); return; }
+  if (!src.hs.length) { toast('Chưa có bài nào chấm xong'); return; }
+  const ten = String(d.ten || '').trim() || 'Bài kiểm tra';
+  let made = '';
+  if (!(cfg.classes[lop] || []).length) {
+    const had = !!cfg.classes[lop];
+    const ds = src.hs.filter(h => h.ten).slice().sort((a, b) => (+a.stt || 1e6) - (+b.stt || 1e6) || lastName(a.ten).localeCompare(lastName(b.ten), 'vi') || a.ten.localeCompare(b.ten, 'vi'))
+      .map((h, i) => ({ stt: String(h.stt || i + 1), sbd: String(h.sbd || h.stt || i + 1), ten: h.ten }));
+    if (ds.length) { cfg.classes[lop] = ds; gbClassOut(lop); made = had ? ` · đã điền danh sách ${ds.length} em` : ` · đã tạo lớp ${lop} (${ds.length} em)`; if (lop === cfg.curClass) rematchAll(true); }
+  }
+  const old = gbSame(lop, ten, src.loai);
+  const t = old ? JSON.parse(JSON.stringify(old)) : { id: gbNewId(), lop, created: Date.now() };
+  const keep = old ? (old.hs || []).filter(h => h.sua) : [];
+  Object.assign(t, { lop, ten, kieu: KIEU[d.kieu] ? d.kieu : 'tx', ngay: d.ngay || todayISO(), loai: src.loai, max: src.max, qs: src.qs, hs: src.hs });
+  if (keep.length) { const ix = gbIndex(t); keep.forEach(k => { const h = gbGet(ix, k); if (h) { h.d = k.d; h.sua = true; } else t.hs.push(k); }); }
+  d.lop = lop;
+  const ok = await gbPut(t);
+  if (ok) toast(`${old ? 'Đã cập nhật' : 'Đã lưu'} “${ten}” vào sổ điểm lớp ${lop}${made}`, { label: 'Mở sổ điểm', fn: () => gbGoto(lop, 'so') });
+  renderAll(); gbCardRefresh(ctx);
+}
+function gbGoto(lop, tab) {
+  if (!$('#ov2').hidden) closeSummary();
+  if (lop && cfg.curClass !== lop) { cfg.curClass = lop; cfg.rep.lop = lop; saveCfg(); rematchAll(true); }
+  gTab = tab || 'so'; gEdit = -1; gOpen = ''; openPane('cls'); renderAll();
+}
+
+/* — Giao diện Quản lý lớp — */
+function gbStoreNote() {
+  if (GB.err) return `<span style="color:var(--bad)">${esc(GB.err)}</span>`;
+  if (!GB.ready) return 'Đang mở sổ điểm…';
+  return GB.mode === 'db' ? 'Sổ điểm lưu riêng trong tài khoản Claude của thầy: mở trên máy khác vẫn thấy, người khác mở trang không xem được.'
+    : 'Sổ điểm lưu trong trình duyệt của máy này. Muốn chuyển sang máy khác: tab Bài kiểm tra → Tải bản sao lưu, rồi Khôi phục ở máy kia.';
+}
+function renderClass(force) {
+  const names = gbClassNames();
+  if (cfg.curClass && !names.includes(cfg.curClass)) cfg.curClass = '';
+  const sel = $('#clsSel'), lop = cfg.curClass, R = roster(), T = lop ? gbTests(lop) : [];
+  if (document.activeElement !== sel) sel.innerHTML = `<option value="">— Chưa chọn lớp —</option>` + names.map(n => `<option value="${esc(n)}"${n === lop ? ' selected' : ''}>Lớp ${esc(n)} · ${(cfg.classes[n] || []).length} em · ${gbTests(n).length} bài</option>`).join('');
+  $('#gbLops').innerHTML = names.map(n => `<option value="${esc(n)}"></option>`).join('');
+  $('#clsSummary').textContent = lop ? `Lớp ${lop} · ${R.length ? R.length + ' em' : 'chưa có danh sách'} · ${T.length} bài kiểm tra`
+    : names.length ? `${names.length} lớp · chọn một lớp để xem học sinh, bài kiểm tra, sổ điểm, tiến bộ` : 'Tạo lớp, nhập danh sách để tự nhận học sinh theo SBD và theo dõi điểm nhiều bài';
+  $('#stepClass').classList.toggle('done', R.length > 0);
+  $('#gTabs').hidden = !lop; $('#clsCards').hidden = !!lop; $('#rosActions').hidden = !lop;
+  document.querySelectorAll('#gTabs [data-gtab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.gtab === gTab)));
+  ['hs', 'bai', 'so', 'tb'].forEach(t => { $('#gt_' + t).hidden = !lop || t !== gTab; });
+  $('#gbStore').innerHTML = gbStoreNote();
+  if (openPaneId !== 'cls' && !force) return;
+  const a = document.activeElement;
+  if (!force && a && a.closest && a.closest('#stepClass .gdyn') && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;   // đang gõ, không vẽ lại
+  if (!lop) { renderClsCards(names); return; }
+  ({ hs: renderHs, bai: renderTestsTab, so: renderBook, tb: renderProg })[gTab]();
+}
+function renderClsCards(names) {
+  $('#clsCards').innerHTML = names.length ? `<div class="clsgrid">${names.map(n => {
+    const T = gbTests(n), st = T.length ? gbStat(T[T.length - 1]) : null;
+    return `<button class="clscard" type="button" data-gcls="${esc(n)}"><b>Lớp ${esc(n)}</b><small>${(cfg.classes[n] || []).length} em · ${T.length} bài kiểm tra</small>${st && st.n ? `<small>Bài gần nhất: TB ${f1(st.avg)}</small>` : ''}</button>`;
+  }).join('')}</div>` : '<div class="empty">Chưa có lớp nào. Bấm <b>+ Lớp mới</b>, đặt tên lớp rồi nhập danh sách từ Excel. Hoặc chấm xong một bài, bấm <b>Lưu vào sổ điểm</b>: app tự tạo lớp từ các bài đã chấm.</div>';
+}
+function renderHs() {
+  const lop = cfg.curClass, R = cfg.classes[lop] || [], T = gbTests(lop), ixs = T.map(gbIndex);
+  const byS = new Map(); sheets.forEach(s => { if (s.status === 'done' && s.data && s.match && s.match.how !== 'none') byS.set(normSbd(s.data.sbd), s); });
+  const anyDone = lop === cfg.curClass && sheets.some(s => s.status === 'done');
+  let h = '';
+  if (!R.length) h += '<div class="empty">Lớp chưa có học sinh. Nhập danh sách từ Excel, dán từ Excel, hoặc thêm từng em bên dưới.</div>';
+  else {
+    h += `<div class="ros"><div class="ros-wrap"><table><thead><tr><th>STT</th><th>SBD</th><th>Họ và tên</th>${anyDone ? '<th>Bài đang chấm</th>' : ''}${T.length ? '<th>TB môn</th>' : ''}<th><span class="sr">Sửa, xóa</span></th></tr></thead><tbody>${R.map((r, i) => {
+      if (i === gEdit) return `<tr class="editing"><td><input class="cellin mono" id="reStt" value="${esc(r.stt)}" inputmode="numeric" aria-label="STT"></td><td><input class="cellin mono" id="reSbd" value="${esc(r.sbd)}" inputmode="numeric" aria-label="SBD"></td><td><input class="cellin" id="reTen" value="${esc(r.ten)}" aria-label="Họ và tên"></td>${anyDone ? '<td></td>' : ''}${T.length ? '<td></td>' : ''}<td class="ract"><button class="mini" type="button" data-ros="save" data-i="${i}">Lưu</button><button class="mini" type="button" data-ros="cancel">Hủy</button><button class="mini danger" type="button" data-ros="del" data-i="${i}" aria-label="Xóa ${esc(r.ten)} khỏi lớp">Xóa</button></td></tr>`;
+      const s = byS.get(normSbd(r.sbd)), g = s && grade(s.data), av = T.length ? gbAvg(T.map((t, j) => gbGet(ixs[j], r)?.d ?? null), T) : null;
+      return `<tr><td class="mono">${esc(r.stt)}</td><td class="mono">${esc(r.sbd)}</td><td>${esc(r.ten)}</td>${anyDone ? `<td class="mono">${s ? `<button class="mini" type="button" data-open="${s.id}">${g ? fmt(g.total) : '?'}</button>` : '<span class="muted">—</span>'}</td>` : ''}${T.length ? `<td class="mono">${f1(av)}</td>` : ''}<td class="ract"><button class="mini" type="button" data-ros="edit" data-i="${i}" aria-label="Sửa hoặc xóa ${esc(r.ten)}">Sửa</button></td></tr>`;
+    }).join('')}</tbody></table></div></div>`;
+  }
+  h += gAdd ? `<div class="cls-row addrow"><label class="field f-stt"><span>STT</span><input type="text" id="raStt" inputmode="numeric" value="${R.length + 1}" autocomplete="off"></label><label class="field f-sbd"><span>SBD</span><input type="text" id="raSbd" class="mono" inputmode="numeric" placeholder="trống = STT" autocomplete="off"></label><label class="field"><span>Họ và tên</span><input type="text" id="raTen" autocomplete="off"></label><button class="btn primary-soft" type="button" data-ros="addok">Thêm</button><button class="btn" type="button" data-ros="addx">Đóng</button></div>`
+    : '<div class="btnrow"><button class="btn" type="button" data-ros="add">+ Thêm học sinh</button></div>';
+  $('#rosList').innerHTML = h;
+}
+function histHtml(st) {
+  const mx = Math.max(1, ...st.bins);
+  return `<div class="hist" role="img" aria-label="Phân bố điểm: ${BINS.map((b, i) => `${b} ${st.bins[i]}`).join(', ')}">${BINS.map((b, i) => `<div class="hb" title="${b}: ${st.bins[i]} em"><span class="hb-n">${st.bins[i]}</span><span class="hb-bar" style="height:${st.bins[i] ? Math.max(4, Math.round(st.bins[i] / mx * 100)) : 0}%"></span><span class="hb-l">${b}</span></div>`).join('')}</div>`;
+}
+function testCard(t) {
+  const st = gbStat(t), open = gOpen === t.id, k = kieuOf(t);
+  let h = `<article class="gtc${open ? ' open' : ''}"><button class="gtc-h" type="button" data-gopen="${esc(t.id)}" aria-expanded="${open}">
+    <span class="kb k-${k}" title="${KIEU[k].n}, hệ số ${KIEU[k].w}">${KIEU[k].s}</span>
+    <span class="gtc-t"><b>${esc(t.ten)}</b><small>${LOAI[t.loai] || ''} · ${fmtDY(t.ngay)} · ${st.n} điểm</small></span>
+    <span class="gtc-avg">${f1(st.avg)}<small>TB lớp</small></span></button>${st.n ? histHtml(st) : ''}`;
+  if (open) {
+    const ix = gbIndex(t), S = gbStudents(t.lop, [t]).filter(s => gbGet(ix, s)?.d != null)
+      .map(s => ({ s, h: gbGet(ix, s) })).sort((a, b) => b.h.d - a.h.d);
+    h += `<div class="gtc-d">
+      <div class="stats"><div class="stat"><b>${f1(st.avg)}</b><span>trung bình</span></div><div class="stat"><b>${st.n ? fmt(st.max) : '—'}</b><span>cao nhất</span></div><div class="stat"><b>${st.n ? fmt(st.min) : '—'}</b><span>thấp nhất</span></div><div class="stat"><b>${st.n ? Math.round(st.pass * 100) + '%' : '—'}</b><span>đạt từ 5 điểm</span></div></div>
+      ${t.qs?.length ? `<p class="hint">Tỉ lệ ${t.loai === 'tn' ? 'đúng' : 'điểm đạt'} từng câu${t.qs.some(q => q.p < 50) ? `, yếu nhất: <b style="color:var(--ink)">${t.qs.slice().sort((a, b) => a.p - b.p).slice(0, 4).map(q => `${esc(q.lab)} (${q.p}%)`).join(', ')}</b>` : ''}</p><div class="qchips">${t.qs.map(q => `<span class="qc ${q.p < 50 ? 'bad' : q.p >= 80 ? 'ok' : ''}"><b>${esc(q.lab)}</b>${q.p}%</span>`).join('')}</div>` : ''}
+      <div class="repgrid">
+        <label class="field"><span>Tên bài</span><input type="text" id="gtf_ten" data-gtf="ten" data-id="${esc(t.id)}" value="${esc(t.ten)}" autocomplete="off"></label>
+        <label class="field"><span>Loại điểm</span><select id="gtf_kieu" data-gtf="kieu" data-id="${esc(t.id)}">${kieuOpts(k)}</select></label>
+        <label class="field"><span>Ngày</span><input type="date" id="gtf_ngay" data-gtf="ngay" data-id="${esc(t.id)}" value="${esc(t.ngay || '')}"></label>
+      </div>
+      ${S.length ? `<details class="howto"><summary>Điểm từng em (${S.length})</summary><div class="ros"><div class="ros-wrap"><table><thead><tr><th>Hạng</th><th>SBD</th><th>Họ và tên</th><th>Điểm</th>${t.max && t.max !== 10 ? `<th>Gốc /${fmt(t.max)}</th>` : ''}<th>Xếp loại</th></tr></thead><tbody>${S.map((x, i) => `<tr><td class="mono">${i + 1}</td><td class="mono">${esc(x.s.sbd)}</td><td>${esc(x.s.ten)}</td><td class="mono">${fmt(x.h.d)}</td>${t.max && t.max !== 10 ? `<td class="mono">${x.h.goc != null ? fmt(x.h.goc) : ''}</td>` : ''}<td>${vXepLoai(x.h.d, 10)}</td></tr>`).join('')}</tbody></table></div></div></details>` : ''}
+      <div class="btnrow"><button class="btn" type="button" data-gb="so">${t.loai === 'tay' ? 'Nhập điểm trong sổ' : 'Xem trong sổ điểm'}</button><button class="btn" type="button" data-gb="x1" data-id="${esc(t.id)}">Excel bài này</button><button class="btn danger" type="button" data-gb="del" data-id="${esc(t.id)}">Xóa bài</button></div>
+    </div>`;
+  }
+  return h + '</article>';
+}
+function renderTestsTab() {
+  const lop = cfg.curClass, T = gbTests(lop).slice().reverse();
+  let h = `<div class="btnrow"><button class="btn primary-soft" type="button" data-gb="tay" aria-expanded="${gTay}">+ Cột điểm nhập tay</button>${T.length ? '<button class="btn" type="button" data-gb="xlsx">Xuất sổ điểm Excel</button>' : ''}</div>`;
+  if (gTay) h += `<div class="import"><div class="repgrid">
+      <label class="field"><span>Tên cột điểm</span><input type="text" id="gtTen" placeholder="VD: Kiểm tra 15 phút lần 2" autocomplete="off"></label>
+      <label class="field"><span>Loại điểm</span><select id="gtKieu">${kieuOpts('tx')}</select></label>
+      <label class="field"><span>Ngày</span><input type="date" id="gtNgay" value="${todayISO()}"></label></div>
+      <div class="btnrow"><button class="btn primary-soft" type="button" data-gb="tayok">Tạo và nhập điểm</button><button class="btn" type="button" data-gb="tayx">Hủy</button></div>
+      <p class="hint">Dùng cho điểm miệng, 15 phút, thực hành… Cột mới hiện trong Sổ điểm, chạm vào ô để gõ điểm từng em (thang 10).</p></div>`;
+  if (!T.length) h += `<div class="empty">Lớp ${esc(lop)} chưa có bài kiểm tra nào. Chấm xong một bài, mở <b>Tổng hợp &amp; xuất</b> (trắc nghiệm) hoặc tab <b>4 · Xuất</b> (tự luận) rồi bấm <b>Lưu vào sổ điểm</b>.</div>`;
+  h += T.map(testCard).join('');
+  h += `<p class="hint">Sao lưu: <button class="btn link inline" type="button" data-gb="bak">Tải bản sao lưu sổ điểm (.json)</button> · <button class="btn link inline" type="button" data-gb="res">Khôi phục từ file</button></p>`;
+  $('#gt_bai').innerHTML = h;
+}
+function renderBook() {
+  const lop = cfg.curClass, T = gbTests(lop), S = gbStudents(lop, T), ixs = T.map(gbIndex);
+  if (!T.length) { $('#gt_so').innerHTML = '<div class="empty">Chưa có bài kiểm tra nào để lập sổ điểm. Lưu một bài đã chấm vào sổ, hoặc tạo cột điểm nhập tay ở tab <b>Bài kiểm tra</b>.</div>'; return; }
+  if (!S.length) { $('#gt_so').innerHTML = '<div class="empty">Lớp chưa có học sinh. Nhập danh sách ở tab <b>Học sinh</b>.</div>'; return; }
+  const V = S.map(st => T.map((t, j) => gbGet(ixs[j], st)?.d ?? null));
+  const cnt = k => T.filter(t => kieuOf(t) === k).length;
+  $('#gt_so').innerHTML = `<div class="btnrow"><button class="btn" type="button" data-gb="xlsx">Xuất sổ điểm Excel</button><button class="btn" type="button" data-gb="tay2">+ Cột điểm nhập tay</button></div>
+    <p class="hint">${cnt('tx')} bài thường xuyên · ${cnt('gk')} giữa kì · ${cnt('ck')} cuối kì. <b>TB môn</b> = (tổng điểm TX + 2 × GK + 3 × CK) chia (số bài TX + 2 × số GK + 3 × số CK), theo Thông tư 22; bài thiếu điểm không tính. Chạm vào ô để sửa điểm.</p>
+    <div class="gb-wrap"><table class="gb"><thead><tr><th class="c-ten">Họ và tên</th>${T.map(t => { const k = kieuOf(t); return `<th class="c-t" title="${esc(t.ten)} · ${KIEU[k].n} · ${fmtDY(t.ngay)}"><span class="kb k-${k}">${KIEU[k].s}</span><span class="th-n">${esc(t.ten)}</span><small>${fmtD(t.ngay)}</small></th>`; }).join('')}<th class="c-avg">TB môn</th></tr></thead>
+    <tbody>${S.map((st, i) => `<tr><td class="c-ten"><span class="mono muted">${esc(st.stt || '')}</span> ${esc(st.ten)}${st.extra ? ' <small class="muted">(ngoài DS)</small>' : ''}</td>${T.map((t, j) => { const v = V[i][j]; return `<td class="c-sc${v == null ? '' : v < 5 ? ' lo' : v >= 8 ? ' hi' : ''}"><input class="sc-in" type="text" inputmode="decimal" data-gcell="${esc(t.id)}|${esc(stKey(st))}" value="${v == null ? '' : fmt(v)}" aria-label="${esc(st.ten)}, ${esc(t.ten)}" autocomplete="off"></td>`; }).join('')}<td class="c-avg">${f1(gbAvg(V[i], T))}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td class="c-ten">TB lớp</td>${T.map(t => `<td>${f1(gbStat(t).avg)}</td>`).join('')}<td>${f1((() => { const a = V.map(v => gbAvg(v, T)).filter(x => x != null); return a.length ? a.reduce((x, y) => x + y, 0) / a.length : null; })())}</td></tr></tfoot></table></div>`;
+}
+function gbCellSet(tid, key, raw) {
+  const t = GB.tests.get(tid); if (!t) return;
+  const st = gbStudents(t.lop, gbTests(t.lop)).find(s => stKey(s) === key); if (!st) return;
+  const v = String(raw).trim().replace(',', '.'); let d = null;
+  if (v !== '') { d = parseFloat(v); if (!isFinite(d) || d < 0 || d > 10) { toast('Điểm phải từ 0 đến 10'); renderClass(true); return; } d = r2(d); }
+  const nt = JSON.parse(JSON.stringify(t)); nt.hs = nt.hs || [];
+  const h = gbGet(gbIndex(nt), st);
+  if (h) { if (h.d === d) return; h.d = d; h.sua = true; h.goc = d == null ? null : r2(d * (nt.max || 10) / 10); }
+  else if (d != null) nt.hs.push({ sbd: st.sbd || '', ten: st.ten || '', stt: st.stt || '', d, goc: r2(d * (nt.max || 10) / 10), sua: true });
+  else return;
+  gbPut(nt);
+}
+function lineChart(series, labels, W) {
+  const H = 210, L = 30, Rr = 46, Tp = 12, B = 28, n = labels.length, pw = W - L - Rr;
+  const x = i => L + (n === 1 ? pw / 2 : i * pw / (n - 1)), y = v => Tp + (10 - v) / 10 * (H - Tp - B);
+  let g = '';
+  const hw = n > 1 ? pw / (n - 1) / 2 : pw / 2;
+  labels.forEach((l, i) => { g += `<rect class="ch-hit" x="${(x(i) - hw).toFixed(1)}" y="${Tp}" width="${(2 * hw).toFixed(1)}" height="${H - Tp - B}"><title>${esc(l.f)}\n${series.map(s => `${esc(s.name)}: ${s.v[i] == null ? 'chưa có' : fmt(s.v[i])}`).join('\n')}</title></rect>`; });
+  for (let v = 0; v <= 10; v += 2) g += `<line class="ch-grid" x1="${L}" x2="${W - Rr}" y1="${y(v)}" y2="${y(v)}"/><text class="ch-ax" x="${L - 7}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  const step = Math.max(1, Math.ceil(n / Math.max(2, Math.floor(pw / 48))));
+  labels.forEach((l, i) => { if (i % step === 0 || i === n - 1) g += `<text class="ch-ax" x="${x(i).toFixed(1)}" y="${H - 8}" text-anchor="middle">${esc(l.s || 'B' + (i + 1))}</text>`; });
+  const ends = [];
+  series.slice().sort((a, b) => (b.ref ? 1 : 0) - (a.ref ? 1 : 0)).forEach(s => {
+    let d = '', pen = false;
+    s.v.forEach((v, i) => { if (v == null) { pen = false; return; } d += `${pen ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`; pen = true; });
+    g += `<path class="ch-line" d="${d}" style="stroke:var(--${s.c})"/>`;
+    s.v.forEach((v, i) => { if (v != null) g += `<circle class="ch-dot" cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="4" style="fill:var(--${s.c})"/>`; });
+    let li = -1; s.v.forEach((v, i) => { if (v != null) li = i; });
+    if (li >= 0) ends.push({ x: x(li) + 8, y: y(s.v[li]) + 4, t: fmt(s.v[li]) });
+  });
+  ends.sort((a, b) => a.y - b.y); for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 14) ends[i].y = ends[i - 1].y + 14;
+  ends.forEach(e => { g += `<text class="ch-end" x="${e.x.toFixed(1)}" y="${e.y.toFixed(1)}">${e.t}</text>`; });
+  const leg = series.length > 1 ? `<div class="ch-leg">${series.map(s => `<span><i style="background:var(--${s.c})"></i>${esc(s.name)}</span>`).join('')}</div>` : '';
+  return `${leg}<svg class="ch" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Biểu đồ điểm qua ${n} bài, thang 10">${g}</svg>`;
+}
+function renderProg() {
+  const lop = cfg.curClass, T = gbTests(lop), S = gbStudents(lop, T), ixs = T.map(gbIndex), box = $('#gt_tb');
+  if (T.length < 2) { box.innerHTML = `<div class="empty">Cần ít nhất 2 bài kiểm tra trong sổ để xem tiến bộ (lớp đang có ${T.length} bài).</div>`; return; }
+  const W = Math.max(300, Math.min(760, (box.clientWidth || 360) - 30));
+  const labels = T.map(t => ({ s: fmtD(t.ngay), f: `${t.ten} · ${KIEU[kieuOf(t)].s} · ${fmtDY(t.ngay)}` }));
+  const cls = T.map(t => { const a = gbStat(t).avg; return a == null ? null : r2(a); });
+  const rows = S.map(st => ({ st, k: stKey(st), v: T.map((t, j) => gbGet(ixs[j], st)?.d ?? null) }));
+  const watch = [], up = [];
+  rows.forEach(r => {
+    const vs = r.v.map((d, j) => ({ d, j })).filter(o => o.d != null), last = vs[vs.length - 1], prev = vs[vs.length - 2], why = [];
+    let sev = 0;
+    if (last && last.d < 5) { why.push(`bài gần nhất ${fmt(last.d)} điểm`); sev += 3; }
+    if (last && prev && prev.d - last.d >= 1.5) { why.push(`giảm ${fmt(prev.d - last.d)} điểm so với bài trước`); sev += 2; }
+    const av = gbAvg(r.v, T); if (av != null && av < 5 && !(last && last.d < 5)) { why.push(`TB môn ${f1(av)}`); sev += 2; }
+    const miss = r.v.filter(d => d == null).length; if (miss) { why.push(`thiếu ${miss} bài`); sev += miss === T.length ? 0.5 : 1; }
+    if (why.length) watch.push({ r, why, sev });
+    if (last && prev && last.d - prev.d >= 1.5) up.push({ r, gain: last.d - prev.d });
+  });
+  watch.sort((a, b) => b.sev - a.sev); up.sort((a, b) => b.gain - a.gain);
+  if (!rows.some(r => r.k === gSel)) gSel = (watch[0]?.r || rows[0])?.k || '';
+  const cur = rows.find(r => r.k === gSel);
+  let h = `<section class="card"><h4>Điểm trung bình lớp qua các bài <span>${T.length} bài · thang 10</span></h4>${lineChart([{ name: 'TB lớp', v: cls, c: 'ch1' }], labels, W)}</section>`;
+  if (cur) {
+    const av = gbAvg(cur.v, T), ca = (() => { const a = rows.map(r => gbAvg(r.v, T)).filter(x => x != null); return a.length ? a.reduce((x, y) => x + y, 0) / a.length : null; })();
+    h += `<section class="card"><h4>Tiến bộ từng em <span>TB môn ${f1(av)}${ca != null ? ` · TB lớp ${f1(ca)}` : ''}</span></h4>
+      <label class="field"><span>Học sinh</span><select id="gSel">${rows.map(r => `<option value="${esc(r.k)}"${r.k === gSel ? ' selected' : ''}>${esc(r.st.stt ? r.st.stt + '. ' : '')}${esc(r.st.ten)}</option>`).join('')}</select></label>
+      ${lineChart([{ name: cur.st.ten || 'Học sinh', v: cur.v, c: 'ch1' }, { name: 'TB lớp', v: cls, c: 'chref', ref: true }], labels, W)}
+      <details class="howto"><summary>Xem dạng bảng</summary><div class="ros"><div class="ros-wrap"><table><thead><tr><th>Bài</th><th>Loại</th><th>Ngày</th><th>Điểm em</th><th>TB lớp</th></tr></thead><tbody>${T.map((t, j) => `<tr><td>${esc(t.ten)}</td><td>${KIEU[kieuOf(t)].s}</td><td class="mono">${fmtD(t.ngay)}</td><td class="mono">${cur.v[j] == null ? '—' : fmt(cur.v[j])}</td><td class="mono">${f1(cls[j])}</td></tr>`).join('')}</tbody></table></div></div></details></section>`;
+  }
+  h += `<section class="card"><h4>Học sinh cần quan tâm <span>${watch.length} em</span></h4>${watch.length ? `<div class="watch">${watch.map(w => `<button class="wrow${w.r.k === gSel ? ' on' : ''}" type="button" data-gstu="${esc(w.r.k)}"><b>${esc(w.r.st.ten)}</b><small${w.sev >= 2 ? ' class="bad-t"' : ''}>${esc(w.why.join(' · '))}</small></button>`).join('')}</div>` : '<p class="hint">Chưa có em nào cần lưu ý: không em nào dưới 5 điểm hoặc giảm mạnh ở bài gần nhất.</p>'}</section>`;
+  if (up.length) h += `<section class="card"><h4>Tiến bộ nổi bật <span>tăng từ 1,5 điểm so với bài trước</span></h4><div class="watch">${up.map(u => `<button class="wrow${u.r.k === gSel ? ' on' : ''}" type="button" data-gstu="${esc(u.r.k)}"><b>${esc(u.r.st.ten)}</b><small>tăng ${fmt(u.gain)} điểm</small></button>`).join('')}</div></section>`;
+  box.innerHTML = h;
+}
+
+/* — Excel, sao lưu — */
+const XL_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+async function gbXlsx(lop) {
+  if (!window.XLSX) await loadScript(XLSX_SRC);
+  const T = gbTests(lop), S = gbStudents(lop, T), ixs = T.map(gbIndex);
+  const rows = [['STT', 'SBD', 'Họ và tên', ...T.map(t => `${t.ten} (${KIEU[kieuOf(t)].s} ${fmtD(t.ngay)})`), 'TB môn']];
+  S.forEach(st => { const v = T.map((t, j) => gbGet(ixs[j], st)?.d ?? null); const a = gbAvg(v, T); rows.push([st.stt || '', st.sbd || '', st.ten || '', ...v.map(x => x == null ? '' : x), a == null ? '' : a]); });
+  rows.push(['', '', 'TB lớp', ...T.map(t => { const s = gbStat(t); return s.n ? Math.round(s.avg * 100) / 100 : ''; }), '']);
+  const ws = XLSX.utils.aoa_to_sheet(rows); ws['!cols'] = [{ wch: 5 }, { wch: 10 }, { wch: 26 }, ...T.map(() => ({ wch: 14 })), { wch: 9 }];
+  const info = [['Tên bài', 'Loại điểm', 'Hệ số', 'Ngày', 'Hình thức', 'Số điểm', 'TB', 'Cao nhất', 'Thấp nhất', 'Tỉ lệ ≥ 5']];
+  T.forEach(t => { const s = gbStat(t), k = kieuOf(t); info.push([t.ten, KIEU[k].n, KIEU[k].w, fmtDY(t.ngay), LOAI[t.loai] || '', s.n, s.n ? Math.round(s.avg * 100) / 100 : '', s.n ? s.max : '', s.n ? s.min : '', s.n ? Math.round(s.pass * 100) + '%' : '']); });
+  info.push([], ['TB môn = (tổng điểm TX + 2 × GK + 3 × CK) / (số bài TX + 2 × số GK + 3 × số CK), theo Thông tư 22; bài thiếu điểm không tính.']);
+  const ws2 = XLSX.utils.aoa_to_sheet(info); ws2['!cols'] = [{ wch: 30 }, { wch: 13 }, { wch: 6 }, { wch: 11 }, { wch: 14 }, { wch: 8 }, { wch: 7 }, { wch: 9 }, { wch: 9 }, { wch: 9 }];
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Sổ điểm'); XLSX.utils.book_append_sheet(wb, ws2, 'Bài kiểm tra');
+  await saveFile(`so-diem-lop-${slug(lop)}-${todayISO()}.xlsx`, new Blob([XLSX.write(wb, { type: 'array', bookType: 'xlsx' })], { type: XL_MIME }), `Đã lưu sổ điểm lớp ${lop}`);
+}
+async function gbXlsxOne(t) {
+  if (!window.XLSX) await loadScript(XLSX_SRC);
+  const ix = gbIndex(t), S = gbStudents(t.lop, [t]), other = t.max && t.max !== 10;
+  const rows = [['STT', 'SBD', 'Họ và tên', 'Điểm (thang 10)', ...(other ? [`Điểm gốc (/${t.max})`] : []), 'Xếp loại', 'Nhận xét']];
+  S.forEach(st => { const h = gbGet(ix, st); rows.push([st.stt || '', st.sbd || '', st.ten || '', h?.d ?? '', ...(other ? [h?.goc ?? ''] : []), h?.d != null ? vXepLoai(h.d, 10) : 'Chưa có điểm', h?.nx || '']); });
+  const ws = XLSX.utils.aoa_to_sheet(rows); ws['!cols'] = [{ wch: 5 }, { wch: 10 }, { wch: 26 }, { wch: 9 }, ...(other ? [{ wch: 10 }] : []), { wch: 11 }, { wch: 70 }];
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Điểm');
+  await saveFile(`${slug(t.ten)}-lop-${slug(t.lop)}.xlsx`, new Blob([XLSX.write(wb, { type: 'array', bookType: 'xlsx' })], { type: XL_MIME }), 'Đã lưu bảng điểm bài này');
+}
+async function gbBackup() {
+  const data = { app: 'cham-phieu-ai', kind: 'sodiem', v: 1, at: new Date().toISOString(), classes: cfg.classes, tests: [...GB.tests.values()] };
+  await saveFile(`so-diem-sao-luu-${todayISO()}.json`, new Blob([JSON.stringify(data)], { type: 'application/json' }), 'Đã lưu bản sao lưu sổ điểm');
+}
+async function gbRestore(file) {
+  let o; try { o = JSON.parse(await file.text()); } catch (e) { toast('File không đúng định dạng'); return; }
+  if (!o || o.kind !== 'sodiem' || !Array.isArray(o.tests)) { toast('Đây không phải file sao lưu sổ điểm của app'); return; }
+  let nT = 0, nC = 0;
+  for (const t of o.tests) { if (!t || !t.id || !t.lop) continue; const cur = GB.tests.get(t.id); if (!cur || (+t.ts || 0) > (+cur.ts || 0)) { gbPut(t); nT++; } }
+  for (const [lop, ds] of Object.entries(o.classes || {})) if (Array.isArray(ds) && ds.length && !(cfg.classes[lop] || []).length) { cfg.classes[lop] = ds; gbClassOut(lop); nC++; }
+  saveCfg(); rematchAll(true); renderAll(); toast(nT || nC ? `Đã khôi phục ${nT} bài kiểm tra${nC ? `, ${nC} lớp` : ''}` : 'Sổ điểm đã có đủ dữ liệu trong file này');
+}
+function rosChanged(lop) { saveCfg(); gbClassOut(lop); if (lop === cfg.curClass) rematchAll(true); renderAll(); }
+
+
 let uid = 0;
 const byId = id => sheets.find(s => s.id === id);
 function padData(d) {
@@ -1410,7 +1959,7 @@ async function addDemo() {
 }
 
 /* ---------- AI ---------- */
-let sampleFn = null, maxImgs = 0, engineProbe = true, downloadsCap = null, mcpCap = null, dbCap = null;
+let sampleFn = null, maxImgs = 0, engineProbe = true, downloadsCap = null, mcpCap = null, dbCap = null, userCap = null;
 const inClaude = !!(window.claude && window.claude.use);
 const claudeOK = () => !!sampleFn && maxImgs > 0;
 const engine = () => (cfg.engine === 'gemini' || !claudeOK()) ? 'gemini' : 'claude';
@@ -1426,8 +1975,10 @@ const engineReady = () => engine() === 'claude' ? claudeOK() : geminiOK();
     try { downloadsCap = await window.claude.use('downloads'); } catch (e) {}
     try { mcpCap = await window.claude.use('mcp'); } catch (e) { mcpCap = null; }
     try { dbCap = await window.claude.use('db'); } catch (e) { dbCap = null; }
+    try { userCap = await window.claude.use('user'); } catch (e) { userCap = null; }
   }
   engineProbe = false; renderEngine(); updateBar(); renderSync();
+  gbInit().catch(() => { GB.mode = 'local'; GB.ready = true; gbRender(); });
   if (cfg.sync.on && cfg.sync.code) startSync(cfg.sync.code, true);
 })();
 
@@ -2307,6 +2858,7 @@ function renderSummary() {
         : `<button class="exp muted-card" type="button" data-exp="gsetup"><b>Lưu điểm lên Google Sheet</b><span>Chưa kết nối. Bấm để mở phần Kết nối Google Sheet ở bước 2</span></button>`}
     </div>
     <p class="hint" id="expStatus" aria-live="polite"></p></section>
+  ${gbCardHtml('tn')}
   <section class="card"><h4>Thông tin in trên phiếu kết quả</h4>
     <div class="repgrid">
       <label class="field"><span>Trường</span><input type="text" id="rTruong" data-rep="truong" value="${esc(R.truong)}" autocomplete="off"></label>
@@ -2333,6 +2885,7 @@ function renderSummary() {
         <div class="nxh"><b>${esc(s.data.ho_ten || 'Chưa có tên')}</b><small>SBD ${esc(s.data.sbd || '—')} · Mã ${esc(s.data.ma_de || '—')} · Hạng ${rk.get(s.id)}</small><span class="pill">${fmt(g.total)} · ${xepLoai(g.total)}</span></div>
         <textarea rows="2" id="nx${s.id}" data-nxid="${s.id}" aria-label="Nhận xét cho ${esc(s.data.ho_ten || 'học sinh')}">${esc(s.data.nx || '')}</textarea>
       </div>`).join('')}</div></section>`;
+  gbCardRefresh('tn');
 }
 async function aiJSON(prompt, signal) {
   if (engine() === 'claude') return await sampleFn.json(prompt, { modelTier: 'quick', cache: false, signal });
@@ -2874,33 +3427,12 @@ function absentNote() {
   return `<p class="hint">Lớp ${esc(cfg.curClass)}: có bài ${R.length - ab.length}/${R.length} em${ab.length ? ` · <b style="color:var(--ink)">Chưa có bài:</b> ${ab.slice(0, 8).map(r => esc(r.ten)).join(', ')}${ab.length > 8 ? ` và ${ab.length - 8} em nữa` : ''}` : ''}${un ? ` · <b style="color:var(--bad)">${un} phiếu không khớp ai</b>` : ''}</p>`;
 }
 function setClsOpen(open) { cfg.clsOpen = open; }
-function renderClass() {
-  const names = Object.keys(cfg.classes).sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }));
-  if (cfg.curClass && !cfg.classes[cfg.curClass]) cfg.curClass = '';
-  const sel = $('#clsSel');
-  sel.innerHTML = `<option value="">Không dùng danh sách lớp</option>` + names.map(n => `<option value="${esc(n)}"${n === cfg.curClass ? ' selected' : ''}>Lớp ${esc(n)} · ${cfg.classes[n].length} em</option>`).join('');
-  const R = roster();
-  $('#clsSummary').textContent = R.length ? `Lớp ${cfg.curClass} · ${R.length} em · tự nhận học sinh theo SBD` : cfg.curClass ? `Lớp ${cfg.curClass} · chưa có danh sách` : 'Không bắt buộc · nhập danh sách để tự nhận đúng học sinh theo SBD';
-  $('#stepClass').classList.toggle('done', R.length > 0);
-  $('#rosActions').hidden = !cfg.curClass;
-  const L = $('#rosList');
-  if (!cfg.curClass) { L.innerHTML = names.length ? '' : '<div class="empty">Chưa có lớp nào. Bấm <b>+ Lớp mới</b>, đặt tên lớp rồi nhập danh sách từ Excel.</div>'; return; }
-  if (!R.length) { L.innerHTML = '<div class="empty">Lớp chưa có học sinh. Nhập danh sách từ Excel hoặc dán từ Excel.</div>'; return; }
-  const byS = new Map(); sheets.forEach(s => { if (s.status === 'done' && s.data && s.match && s.match.how !== 'none') byS.set(normSbd(s.data.sbd), s); });
-  const anyDone = sheets.some(s => s.status === 'done');
-  const open = $('#rosList details')?.open;
-  L.innerHTML = `<details class="ros"${open ? ' open' : ''}><summary>Xem danh sách ${R.length} em${anyDone ? ` · có bài ${R.filter(r => byS.has(normSbd(r.sbd))).length}/${R.length}` : ''}</summary>
-    <div class="ros-wrap"><table><thead><tr><th>STT</th><th>SBD</th><th>Họ và tên</th><th>Điểm</th></tr></thead><tbody>${R.map(r => {
-      const s = byS.get(normSbd(r.sbd)), g = s && grade(s.data);
-      return `<tr${s ? ` class="has" data-open="${s.id}"` : ''}><td class="mono">${esc(r.stt)}</td><td class="mono">${esc(r.sbd)}</td><td>${esc(r.ten)}</td><td class="mono">${s ? (g ? fmt(g.total) : '?') : '<span class="muted">—</span>'}</td></tr>`;
-    }).join('')}</tbody></table></div></details>`;
-}
 function setRoster(list, src) {
   const lop = cfg.curClass; if (!lop) return;
   if (!list.length) { toast(`Không tìm thấy họ tên học sinh trong ${src}. Cần cột "Họ và tên" và cột "SBD".`); return; }
   const old = cfg.classes[lop] ? cfg.classes[lop].slice() : [];
-  cfg.classes[lop] = list; saveCfg(); rematchAll(true); renderAll();
-  toast(`Đã nhập ${list.length} em vào lớp ${lop}`, { label: 'Hoàn tác', fn: () => { cfg.classes[lop] = old; saveCfg(); rematchAll(true); renderAll(); } });
+  cfg.classes[lop] = list; gbClassOut(lop); saveCfg(); rematchAll(true); renderAll();
+  toast(`Đã nhập ${list.length} em vào lớp ${lop}`, { label: 'Hoàn tác', fn: () => { cfg.classes[lop] = old; gbClassOut(lop); saveCfg(); rematchAll(true); renderAll(); } });
 }
 async function importRosterFile(file) {
   try {
@@ -3218,6 +3750,7 @@ function openPane(id) {
   if (openPaneId && openPaneId !== id) $(PANES[openPaneId]).classList.remove('open');
   paneOpener = paneOpener || document.activeElement;
   const el = $(PANES[id]); el.classList.add('open'); openPaneId = id; syncLock();
+  if (id === 'cls') renderClass(true);
   el.querySelector('.panel-body').scrollTop = 0;
   el.querySelector('[data-close]')?.focus({ preventScroll: true });
 }
@@ -3233,7 +3766,8 @@ function renderTiles() {
   const parts = [cfg.n1 && cfg.n1, cfg.n2 && cfg.n2, cfg.n3 && cfg.n3].filter(Boolean).join(' + ');
   set('Key', sample ? `Đáp án ví dụ · ${structName()}` : full ? `${structName()} · ${cfg.keys.length} mã đề` : `${structName()} · còn thiếu câu`, sample || !full ? 'warn' : 'ok');
   const R = roster();
-  set('Cls', R.length ? `Lớp ${cfg.curClass} · ${R.length} em` : cfg.curClass ? `Lớp ${cfg.curClass} · chưa có danh sách` : 'Không bắt buộc · tự nhận học sinh theo SBD', R.length ? 'ok' : '');
+  const nCl = gbClassNames().length, nTe = cfg.curClass ? gbTests(cfg.curClass).length : 0;
+  set('Cls', cfg.curClass ? `Lớp ${cfg.curClass} · ${R.length ? R.length + ' em' : 'chưa có DS'} · ${nTe} bài` : nCl ? `${nCl} lớp · chưa chọn lớp` : 'Danh sách, sổ điểm, tiến bộ', R.length ? 'ok' : '');
   const n = sheets.length, done = sheets.filter(x => x.status === 'done').length, err = sheets.filter(x => x.status === 'error').length;
   set('Sh', n ? `${n} phiếu · đã chấm ${done}${err ? ` · ${err} lỗi` : ''}` : 'Chưa có phiếu', n ? (done === n ? 'ok' : 'warn') : '');
   set('Ai', engineProbe ? 'Đang kết nối…' : engineReady()
@@ -3281,7 +3815,8 @@ $('#drop').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key ===
 
 $('#clsSel').addEventListener('change', e => {
   cfg.curClass = e.target.value; if (cfg.curClass) cfg.rep.lop = cfg.curClass;
-  saveCfg(); rematchAll(true); renderAll();
+  gEdit = -1; gOpen = ''; gSel = ''; gAdd = false; gTay = false;
+  saveCfg(); rematchAll(true); renderAll(); e.target.blur();
 });
 $('#clsNew').addEventListener('click', e => {
   const box = $('#clsNewBox'); box.hidden = !box.hidden; e.currentTarget.setAttribute('aria-expanded', String(!box.hidden));
@@ -3289,16 +3824,17 @@ $('#clsNew').addEventListener('click', e => {
 });
 const createClass = () => {
   const name = $('#clsNewName').value.trim().replace(/^lớp\s+/i, ''); if (!name) { toast('Nhập tên lớp, ví dụ 10A3'); return; }
-  if (!cfg.classes[name]) cfg.classes[name] = [];
+  if (!cfg.classes[name]) { cfg.classes[name] = []; gbClassOut(name); }
+  gTab = 'hs';
   cfg.curClass = name; cfg.rep.lop = name; $('#clsNewName').value = ''; $('#clsNewBox').hidden = true; $('#clsNew').setAttribute('aria-expanded', 'false');
   saveCfg(); rematchAll(true); renderAll(); toast(`Đã chọn lớp ${name}. Nhập danh sách học sinh bên dưới.`);
 };
 $('#clsNewOk').addEventListener('click', createClass);
 $('#clsNewName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); createClass(); } });
 $('#clsDel').addEventListener('click', () => {
-  const lop = cfg.curClass; if (!lop) return; const old = cfg.classes[lop];
-  delete cfg.classes[lop]; cfg.curClass = ''; saveCfg(); rematchAll(true); renderAll();
-  toast(`Đã xóa lớp ${lop} khỏi app`, { label: 'Hoàn tác', fn: () => { cfg.classes[lop] = old; cfg.curClass = lop; saveCfg(); rematchAll(true); renderAll(); } });
+  const lop = cfg.curClass; if (!lop) return; const old = cfg.classes[lop], tests = gbTests(lop);
+  delete cfg.classes[lop]; cfg.curClass = ''; gbClassOut(lop); tests.forEach(t => gbDel(t.id)); saveCfg(); rematchAll(true); renderAll();
+  toast(`Đã xóa lớp ${lop}${tests.length ? ` và ${tests.length} bài kiểm tra` : ''}`, { label: 'Hoàn tác', fn: () => { if (old) cfg.classes[lop] = old; cfg.curClass = lop; gbClassOut(lop); tests.forEach(t => gbPut(t)); saveCfg(); rematchAll(true); renderAll(); } });
 });
 $('#rosImp').addEventListener('click', () => $('#rosIn').click());
 $('#rosIn').addEventListener('change', e => { const f = e.target.files?.[0]; if (f) importRosterFile(f).finally(() => { e.target.value = ''; }); });
@@ -4408,6 +4944,9 @@ function renderVan() {
     return `<div class="stats"><div class="stat"><b>${D.length}</b><span>bài đã chấm</span></div><div class="stat"><b>${fmt(avg)}</b><span>điểm trung bình</span></div><div class="stat"><b>${fmt(Math.max(...ts))}</b><span>cao nhất</span></div><div class="stat"><b>${fmt(Math.min(...ts))}</b><span>thấp nhất</span></div></div>
       ${de?.outline?.length ? `<p class="hint">Tỉ lệ điểm trung bình từng câu: ${de.outline.map(c => `<b>${esc(c.id)}</b> ${Math.round(D.reduce((a, e) => a + vScore(e, c), 0) / D.length / (c.toi_da || 1) * 100)}%`).join(' · ')}</p>` : ''}`; })()
     : '<div class="empty">Chưa có bài nào chấm xong.</div>';
+  const gbBox = $('#vanGb');
+  if (!gbBox.contains(document.activeElement)) gbBox.innerHTML = D.length && de ? gbCardHtml('van') : '';
+  gbCardRefresh('van');
   if (vanCurId != null && !$('#ovVan').hidden) renderVanDetail();
 }
 function openVanDetail(id) { vanCurId = id; $('#ovVan').hidden = false; syncLock(); renderVanDetail(); $('#ovVanBody').scrollTop = 0; $('#ovVanClose').focus(); }
@@ -4538,6 +5077,79 @@ $('#ovVanBody').addEventListener('click', e => {
     const i = essays.indexOf(ess); essays.splice(i, 1); closeVanDetail();
     toast('Đã xóa bài', { label: 'Hoàn tác', fn: () => { essays.splice(i, 0, ess); renderVan(); } });
   }
+});
+
+/* — Sự kiện: Quản lý lớp — */
+$('#gTabs').addEventListener('click', e => { const b = e.target.closest('[data-gtab]'); if (!b) return; gTab = b.dataset.gtab; gEdit = -1; renderClass(true); });
+$('#stepClass').addEventListener('click', e => {
+  const c = e.target.closest('[data-gcls]'); if (c) { cfg.curClass = c.dataset.gcls; if (cfg.classes[cfg.curClass]) cfg.rep.lop = cfg.curClass; saveCfg(); rematchAll(true); gTab = 'hs'; renderAll(); return; }
+  const r = e.target.closest('[data-ros]');
+  if (r) {
+    const lop = cfg.curClass, R = cfg.classes[lop] || (cfg.classes[lop] = []), i = +r.dataset.i, act = r.dataset.ros;
+    if (act === 'edit') { gEdit = i; renderClass(true); $('#reTen')?.focus(); }
+    else if (act === 'cancel') { gEdit = -1; renderClass(true); }
+    else if (act === 'save') {
+      const ten = $('#reTen').value.trim(); if (!ten) { toast('Họ tên không được để trống'); return; }
+      const stt = $('#reStt').value.trim() || String(i + 1); R[i] = { stt, sbd: $('#reSbd').value.trim() || stt, ten }; gEdit = -1; rosChanged(lop); renderClass(true);
+    } else if (act === 'del') {
+      const old = R.slice(), st = R[i]; R.splice(i, 1); gEdit = -1; rosChanged(lop); renderClass(true);
+      toast(`Đã xóa ${st.ten} khỏi lớp ${lop}`, { label: 'Hoàn tác', fn: () => { cfg.classes[lop] = old; rosChanged(lop); renderClass(true); } });
+    } else if (act === 'add') { gAdd = true; renderClass(true); $('#raTen')?.focus(); }
+    else if (act === 'addx') { gAdd = false; renderClass(true); }
+    else if (act === 'addok') {
+      const ten = $('#raTen').value.trim(); if (!ten) { toast('Nhập họ tên học sinh'); $('#raTen').focus(); return; }
+      const stt = $('#raStt').value.trim() || String(R.length + 1), sbd = $('#raSbd').value.trim() || stt;
+      if (normSbd(sbd) && R.some(x => normSbd(x.sbd) === normSbd(sbd))) { toast(`SBD ${sbd} đã có trong lớp`); $('#raSbd').focus(); return; }
+      R.push({ stt, sbd, ten }); rosChanged(lop); renderClass(true); toast(`Đã thêm ${ten}`); $('#raTen')?.focus();
+    }
+    return;
+  }
+  const o = e.target.closest('[data-gopen]'); if (o) { gOpen = gOpen === o.dataset.gopen ? '' : o.dataset.gopen; renderClass(true); return; }
+  const s = e.target.closest('[data-gstu]'); if (s) { gSel = s.dataset.gstu; renderClass(true); $('#gSel')?.focus({ preventScroll: true }); $('#gSel')?.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+  const b = e.target.closest('[data-gb]'); if (!b) return;
+  const lop = cfg.curClass, act = b.dataset.gb, t = b.dataset.id && GB.tests.get(b.dataset.id);
+  if (act === 'tay' || act === 'tay2') { gTay = act === 'tay2' ? true : !gTay; gTab = 'bai'; renderClass(true); if (gTay) $('#gtTen')?.focus(); }
+  else if (act === 'tayx') { gTay = false; renderClass(true); }
+  else if (act === 'tayok') {
+    const ten = $('#gtTen').value.trim() || `Điểm ${fmtD($('#gtNgay').value) || 'nhập tay'}`;
+    const nt = { id: gbNewId(), lop, created: Date.now(), ten, kieu: $('#gtKieu').value, ngay: $('#gtNgay').value || todayISO(), loai: 'tay', max: 10, qs: [], hs: [] };
+    gTay = false; gTab = 'so'; gbPut(nt); renderClass(true); toast(`Đã tạo cột “${ten}”. Gõ điểm từng em vào cột mới.`);
+    setTimeout(() => document.querySelector(`[data-gcell^="${attrQ(nt.id)}|"]`)?.focus(), 50);
+  }
+  else if (act === 'xlsx') gbXlsx(lop).catch(err => toast(err?.message || 'Không tạo được file Excel'));
+  else if (act === 'x1' && t) gbXlsxOne(t).catch(err => toast(err?.message || 'Không tạo được file Excel'));
+  else if (act === 'so') { gTab = 'so'; renderClass(true); }
+  else if (act === 'del' && t) { gOpen = ''; gbDel(t.id); toast(`Đã xóa “${t.ten}” khỏi sổ điểm`, { label: 'Hoàn tác', fn: () => gbPut(t) }); }
+  else if (act === 'bak') gbBackup().catch(err => toast(err?.message || 'Không tạo được bản sao lưu'));
+  else if (act === 'res') $('#gbIn').click();
+});
+$('#stepClass').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (['reStt', 'reSbd', 'reTen'].includes(e.target.id)) { e.preventDefault(); $('[data-ros="save"]')?.click(); }
+  else if (['raStt', 'raSbd', 'raTen'].includes(e.target.id)) { e.preventDefault(); $('[data-ros="addok"]')?.click(); }
+  else if (e.target.id === 'gtTen') { e.preventDefault(); $('[data-gb="tayok"]')?.click(); }
+  else if (e.target.dataset?.gcell) { e.preventDefault(); e.target.blur(); }
+});
+$('#stepClass').addEventListener('change', e => {
+  const el = e.target;
+  if (el.id === 'gSel') { gSel = el.value; renderClass(true); $('#gSel')?.focus({ preventScroll: true }); return; }
+  if (el.dataset?.gcell) {
+    const [tid, key] = el.dataset.gcell.split('|'); gbCellSet(tid, key, el.value);
+    setTimeout(() => { const k = document.activeElement?.dataset?.gcell; renderClass(true); if (k) document.querySelector(`[data-gcell="${attrQ(k)}"]`)?.focus(); }, 0);
+    return;
+  }
+  if (el.dataset?.gtf) {
+    const t = GB.tests.get(el.dataset.id); if (!t) return;
+    const v = el.value.trim(); if (el.dataset.gtf === 'ten' && !v) { el.value = t.ten; return; }
+    gbPut({ ...t, [el.dataset.gtf]: v }); setTimeout(() => renderClass(true), 0);
+  }
+});
+$('#gbIn').addEventListener('change', e => { const f = e.target.files?.[0]; if (f) gbRestore(f).finally(() => { e.target.value = ''; }); });
+document.addEventListener('input', gbField);
+document.addEventListener('change', gbField);
+document.addEventListener('click', e => {
+  const s = e.target.closest('[data-gbsave]'); if (s) { gbSave(s.dataset.gbsave).catch(err => toast(err?.message || 'Chưa lưu được')); return; }
+  const g = e.target.closest('[data-gbgo]'); if (g) gbGoto(cleanLop(gbDraftGet(g.dataset.gbgo).lop), 'so');
 });
 
 /* ---------- Khởi động ---------- */
