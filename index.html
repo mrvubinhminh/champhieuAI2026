@@ -400,6 +400,43 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
 .sy-dev .mono{font-weight:700}
 .th .from{position:absolute;left:5px;top:24px;font:600 10.5px var(--f-body);background:var(--accent-soft);color:var(--accent);padding:1px 5px;border-radius:5px;max-width:calc(100% - 10px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+/* Chấm Văn */
+.tile-van{min-height:0;background:linear-gradient(160deg,var(--accent-soft),var(--surface) 70%)}
+@media (min-width:640px){#tSum{grid-column:auto}}
+.vtabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%}
+.vtabs button{padding:0 6px;font-size:13px;min-height:42px}
+.vtabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+@media (max-width:520px){.vtabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lbl-row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+#vanDe,#vanHdc{font-family:var(--f-body);letter-spacing:0;font-size:14.5px;line-height:1.5}
+.ol-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px}
+.ol-head .ok{color:var(--ok);font-weight:600} .ol-head .warn{color:var(--warn);font-weight:600}
+.ol-row{display:grid;grid-template-columns:52px minmax(0,1fr) 92px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.ol-id{font-weight:700;color:var(--accent)}
+.ol-txt b{display:block;font-weight:600;font-size:14.5px}
+.ol-txt small{display:block;color:var(--muted);font-size:12.5px;line-height:1.4}
+.ol-pt input{min-height:40px;text-align:center;font-family:var(--f-mono);font-weight:700}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.vlist{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px}
+.vrow .sc small{font-size:11.5px}
+.vpages{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.vpg{flex:none;width:96px;display:grid;gap:4px;text-decoration:none;color:var(--muted);font-size:12px;text-align:center}
+.vpg img{width:96px;height:132px;object-fit:cover;object-position:top;border:1px solid var(--line);border-radius:8px}
+.vscores{display:grid;gap:8px}
+.vsc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:4px}
+.vsc-h{display:flex;align-items:center;gap:8px}
+.vsc-h b{flex:1;min-width:0;font-weight:600;font-size:14px}
+.vsc-h input{width:78px;min-height:38px;text-align:center;font-family:var(--f-mono);font-weight:700;padding:4px}
+.vsc-h input.edited{border-color:var(--warn);background:var(--warn-soft)}
+.vsc p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.45}
+.vsc .bad-t{color:var(--bad)}
+.mono-ta{font-family:var(--f-mono);font-size:13px;letter-spacing:0;line-height:1.5}
+#vanBooklet{width:100%}
+#vanLayout button,#vanLayoutT button{padding:0 12px}
+.vmon{display:grid;grid-template-columns:1fr 1fr;width:100%}
+.vmon button{min-height:44px;font-size:15px}
+.vmon button[aria-checked="true"]{background:var(--accent);color:var(--accent-ink)}
+
 /* Toast */
 .toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
 .toast button{background:none;border:0;color:var(--accent-soft);font-weight:700;min-height:32px;text-decoration:underline}
@@ -441,6 +478,8 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
     <button class="tile" type="button" id="tAi" data-pane="ai"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9.5 9.5h5v5h-5zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></span><span class="t-txt"><b>AI đọc phiếu</b><small id="tAiS"></small></span></button>
     <button class="tile" type="button" id="tGs" data-pane="gs"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></span><span class="t-txt"><b>Google Sheet</b><small id="tGsS"></small></span></button>
     <button class="tile" type="button" id="tSync" data-pane="sync"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/></svg></span><span class="t-txt"><b>Đồng bộ nhiều máy</b><small id="tSyncS"></small></span></button>
+    <button class="tile tile-van" type="button" id="tVan" data-pane="van" data-mon="van"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span><span class="t-txt"><b>Chấm tự luận Văn</b><small id="tVanS"></small></span></button>
+    <button class="tile tile-van" type="button" id="tToan" data-pane="van" data-mon="toan"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h7M7.5 3.5v7M4 17h7M14 4l6 6M20 4l-6 6M14 15h6M14 19h6"/></svg></span><span class="t-txt"><b>Chấm tự luận Toán</b><small id="tToanS"></small></span></button>
     <button class="tile" type="button" id="tSum" data-sum="1"><span class="t-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></span><span class="t-txt"><b>Tổng hợp &amp; xuất</b><small id="tSumS"></small></span></button>
   </nav>
 </main>
@@ -656,6 +695,135 @@ select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line-s
     </div>
   </div>
 </section>
+<section class="pane" id="paneVan" data-pane-id="van" role="dialog" aria-modal="true" aria-labelledby="h_van">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="grow"><h3 id="h_van">Chấm tự luận Ngữ văn</h3><p class="ph-sub" id="vanSub"></p></div>
+      <button class="btn" type="button" data-close>Xong</button>
+    </div>
+    <div class="panel-body">
+      <div class="seg vmon" role="radiogroup" id="vanMon" aria-label="Môn chấm">
+        <button type="button" role="radio" data-mon="van">Ngữ văn</button>
+        <button type="button" role="radio" data-mon="toan">Toán</button>
+      </div>
+      <div class="seg vtabs" role="tablist" id="vanTabs" aria-label="Các bước chấm tự luận">
+        <button type="button" role="tab" data-vtab="de">1 · Đề &amp; HDC</button>
+        <button type="button" role="tab" data-vtab="giay">2 · Giấy làm bài</button>
+        <button type="button" role="tab" data-vtab="bai">3 · Bài làm</button>
+        <button type="button" role="tab" data-vtab="xuat">4 · Xuất</button>
+      </div>
+
+      <div id="vt_de" class="stack">
+        <div class="cls-row">
+          <label class="field"><span>Đề đang chấm</span><select id="vanDeSel"></select></label>
+          <button class="btn" type="button" id="vanDeNew">+ Đề mới</button>
+        </div>
+        <div id="vanDeForm" class="stack">
+          <label class="field"><span>Tên đề (in trên giấy làm bài và phiếu nhận xét)</span><input type="text" id="vanName" autocomplete="off" placeholder="VD: Kiểm tra giữa kì I · Ngữ văn 10"></label>
+          <div class="field"><span class="lbl-row">Đề bài <button class="btn link inline" type="button" data-vfile="de">Tải file đề (PDF, Word, ảnh)</button></span>
+            <textarea id="vanDe" rows="7" placeholder="Dán toàn bộ đề: văn bản đọc hiểu, các câu hỏi, đề viết đoạn văn và bài văn…"></textarea></div>
+          <div class="field"><span class="lbl-row">Hướng dẫn chấm <button class="btn link inline" type="button" data-vfile="hdc">Tải file HDC (PDF, Word, ảnh)</button></span>
+            <textarea id="vanHdc" rows="7" placeholder="Dán hướng dẫn chấm, có điểm từng câu, từng ý…"></textarea></div>
+          <input type="file" id="vanTxtIn" accept=".pdf,.docx,.txt,.md,image/*,application/pdf" hidden>
+          <p class="hint" id="vanFileStatus" aria-live="polite"></p>
+          <button class="btn primary-soft" type="button" id="vanAnalyze">AI lập khung điểm từ hướng dẫn chấm</button>
+          <div id="vanOutline" class="stack"></div>
+          <button class="btn link danger" type="button" id="vanDeDel">Xóa đề này</button>
+        </div>
+      </div>
+
+      <div id="vt_giay" class="stack" hidden>
+        <p class="hint">Giấy làm bài A4, 4 trang, in cho học sinh làm. Có 4 ô vuông góc để quét bằng camera, số dòng ở lề để AI và thầy chỉ đúng vị trí lỗi, cột riêng cho giám khảo.</p>
+        <div class="fmt sy-f">
+          <label class="field"><span>Kỳ kiểm tra</span><input type="text" id="vanKy" autocomplete="off" placeholder="VD: KIỂM TRA GIỮA KÌ I · NĂM HỌC 2026–2027"></label>
+          <label class="field"><span>Thời gian làm bài (phút)</span><input type="number" id="vanTg" min="15" max="240" step="5" inputmode="numeric"></label>
+        </div>
+        <div class="eng-row"><span class="lbl">Bố cục</span>
+          <div class="seg" role="radiogroup" aria-label="Bố cục giấy Toán" id="vanLayoutT">
+            <button type="button" role="radio" data-vlayt="ts10">Tuyển sinh 10</button>
+            <button type="button" role="radio" data-vlayt="free">Kiểm tra (kẻ dòng)</button>
+          </div>
+          <div class="seg" role="radiogroup" aria-label="Bố cục giấy" id="vanLayout">
+            <button type="button" role="radio" data-vlay="thpt">THPT</button>
+            <button type="button" role="radio" data-vlay="ts10">Tuyển sinh 10</button>
+            <button type="button" role="radio" data-vlay="free">Kẻ dòng</button>
+          </div></div>
+        <p class="hint" id="vanLayHint"></p>
+        <label class="field" id="vanTsNRow" hidden><span>Số ý của Phần I · Câu 1 (a, b, c…)</span><input type="number" id="vanTsN" min="2" max="7" inputmode="numeric"></label>
+        <div class="card" id="vanFeatT">
+          <h4>Các mục giúp học sinh làm bài Toán tốt hơn</h4>
+          <ul class="vlist">
+            <li><b>Cột "Bài"</b> bên trái để ghi số bài, số câu; AI và giám khảo không lẫn bài.</li>
+            <li><b>Cột "Điểm GK"</b> bên phải để giám khảo ghi điểm từng bước 0,25.</li>
+            <li><b>Khung đồ thị Bài 1</b> (Tuyển sinh 10): bảng giá trị của (P), (d) và lưới ô 5 mm để vẽ.</li>
+            <li><b>Khung hình vẽ</b> lưới ô 5 mm cho bài hình học, nhắc vẽ bằng bút chì và thước.</li>
+            <li><b>Gợi ý thời gian</b> theo nhóm bài; nhắc trình bày mỗi bước một dòng, có kết luận.</li>
+            <li><b>Bảng tự kiểm tra</b>: điều kiện xác định, kết luận, đơn vị, căn cứ chứng minh, thử lại nghiệm.</li>
+          </ul>
+        </div>
+        <div class="card" id="vanFeatV">
+          <h4>Các mục giúp học sinh làm bài tốt hơn</h4>
+          <ul class="vlist">
+            <li><b>Gợi ý phân bổ thời gian</b> theo từng phần ngay đầu bài.</li>
+            <li><b>Hướng dẫn cách trả lời</b> in sẵn ở đầu mỗi phần.</li>
+            <li><b>Khung phác thảo đoạn văn</b> (câu chủ đề, lí lẽ, dẫn chứng, phản đề, câu kết), không chấm.</li>
+            <li><b>Khung dàn ý bài văn</b> (mở bài, 3 luận điểm, phản đề/mở rộng, kết bài), không chấm.</li>
+            <li><b>Mốc ≈200 chữ</b> ở lề trang đoạn văn để học sinh canh dung lượng.</li>
+            <li><b>Bảng tự kiểm tra trước khi nộp</b>: 6 lỗi hay mất điểm nhất.</li>
+            <li><b>Số dòng in ở lề</b>, có ô SBD trên từng trang để không lẫn trang.</li>
+          </ul>
+        </div>
+        <button class="btn primary" type="button" id="vanBooklet">Tải giấy làm bài (PDF 4 trang)</button>
+        <p class="hint" id="vanBkStatus" aria-live="polite"></p>
+      </div>
+
+      <div id="vt_bai" class="stack" hidden>
+        <div class="hero-btns">
+          <button class="btn primary" type="button" id="vanCam">Quét bằng camera</button>
+          <label class="btn up-btn" for="vanFileIn" role="button" tabindex="0" id="vanUp">Tải PDF / ảnh bài làm</label>
+        </div>
+        <input type="file" id="vanFileIn" accept="application/pdf,image/*" multiple hidden>
+        <input type="file" id="vanCamIn" accept="image/*" capture="environment" hidden>
+        <div class="fmt sy-f">
+          <label class="field"><span>Số trang mỗi bài</span><input type="number" id="vanPP" min="1" max="12" inputmode="numeric"></label>
+          <div class="field" id="vanTierRow"><span>Chất lượng chấm (Claude)</span>
+            <div class="seg" role="radiogroup" aria-label="Chất lượng chấm" id="vanTier">
+              <button type="button" role="radio" data-vtier="complex">Kỹ nhất</button>
+              <button type="button" role="radio" data-vtier="default">Cân bằng</button>
+            </div></div>
+        </div>
+        <p class="hint">PDF nhiều bài thì app tự tách theo số trang mỗi bài. Ảnh chụp được gom lần lượt theo thứ tự tên file.</p>
+        <div class="btnrow">
+          <button class="btn primary-soft" type="button" id="vanRun">Chấm bài</button>
+          <button class="btn" type="button" id="vanStop" hidden>Dừng</button>
+          <button class="btn link danger" type="button" id="vanClear" hidden>Xóa tất cả bài</button>
+        </div>
+        <p class="hint" id="vanRunNote" aria-live="polite"></p>
+        <p class="hint" id="vanStatus" aria-live="polite"></p>
+        <div class="list" id="vanList"></div>
+      </div>
+
+      <div id="vt_xuat" class="stack" hidden>
+        <div id="vanStats"></div>
+        <div class="exp-grid">
+          <button class="exp" type="button" data-vexp="pdfzip"><b>PDF nhận xét từng em (.zip)</b><span>Mỗi em một file: điểm từng câu, nhận xét, lỗi cần sửa, đoạn viết lại mẫu, ý kiến giám khảo</span></button>
+          <button class="exp" type="button" data-vexp="pdfall"><b>PDF nhận xét cả lớp</b><span>Một file để in hoặc lưu hồ sơ</span></button>
+          <button class="exp" type="button" data-vexp="xlsx"><b>Bảng điểm Excel</b><span>Điểm từng câu, tổng, xếp loại, nhận xét</span></button>
+        </div>
+        <p class="hint" id="vanExpStatus" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="ov" id="ovVan" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="ovVanTitle">
+    <div class="panel-head">
+      <h3 id="ovVanTitle">Bài làm</h3>
+      <button class="icon-btn" id="ovVanClose" type="button" aria-label="Đóng" style="margin-left:0">✕</button>
+    </div>
+    <div class="panel-body" id="ovVanBody"></div>
+  </div>
+</div>
 <section class="pane" id="stepRes" data-pane-id="res" role="dialog" aria-modal="true" aria-labelledby="h_res">
   <div class="panel">
     <div class="panel-head">
@@ -1376,8 +1544,8 @@ async function modelFor(key) {
   return best;
 }
 async function genWith(key, model, parts, opt) {
-  const cands = thinkCands(model);
-  let i = Math.min(cfg.gThinkIdx[model] ?? 0, cands.length - 1);
+  const cands = opt.think ? [null] : thinkCands(model);
+  let i = opt.think ? 0 : Math.min(cfg.gThinkIdx[model] ?? 0, cands.length - 1);
   for (;;) {
     const gc = { temperature: opt.temperature ?? 0 };
     if (opt.json !== false) gc.responseMimeType = 'application/json';
@@ -1388,7 +1556,7 @@ async function genWith(key, model, parts, opt) {
         method: 'POST', signal: opt.signal, headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: gc })
       });
-      if ((cfg.gThinkIdx[model] ?? 0) !== i) { cfg.gThinkIdx[model] = i; saveCfg(); }
+      if (!opt.think && (cfg.gThinkIdx[model] ?? 0) !== i) { cfg.gThinkIdx[model] = i; saveCfg(); }
       return { j, ms: performance.now() - t0, think: cands[i], key, model };
     } catch (e) {
       if (e?.status === 400 && /think/i.test(e.message) && i < cands.length - 1) { i++; continue; }
@@ -2481,12 +2649,18 @@ const scan = { on: false, stream: null, track: null, raf: 0, last: 0, prev: null
 const camLive = () => !inClaude && !!navigator.mediaDevices?.getUserMedia;
 function scanHud() {
   if (!scan.on) return;
+  if (scan.target === 'van') {
+    const pp = Math.max(1, +cfg.van.pagesPer || 4), mine = essays.filter(e => scan.ids.includes(e.id)), last = mine[mine.length - 1];
+    $('#scanCount').textContent = mine.length ? `Bài ${mine.length} · trang ${last.pages.length}/${pp}${cfg.scanGrade ? ` · chấm ${mine.filter(e => e.status === 'done').length}` : ''}` : `0 bài · ${pp} trang/bài`;
+    return;
+  }
   const mine = sheets.filter(s => scan.ids.includes(s.id)), done = mine.filter(s => s.status === 'done').length;
   $('#scanCount').textContent = `${mine.length} phiếu${cfg.scanGrade && mine.length ? ` · chấm ${done}` : ''}`;
 }
 function scanSay(t, ok) { const m = $('#scanMsg'); m.textContent = t; m.classList.toggle('ok', !!ok); }
-async function openScanner() {
-  if (!camLive()) { $('#camIn').click(); return; }
+async function openScanner(target) {
+  scan.target = target === 'van' ? 'van' : 'mc';
+  if (!camLive()) { (scan.target === 'van' ? $('#vanCamIn') : $('#camIn')).click(); return; }
   const el = $('#scan'); el.hidden = false; syncLock();
   $('#scanAuto').checked = cfg.scanAuto; $('#scanGrade').checked = cfg.scanGrade;
   Object.assign(scan, { on: true, prev: null, stable: 0, lost: 0, armed: true, shotQuad: null, busy: false, n: 0, ids: [], torch: false });
@@ -2497,7 +2671,7 @@ async function openScanner() {
   } catch (e) {
     closeScanner();
     toast(e?.name === 'NotAllowedError' ? 'Chưa cho phép dùng camera. Thầy cho phép camera cho trang này trong cài đặt trình duyệt.' : 'Không mở được camera. Thầy chụp từng phiếu thay thế.');
-    $('#camIn').click(); return;
+    (scan.target === 'van' ? $('#vanCamIn') : $('#camIn')).click(); return;
   }
   if (!scan.on) { scan.stream.getTracks().forEach(t => t.stop()); return; }
   const v = $('#scanVid'); v.srcObject = scan.stream;
@@ -2516,6 +2690,7 @@ function closeScanner() {
   syncLock();
   try { if (!running) wakeLock?.release(); } catch (e) {}
   renderAll();
+  if (scan.target === 'van') { renderVan(); if (scan.n) { toast(`Đã quét ${scan.n} trang bài Văn`); vanSetTab('bai'); openPane('van'); if (cfg.scanGrade && !vanRun) vanRunAll(); } return; }
   if (scan.n) toast(`Đã quét ${scan.n} phiếu${cfg.scanGrade ? '' : '. Bấm Chấm để AI đọc'}`);
   if (scan.n && !cfg.scanGrade) openPane('sheets');
 }
@@ -2584,6 +2759,16 @@ async function scanCapture(r, manual) {
     const out = q ? warpQuad(full, q) : full;
     scanFeedback();
     scan.shotQuad = q || null; scan.armed = false; scan.n++;
+    if (scan.target === 'van') {
+      const pp = Math.max(1, +cfg.van.pagesPer || 4), e = await vanAddCanvas(out, `Bài quét ${essays.length + 1}`);
+      if (!scan.ids.includes(e.id)) scan.ids.push(e.id);
+      const img = $('#scanLast'); img.src = e.pages[e.pages.length - 1].thumb; img.style.visibility = 'visible';
+      const full = e.pages.length >= pp;
+      scanSay(full ? `Xong bài ${scan.ids.length} (${pp} trang) · đặt bài tiếp theo` : `Bài ${scan.ids.length} · đã có trang ${e.pages.length}/${pp} · lật trang tiếp`, true);
+      renderVan(); scanHud();
+      if (full && cfg.scanGrade && engineReady() && !vanRun) vanRunAll();
+      return;
+    }
     await addCanvas(out, `Quét ${String(scan.n).padStart(2, '0')}`);
     const sh = sheets[sheets.length - 1]; scan.ids.push(sh.id);
     const img = $('#scanLast'); img.src = sh.thumb; img.style.visibility = 'visible';
@@ -3022,10 +3207,10 @@ function renderSync() {
 }
 
 /* ---------- Màn hình ô & bảng mở ra ---------- */
-const PANES = { key: '#stepKey', cls: '#stepClass', sheets: '#stepSheets', ai: '#paneAi', gs: '#paneGs', sync: '#paneSync', res: '#stepRes' };
+const PANES = { key: '#stepKey', cls: '#stepClass', sheets: '#stepSheets', ai: '#paneAi', gs: '#paneGs', sync: '#paneSync', van: '#paneVan', res: '#stepRes' };
 let openPaneId = null, paneOpener = null;
 function syncLock() {
-  const any = !$('#ov').hidden || !$('#ov2').hidden || !$('#scan').hidden || !!openPaneId;
+  const any = !$('#ov').hidden || !$('#ov2').hidden || !$('#scan').hidden || !$('#ovVan').hidden || !!openPaneId;
   document.body.classList.toggle('lock', any);
 }
 function openPane(id) {
@@ -3057,6 +3242,12 @@ function renderTiles() {
   set('Gs', inClaude ? (mcpCap ? 'Lưu bảng điểm qua Google Drive' : 'Dùng trên bản Vercel') : gasOK() ? 'Đã nhập URL kết nối' : 'Chưa kết nối', inClaude ? (mcpCap ? 'ok' : '') : gasOK() ? 'ok' : '');
   const G = graded();
   set('Sync', SY.on ? `${SY.code} · ${syncDevCount()} máy${SY.err ? ' · lỗi' : ''}` : 'Chưa bật · nhiều máy cùng chấm', SY.on ? (SY.err ? 'warn' : 'ok') : '');
+  for (const [id, m] of [['Van', 'van'], ['Toan', 'toan']]) {
+    const de = cfg.van.des.find(d => d.id === cfg.van[m === 'toan' ? 'curDeT' : 'curDe'] && monOf(d) === m) || null, E = essays.filter(e => (e.mon || 'van') === m), dn = E.filter(e => e.status === 'done').length;
+    const empty = !de || (!de.de.trim() && !de.hdc.trim());
+    set(id, empty ? (m === 'toan' ? 'Đáp án – thang điểm → AI chấm từng bước, nhận xét từng em' : 'Đề + hướng dẫn chấm → AI chấm và nhận xét từng em')
+      : `${de.name}${E.length ? ` · ${E.length} bài · chấm ${dn}` : ' · chưa có bài'}${de.outline?.length ? '' : ' · chưa có khung điểm'}`, empty ? '' : (de.outline?.length ? 'ok' : 'warn'));
+  }
   set('Sum', G.length ? `${G.length} bài · Excel, PDF, nhận xét` : 'Chấm xong để xuất file', G.length ? 'ok' : '');
   // thẻ kết quả
   const card = $('#resCard'), mx = maxScore() || 10;
@@ -3080,7 +3271,7 @@ function renderTiles() {
 
 /* ---------- Sự kiện ---------- */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-pane]'); if (t) { if (t.dataset.pane === 'sheets' && sheets.some(x => x.status === 'error')) { shFilter = 'error'; renderSheets(); } openPane(t.dataset.pane); return; }
+  const t = e.target.closest('[data-pane]'); if (t) { if (t.dataset.mon) { cfg.van.mon = t.dataset.mon; saveCfg(); renderVan(); } if (t.dataset.pane === 'sheets' && sheets.some(x => x.status === 'error')) { shFilter = 'error'; renderSheets(); } openPane(t.dataset.pane); return; }
   if (e.target.closest('[data-close]')) { closePane(); return; }
   if (e.target.closest('[data-sum]')) { if (graded().length) openSummary(); else toast('Chấm xong ít nhất một phiếu rồi mới tổng hợp được.'); return; }
   if (e.target.closest('[data-cam]')) { closePane(); openScanner(); return; }
@@ -3221,7 +3412,7 @@ $('#camIn').addEventListener('change', e => {
 $('#scanClose').addEventListener('click', closeScanner);
 $('#scanShot').addEventListener('click', () => scanCapture(null, true));
 $('#scanAuto').addEventListener('change', e => { cfg.scanAuto = e.target.checked; saveCfg(); });
-$('#scanGrade').addEventListener('change', e => { cfg.scanGrade = e.target.checked; saveCfg(); scanHud(); if (cfg.scanGrade && engineReady() && !running) runAll(); });
+$('#scanGrade').addEventListener('change', e => { cfg.scanGrade = e.target.checked; saveCfg(); scanHud(); if (!cfg.scanGrade || !engineReady()) return; if (scan.target === 'van') { if (!vanRun) vanRunAll(); } else if (!running) runAll(); });
 $('#scanTorch').addEventListener('click', async e => {
   const b = e.currentTarget; scan.torch = !scan.torch;
   try { await scan.track?.applyConstraints({ advanced: [{ torch: scan.torch }] }); b.setAttribute('aria-pressed', String(scan.torch)); }
@@ -3288,7 +3479,7 @@ document.addEventListener('click', e => {
 
 $('#ovClose').addEventListener('click', closeDetail);
 $('#ov').addEventListener('click', e => { if (e.target.id === 'ov') closeDetail(); });
-document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (scan.on) closeScanner(); else if (!$('#ov').hidden) closeDetail(); else if (!$('#ov2').hidden) closeSummary(); else if (openPaneId) closePane(); });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (scan.on) closeScanner(); else if (!$('#ovVan').hidden) closeVanDetail(); else if (!$('#ov').hidden) closeDetail(); else if (!$('#ov2').hidden) closeSummary(); else if (openPaneId) closePane(); });
 $('#ov2Close').addEventListener('click', closeSummary);
 $('#ov2').addEventListener('click', e => { if (e.target.id === 'ov2') closeSummary(); });
 $('#sumBody').addEventListener('click', e => {
@@ -3362,9 +3553,1001 @@ $('#syName').addEventListener('change', e => {
   if (SY.on) { SY.lastSig.clear(); syncSoon(); } renderSync();
 });
 $('#syCode').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#syStart').click(); } });
+/* ======================= CHẤM TỰ LUẬN NGỮ VĂN =======================
+ * Đề + Hướng dẫn chấm → AI lập khung điểm (thầy duyệt) → giấy làm bài 4 trang (PDF) →
+ * bài làm (quét/tải, mỗi bài N trang) → AI chép chữ viết tay → AI chấm theo HDC → PDF nhận xét.
+ */
+const VAN_DEF = { des: [], curDe: '', curDeT: '', mon: 'van', pagesPer: 4, layout: 'thpt', layoutT: 'free', tier: 'complex', ky: '', tg: 90, tgT: 90, tsN: 5 };
+cfg.van = { ...VAN_DEF, ...(cfg.van || {}) };
+const MAMMOTH_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+let essays = [], vuid = 0, vanRun = false, vanHalt = '', vanCurId = null, vanTab = 'de';
+const vanCtrls = new Set();
+const MON = () => cfg.van.mon === 'toan' ? 'toan' : 'van';
+const isToan = () => MON() === 'toan';
+const monOf = d => (d && d.mon === 'toan') ? 'toan' : 'van';
+const MONNAME = m => (m || MON()) === 'toan' ? 'Toán' : 'Ngữ văn';
+const curKey = () => isToan() ? 'curDeT' : 'curDe';
+const monDes = () => cfg.van.des.filter(d => monOf(d) === MON());
+const vDe = () => monDes().find(d => d.id === cfg.van[curKey()]) || null;
+const mEss = () => essays.filter(e => (e.mon || 'van') === MON());
+const deOf = e => cfg.van.des.find(d => d.id === e.deId) || vDe();
+const vEss = id => essays.find(e => e.id === id);
+const vMax = de => r2((de?.outline || []).reduce((a, c) => a + (+c.toi_da || 0), 0));
+const vStr = v => String(v ?? '').trim();
+const vArr = v => (Array.isArray(v) ? v : v ? [v] : []).map(vStr).filter(Boolean);
+const num = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return isFinite(n) ? n : 0; };
+function vScore(e, c) {
+  const ov = e.edit?.[c.id];
+  if (ov !== undefined && ov !== '') return Math.max(0, Math.min(+c.toi_da || 0, num(ov)));
+  const it = (e.g?.cau || []).find(x => x.id === String(c.id));
+  return it ? Math.max(0, Math.min(+c.toi_da || 0, it.diem)) : 0;
+}
+function vTotal(e) { const de = deOf(e); if (!e.g || !de?.outline?.length) return null; return r2(de.outline.reduce((a, c) => a + vScore(e, c), 0)); }
+function vXepLoai(t, mx) { const p = t / (mx || 10) * 10; return p >= 8 ? 'Giỏi' : p >= 6.5 ? 'Khá' : p >= 5 ? 'Trung bình' : p >= 3.5 ? 'Yếu' : 'Kém'; }
+const vName = e => e.ten || e.tr?.ho_ten || e.name;
+
+/* ---------- AI dùng chung (ảnh + chữ) ---------- */
+async function vanAI(prompt, images, tier, signal) {
+  if (engine() === 'claude') {
+    const opt = { modelTier: tier || 'default', cache: false, signal };
+    if (images?.length) opt.images = images;
+    return await sampleFn.json(prompt, opt);
+  }
+  const parts = [{ text: prompt }];
+  for (const b of images || []) parts.push({ inline_data: { mime_type: b.type || 'image/jpeg', data: await toB64(b) } });
+  const { j } = await geminiGen(parts, { signal, temperature: 0.2, think: true });
+  const t = geminiText(j);
+  if (!t) throw { code: 'empty_completion', message: 'Gemini không trả lời' };
+  return tolerantJSON(t);
+}
+function aiErrText(e) {
+  const c = e?.code;
+  return c === 'not_granted' ? 'Chưa cho phép trang dùng AI' : c === 'rate_limited' ? 'AI đang giới hạn lượt, thử lại sau ít phút'
+    : c === 'invalid_json' ? 'AI trả về sai định dạng' : c === 'refused' ? 'AI từ chối xử lý nội dung này' : c === 'prompt_too_large' ? 'Đề/HDC/bài làm quá dài'
+    : (e?.message || 'Lỗi kết nối AI');
+}
+
+/* ---------- Đọc file đề / hướng dẫn chấm ---------- */
+async function vanOCR(images, what) {
+  const per = engine() === 'claude' ? Math.max(1, Math.min(maxImgs || 1, 5)) : images.length;
+  let out = '';
+  for (let i = 0; i < images.length; i += per) {
+    const o = await vanAI(`Chép lại CHÍNH XÁC toàn bộ chữ in trong ${images.length > 1 ? 'các ảnh (theo thứ tự)' : 'ảnh'} – đây là ${what} môn ${MONNAME()}. Giữ nguyên xuống dòng, đánh số, điểm số.${isToan() ? ' Công thức viết bằng ký hiệu thường (x², √(x+1), x₁, ≤, ≠, ⇔, Δ, π, °, ∠ABC), phân số dạng (a)/(b), không dùng LaTeX; hình vẽ mô tả ngắn trong [Hình: …].' : ''} Bảng chuyển thành từng dòng "cột 1 | cột 2 | …". Không thêm lời bình. Trả về JSON {"van_ban":"..."}`,
+      images.slice(i, i + per), 'default');
+    out += (out ? '\n' : '') + vStr(o?.van_ban);
+  }
+  return out;
+}
+async function fileToText(file, what) {
+  const n = file.name.toLowerCase();
+  if (/\.(txt|md)$/.test(n) || file.type.startsWith('text/')) return await file.text();
+  if (/\.docx$/.test(n)) {
+    if (!window.mammoth) await loadScript(MAMMOTH_SRC);
+    return (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value;
+  }
+  if (/\.doc$/.test(n)) throw new Error('File .doc cũ: thầy lưu lại thành .docx hoặc PDF rồi tải lên');
+  if (/\.pdf$/.test(n) || file.type === 'application/pdf') {
+    if (!window.pdfjsLib) throw new Error('Không tải được thư viện đọc PDF');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    let txt = '';
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const tc = await (await pdf.getPage(p)).getTextContent();
+      txt += tc.items.map(it => it.str + (it.hasEOL ? '\n' : '')).join('') + '\n';
+    }
+    if (txt.replace(/\s/g, '').length > 80) return txt.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    if (!engineReady()) throw new Error('PDF dạng ảnh scan, cần AI để đọc. Chọn AI ở ô AI đọc phiếu trước');
+    const imgs = [];
+    for (let p = 1; p <= Math.min(pdf.numPages, 8); p++) {
+      const page = await pdf.getPage(p), vp = page.getViewport({ scale: 1700 / Math.max(page.getViewport({ scale: 1 }).width, page.getViewport({ scale: 1 }).height) });
+      const c = whiteCanvas(Math.ceil(vp.width), Math.ceil(vp.height));
+      await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      imgs.push(await canvasBlob(c, 0.85));
+    }
+    return await vanOCR(imgs, what);
+  }
+  if (file.type.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/.test(n)) {
+    if (!engineReady()) throw new Error('Cần AI để đọc ảnh. Chọn AI ở ô AI đọc phiếu trước');
+    return await vanOCR([file], what);
+  }
+  throw new Error('Chỉ đọc được PDF, Word (.docx), ảnh hoặc .txt');
+}
+
+/* ---------- Khung điểm từ hướng dẫn chấm ---------- */
+async function vanAnalyze(quiet) {
+  const de = vDe();
+  if (!de || !de.de.trim() || !de.hdc.trim()) { toast('Nhập đề và hướng dẫn chấm trước'); return false; }
+  if (!engineReady()) { toast('Chưa có AI. Chọn AI ở ô AI đọc phiếu'); return false; }
+  const btn = $('#vanAnalyze'); if (btn) { btn.disabled = true; btn.textContent = 'AI đang đọc hướng dẫn chấm…'; }
+  try {
+    const o = await vanAI(isToan() ? toanOutlinePrompt(de) : [
+      'Bạn là tổ trưởng chuyên môn Ngữ văn THPT. Từ đề kiểm tra và hướng dẫn chấm (HDC) dưới đây, lập KHUNG ĐIỂM để chấm.',
+      'Yêu cầu: liệt kê mọi câu được chấm điểm theo đúng thứ tự trong đề; điểm tối đa lấy ĐÚNG theo HDC (không tự đặt); mỗi câu kèm các tiêu chí con và điểm của từng tiêu chí đúng như HDC (gom ngắn gọn, giữ nguyên số điểm).',
+      'id: câu thuộc Phần I đặt "I.1", "I.2"…, Phần II đặt "II.1", "II.2"…; câu có các ý nhỏ a, b, c… được chấm riêng thì tách mỗi ý một mục, id dạng "I.1a", "I.1b".',
+      'Nếu HDC chỉ là "gợi ý làm bài"/bài làm mẫu, không ghi điểm từng câu: lấy tổng điểm từng phần ghi trong đề (VD "PHẦN I … (5.0 điểm)") rồi phân bổ hợp lí theo độ khó và dung lượng từng câu (câu viết đoạn, viết bài được nhiều điểm hơn); tiêu chí lấy từ các ý chính của gợi ý; ghi rõ vào "ghi_chu" là điểm do AI đề xuất để giáo viên kiểm tra.',
+      'Nếu HDC có yêu cầu dung lượng (ví dụ đoạn văn khoảng 200 chữ, bài văn khoảng 600 chữ) thì ghi vào "so_chu".',
+      '', '=== ĐỀ ===', de.de.slice(0, 15000), '', '=== HƯỚNG DẪN CHẤM ===', de.hdc.slice(0, 20000), '',
+      'Chỉ trả về JSON: {"cau":[{"id":"I.1","ten":"Đọc hiểu – Câu 1","yeu_cau":"tóm tắt yêu cầu câu hỏi","toi_da":0.5,"tieu_chi":[{"nd":"…","diem":0.5}]}],"so_chu":{"II.1":200,"II.2":600},"ghi_chu":"lưu ý đặc biệt của HDC nếu có"}'
+    ].join('\n'), [], 'default');
+    const cau = (Array.isArray(o?.cau) ? o.cau : []).map((c, i) => ({
+      id: vStr(c.id) || String(i + 1), ten: vStr(c.ten) || `Câu ${i + 1}`, yeu_cau: vStr(c.yeu_cau), toi_da: num(c.toi_da),
+      tieu_chi: (Array.isArray(c.tieu_chi) ? c.tieu_chi : []).map(t => ({ nd: vStr(t.nd), diem: num(t.diem) })).filter(t => t.nd)
+    })).filter(c => c.toi_da > 0);
+    if (!cau.length) throw new Error('AI không tách được câu nào từ hướng dẫn chấm');
+    de.outline = cau; de.so_chu = o.so_chu && typeof o.so_chu === 'object' ? o.so_chu : {}; de.ghi_chu = vStr(o.ghi_chu);
+    saveCfg(); renderVan();
+    if (!quiet) toast(`Đã lập khung điểm ${cau.length} câu · tổng ${fmt(vMax(de))} điểm. Thầy kiểm tra lại điểm tối đa từng câu`);
+    return true;
+  } catch (e) { toast('Chưa lập được khung điểm: ' + aiErrText(e)); return false; }
+  finally { if (btn) { btn.disabled = false; btn.textContent = 'AI lập khung điểm từ hướng dẫn chấm'; } }
+}
+
+/* ---------- Giấy làm bài 4 trang (A4, 150 dpi) ---------- */
+const BW = 1240, BH = 1754, BM = 64, BLH = 44;
+const BK = { ink: '#151515', mute: '#5c5c5c', line: '#b9b9b9', faint: '#d4d4d4', tint: '#f3f3f1' };
+function bkBase(p, n, o) {
+  const c = whiteCanvas(BW, BH), x = c.getContext('2d'); x.textBaseline = 'alphabetic';
+  const S = 30; x.fillStyle = BK.ink;
+  [[BM - 14, BM - 14], [BW - BM - S + 14, BM - 14], [BM - 14, BH - BM - S + 14], [BW - BM - S + 14, BH - BM - S + 14]].forEach(([a, b]) => x.fillRect(a, b, S, S));
+  x.font = `700 19px ${FB}`; x.fillStyle = BK.mute; x.fillText(o.mon === 'toan' ? 'TOÁN · GIẤY LÀM BÀI' : 'NGỮ VĂN · GIẤY LÀM BÀI', BM + 34, BM + 8);
+  x.textAlign = 'right'; x.fillText(`Trang ${p}/${n}`, BW - BM - 34, BM + 8); x.textAlign = 'left';
+  if (p > 1) {
+    x.font = `600 19px ${FB}`; x.fillStyle = BK.mute; const bx = BW / 2 - 120; x.fillText('SBD', bx - 50, BM + 8);
+    x.strokeStyle = BK.ink; x.lineWidth = 1.5; for (let i = 0; i < 6; i++) x.strokeRect(bx + i * 34, BM - 18, 34, 36);
+  }
+  x.font = `400 15px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'center';
+  x.fillText('Viết bằng bút mực xanh hoặc đen · Không viết vào cột giám khảo · Giữ giấy phẳng để quét', BW / 2, BH - BM + 8);
+  x.textAlign = 'left';
+  return { c, x };
+}
+function bkTitle(x, y, t, sub) {
+  x.fillStyle = BK.ink; x.font = `700 25px ${FB}`; x.fillText(t, BM + 6, y + 25);
+  if (sub) { x.font = `italic 400 18px ${FB}`; x.fillStyle = BK.mute; x.fillText(sub, BM + 6, y + 54); return y + 64; }
+  return y + 38;
+}
+function bkLines(x, y0, y1, o = {}) {
+  const L = BM + 52, R = BW - BM - 150, st = o.start || 0;
+  x.font = `600 13px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'center'; x.fillText(o.gk || 'Giám khảo', (R + BW - BM) / 2, y0 + 14); x.textAlign = 'left';
+  x.strokeStyle = BK.line; x.setLineDash([5, 5]); x.lineWidth = 1.2; x.beginPath(); x.moveTo(R + 12, y0); x.lineTo(R + 12, y1); x.stroke(); x.setLineDash([]);
+  if (o.bai) { x.font = `600 13px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'center'; x.fillText('Bài', L + 40, y0 + 14); x.textAlign = 'left'; x.strokeStyle = BK.line; x.setLineDash([5, 5]); x.beginPath(); x.moveTo(L + 80, y0); x.lineTo(L + 80, y1); x.stroke(); x.setLineDash([]); }
+  let i = 0;
+  for (let y = y0 + BLH; y <= y1; y += BLH) {
+    i++;
+    x.strokeStyle = i % 5 ? BK.faint : BK.line; x.lineWidth = 1.2; x.beginPath(); x.moveTo(L, y); x.lineTo(R, y); x.stroke();
+    x.font = `600 14px ${FM}`; x.fillStyle = BK.mute; x.textAlign = 'right'; x.fillText(String(st + i), L - 10, y - 10); x.textAlign = 'left';
+    if (o.mark && i === o.mark.at) {
+      x.fillStyle = BK.ink; x.font = `700 13px ${FB}`; x.textAlign = 'center'; x.fillText(o.mark.label, (R + BW - BM) / 2 + 6, y - 10); x.textAlign = 'left';
+      x.strokeStyle = BK.ink; x.lineWidth = 2; x.beginPath(); x.moveTo(R - 26, y); x.lineTo(R, y); x.stroke();
+    }
+  }
+  return i;
+}
+function detectTs10(t) {
+  t = String(t || ''); const up = t.toUpperCase();
+  const ts = /TUYỂN SINH|LỚP 10|VÀO 10|TS10/.test(up) || (/VĂN BẢN NGHỊ LUẬN/.test(up) && /(TÁC PHẨM VĂN HỌC|VĂN BẢN VĂN HỌC)/.test(up));
+  const p1 = t.split(/PHẦN\s+II|II\.\s*PHẦN/i)[0], c1 = (p1.split(/Câu\s*2/i)[0] || '');
+  const items = new Set((c1.match(/^\s*([a-g])[.)]\s+\S/gim) || []).map(m => m.trim()[0].toLowerCase()));
+  return { ts, n: items.size >= 2 ? items.size : 0 };
+}
+// Khối trả lời có nhãn (a., b., Luận đề:…): dòng kẻ đánh số liên tục từ "start"
+function bkSlots(x, y0, slots, start = 0) {
+  const L = BM + 52, R = BW - BM - 150;
+  const total = slots.reduce((a, s) => a + s.lines, 0), y1 = y0 + total * BLH;
+  x.font = `600 13px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'center'; x.fillText('Giám khảo', (R + BW - BM) / 2, y0 + 14); x.textAlign = 'left';
+  x.strokeStyle = BK.line; x.setLineDash([5, 5]); x.lineWidth = 1.2; x.beginPath(); x.moveTo(R + 12, y0); x.lineTo(R + 12, y1); x.stroke(); x.setLineDash([]);
+  let y = y0, n = start;
+  slots.forEach((s, si) => {
+    if (si) { x.strokeStyle = BK.mute; x.lineWidth = 1.6; x.beginPath(); x.moveTo(L - 46, y); x.lineTo(R, y); x.stroke(); }
+    for (let k = 0; k < s.lines; k++) {
+      y += BLH; n++;
+      x.strokeStyle = BK.faint; x.lineWidth = 1.2; x.beginPath(); x.moveTo(L, y); x.lineTo(R, y); x.stroke();
+      x.font = `600 14px ${FM}`; x.fillStyle = BK.mute; x.textAlign = 'right'; x.fillText(String(n), L - 10, y - 10); x.textAlign = 'left';
+      if (k === 0) {
+        x.font = `700 19px ${FB}`; x.fillStyle = BK.ink; x.fillText(s.label, L + 4, y - 11);
+        if (s.hint) { x.font = `italic 400 14px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'right'; x.fillText(fitText(x, s.hint, R - L - x.measureText(s.label).width - 60), R - 6, y - 12); x.textAlign = 'left'; }
+      }
+    }
+  });
+  return { y: y1, n };
+}
+function bkBox(x, y, h, title, rows, cols = 1) {
+  const L = BM + 6, W = BW - 2 * BM - 12;
+  x.fillStyle = BK.tint; x.fillRect(L, y, W, h); x.strokeStyle = BK.line; x.lineWidth = 1.5; x.strokeRect(L, y, W, h);
+  x.fillStyle = BK.ink; x.font = `700 18px ${FB}`; x.fillText(title, L + 16, y + 30);
+  const cw = (W - 32) / cols, rh = (h - 50) / Math.ceil(rows.length / cols);
+  rows.forEach((r, i) => {
+    const cx = L + 16 + (i % cols) * cw, cy = y + 46 + Math.floor(i / cols) * rh;
+    x.font = `600 16px ${FB}`; x.fillStyle = BK.mute; x.fillText(r, cx, cy + rh * 0.62);
+    const tw = x.measureText(r).width + 10;
+    x.strokeStyle = BK.line; x.setLineDash([2, 4]); x.beginPath(); x.moveTo(cx + tw, cy + rh * 0.68); x.lineTo(cx + cw - 20, cy + rh * 0.68); x.stroke(); x.setLineDash([]);
+  });
+  return y + h;
+}
+function bkChecks(x, y, h, title, items) {
+  const L = BM + 6, W = BW - 2 * BM - 12;
+  x.strokeStyle = BK.ink; x.lineWidth = 2; x.strokeRect(L, y, W, h);
+  x.fillStyle = BK.ink; x.font = `700 18px ${FB}`; x.fillText(title, L + 16, y + 30);
+  const cw = (W - 32) / 2, rh = (h - 52) / Math.ceil(items.length / 2);
+  items.forEach((t, i) => {
+    const cx = L + 16 + (i % 2) * cw, cy = y + 44 + Math.floor(i / 2) * rh;
+    x.strokeStyle = BK.ink; x.lineWidth = 1.5; x.strokeRect(cx, cy + 6, 20, 20);
+    x.font = `400 16px ${FB}`; x.fillStyle = BK.ink; x.fillText(fitText(x, t, cw - 44), cx + 30, cy + 22);
+  });
+  return y + h;
+}
+function bkTime(tg) {
+  const r5 = v => Math.max(5, Math.round(v / 5) * 5), a = r5(tg * 0.25), b = r5(tg * 0.2), d = r5(tg * 0.1), c = Math.max(5, tg - a - b - d);
+  return `Gợi ý thời gian (${tg} phút): Đọc hiểu ~${a}′ · Đoạn văn ~${b}′ · Bài văn ~${c}′ · Soát lỗi ~${d}′`;
+}
+function bkTimeTs(tg) {
+  const r5 = v => Math.max(5, Math.round(v / 5) * 5), a = r5(tg * 0.21), b = r5(tg * 0.21), c = r5(tg * 0.08), e = r5(tg * 0.08), d = Math.max(10, tg - a - b - c - e);
+  return `Gợi ý thời gian (${tg} phút): I.1 ~${a}′ · I.2 đoạn văn ~${b}′ · II.1 ~${c}′ · II.2 bài văn ~${d}′ · soát lỗi ~${e}′`;
+}
+function tsSlots(n, rows) {   // chia số dòng cho các ý a, b, c…; ý cuối là đoạn 5–7 câu
+  n = Math.max(2, Math.min(7, n | 0)); const last = Math.min(8, Math.max(6, rows - (n - 1) * 3));
+  const rest = rows - last, base = Math.floor(rest / (n - 1)), extra = rest - base * (n - 1);
+  return Array.from({ length: n }, (_, i) => i === n - 1
+    ? { label: String.fromCharCode(97 + i) + '.', lines: last, hint: 'Đoạn 5–7 câu: câu chủ đề → lí lẽ 1 → lí lẽ 2 → câu chốt' }
+    : { label: String.fromCharCode(97 + i) + '.', lines: base + (i < extra ? 1 : 0) });
+}
+function bookletTs10(o) {
+  const n = 4, out = [], BOT = BH - BM - 34; let tsP3 = 27;
+  // Trang 1: thông tin + Phần I Câu 1 (các ý a, b, c…)
+  { const { c, x } = bkBase(1, n, o); let y = BM + 44;
+    x.fillStyle = BK.ink; x.font = `600 19px ${FB}`; x.fillText(fitText(x, (o.truong || '').toUpperCase(), 640), BM + 6, y + 18);
+    x.font = `400 18px ${FB}`; x.fillStyle = BK.mute; x.fillText(fitText(x, o.ky || 'KỲ THI TUYỂN SINH LỚP 10', 640), BM + 6, y + 44);
+    x.textAlign = 'right'; x.fillText(`Thời gian làm bài: ${o.tg} phút`, BW - BM - 6, y + 44); x.textAlign = 'left';
+    y += 84; x.fillStyle = BK.ink; x.font = `700 34px ${FB}`; x.textAlign = 'center'; x.fillText('BÀI LÀM MÔN NGỮ VĂN', BW / 2, y); x.textAlign = 'left';
+    if (o.de) { y += 30; x.font = `italic 400 19px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'center'; x.fillText(fitText(x, o.de, 900), BW / 2, y); x.textAlign = 'left'; }
+    y += 30;
+    x.font = `600 21px ${FB}`; x.fillStyle = BK.ink; x.fillText('Họ và tên:', BM + 6, y + 22);
+    x.strokeStyle = BK.mute; x.setLineDash([2, 5]); x.beginPath(); x.moveTo(BM + 120, y + 26); x.lineTo(BM + 720, y + 26); x.stroke(); x.setLineDash([]);
+    x.fillText('Lớp:', BM + 750, y + 22); x.setLineDash([2, 5]); x.beginPath(); x.moveTo(BM + 805, y + 26); x.lineTo(BW - BM - 6, y + 26); x.stroke(); x.setLineDash([]);
+    if (o.lop) { x.font = `italic 400 21px ${FB}`; x.fillStyle = BK.mute; x.fillText(o.lop, BM + 820, y + 20); }
+    y += 46; x.font = `600 21px ${FB}`; x.fillStyle = BK.ink; x.fillText('Số báo danh', BM + 6, y + 30);
+    x.strokeStyle = BK.ink; x.lineWidth = 1.5; for (let i = 0; i < 6; i++) x.strokeRect(BM + 150 + i * 44, y, 44, 46);
+    x.fillText('Mã đề', BW - BM - 6 - 3 * 44 - 90, y + 30); for (let i = 0; i < 3; i++) x.strokeRect(BW - BM - 6 - (3 - i) * 44, y, 44, 46);
+    y += 62;
+    const heads = ['Điểm bằng số', 'Điểm bằng chữ', 'Giám khảo 1 (ký)', 'Giám khảo 2 (ký)'], W = BW - 2 * BM - 12, cw = W / 4;
+    x.strokeStyle = BK.ink; x.lineWidth = 2; x.strokeRect(BM + 6, y, W, 92);
+    heads.forEach((h, i) => { if (i) { x.beginPath(); x.moveTo(BM + 6 + i * cw, y); x.lineTo(BM + 6 + i * cw, y + 92); x.stroke(); }
+      x.font = `600 16px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'center'; x.fillText(h, BM + 6 + i * cw + cw / 2, y + 22); x.textAlign = 'left'; });
+    y += 104;
+    x.fillStyle = BK.tint; x.fillRect(BM + 6, y, W, 38); x.font = `600 16px ${FB}`; x.fillStyle = BK.ink; x.fillText(fitText(x, bkTimeTs(o.tg), W - 28), BM + 20, y + 26);
+    y += 50;
+    y = bkTitle(x, y, 'PHẦN I. ĐỌC HIỂU VĂN BẢN VĂN HỌC · Câu 1', 'Mỗi ý trả lời trong khối có nhãn a, b, c… tương ứng. Câu hỏi về "tác dụng" thì nêu đủ 2 vế: nội dung và nghệ thuật.');
+    const rows = Math.floor((BOT - y) / BLH);
+    bkSlots(x, y, tsSlots(o.tsN || 5, rows));
+    out.push(c); }
+  // Trang 2: Phần I Câu 2 (đoạn văn ~200 chữ) + Phần II Câu 1 (luận đề, luận điểm)
+  { const { c, x } = bkBase(2, n, o); let y = BM + 44;
+    y = bkTitle(x, y, 'PHẦN I · Câu 2 – Đoạn văn phân tích (khoảng 200 chữ)', 'Một đoạn duy nhất: câu chủ đề nêu tên tác phẩm, tác giả và vấn đề; mỗi nhận xét đi kèm dẫn chứng trích từ văn bản.');
+    y = bkBox(x, y + 2, 168, 'PHÁC THẢO NHANH (không chấm · 2 phút)', ['Câu chủ đề:', 'Nét đặc sắc 2:', 'Nét đặc sắc 1:', 'Dẫn chứng 2:', 'Dẫn chứng 1:', 'Đánh giá, câu kết:'], 2) + 12;
+    bkLines(x, y, y + 19 * BLH, { mark: { at: 16, label: '≈200 chữ' } });
+    y += 19 * BLH + 22;
+    y = bkTitle(x, y, 'PHẦN II. ĐỌC HIỂU VĂN BẢN NGHỊ LUẬN · Câu 1', 'Ghi đúng nhãn rồi trả lời; luận điểm viết thành câu hoàn chỉnh, theo thứ tự trong văn bản.');
+    const rows = Math.floor((BOT - y) / BLH), lp = Math.max(1, Math.floor((rows - 2) / 3));
+    bkSlots(x, y, [{ label: 'Luận đề:', lines: 2 }, { label: 'Luận điểm 1:', lines: lp }, { label: 'Luận điểm 2:', lines: lp }, { label: 'Luận điểm 3 / quan hệ luận đề – luận điểm:', lines: Math.max(1, rows - 2 - 2 * lp) }], 19);
+    out.push(c); }
+  // Trang 3: Phần II Câu 2 – bài văn ~600 chữ
+  { const { c, x } = bkBase(3, n, o); let y = BM + 44;
+    y = bkTitle(x, y, 'PHẦN II · Câu 2 – Bài văn nghị luận xã hội (khoảng 600 chữ)', 'Mở bài – Thân bài – Kết bài; mỗi ý một đoạn. Viết tiếp sang trang 4.');
+    y = bkBox(x, y + 2, 238, 'DÀN Ý NHANH (không chấm · 5 phút)', ['Mở bài – dẫn câu nói, nêu vấn đề:', 'Giải thích từ khóa:', 'Bàn luận – vì sao, vai trò, ý nghĩa:', 'Dẫn chứng (người thật, việc thật):', 'Phản đề – phê phán biểu hiện trái:', 'Bài học, hành động, liên hệ bản thân:', 'Kết bài – khẳng định lại vấn đề:'], 1) + 14;
+    tsP3 = bkLines(x, y, BOT); out.push(c); }
+  // Trang 4: bài văn (tiếp) + tự kiểm tra
+  { const { c, x } = bkBase(4, n, o); let y = BM + 44;
+    y = bkTitle(x, y, 'PHẦN II · Câu 2 (tiếp)');
+    bkLines(x, y, BOT - 212, { mark: { at: Math.max(1, 46 - tsP3), label: '≈600 chữ' } });
+    bkChecks(x, BOT - 192, 192, 'TỰ KIỂM TRA TRƯỚC KHI NỘP (đánh dấu vào ô)', [
+      'Câu 1 trả lời đủ các ý a, b, c…; đúng thuật ngữ', 'Câu "tác dụng": đủ 2 vế nội dung + nghệ thuật',
+      'Đoạn văn: 1 đoạn, có dẫn chứng trích từ văn bản', 'Phần II Câu 1: ghi rõ luận đề, từng luận điểm',
+      'Bài văn: giải thích → bàn luận → dẫn chứng → phản đề', 'Có liên hệ bản thân; đã soát chính tả, dấu câu']);
+    out.push(c); }
+  return out;
+}
+function bkGrid(x, y, h, title, sub) {   // ô lưới 5 mm để vẽ đồ thị, hình
+  const L = BM + 6, W = BW - 2 * BM - 12, G = 29.5;
+  x.strokeStyle = BK.ink; x.lineWidth = 2; x.strokeRect(L, y, W, h);
+  x.fillStyle = BK.ink; x.font = `700 18px ${FB}`; x.fillText(title, L + 14, y + 28);
+  if (sub) { x.font = `italic 400 15px ${FB}`; x.fillStyle = BK.mute; x.fillText(fitText(x, sub, W - x.measureText(title).width - 60), L + 30 + x.measureText(title).width + 0, y + 28); }
+  const gy = y + 42, gh = h - 50;
+  x.lineWidth = 1;
+  for (let k = 0, xx = L + 12; xx <= L + W - 12; xx += G, k++) { x.strokeStyle = k % 2 ? '#e6e6e6' : '#d2d2d2'; x.beginPath(); x.moveTo(xx, gy); x.lineTo(xx, gy + gh); x.stroke(); }
+  for (let k = 0, yy = gy; yy <= gy + gh; yy += G, k++) { x.strokeStyle = k % 2 ? '#e6e6e6' : '#d2d2d2'; x.beginPath(); x.moveTo(L + 12, yy); x.lineTo(L + W - 12, yy); x.stroke(); }
+  return y + h;
+}
+function bkHeadToan(x, o, ts) {
+  let y = BM + 44;
+  x.fillStyle = BK.ink; x.font = `600 19px ${FB}`; x.fillText(fitText(x, (o.truong || '').toUpperCase(), 640), BM + 6, y + 18);
+  x.font = `400 18px ${FB}`; x.fillStyle = BK.mute; x.fillText(fitText(x, o.ky || (ts ? 'KỲ THI TUYỂN SINH LỚP 10' : 'KIỂM TRA ĐỊNH KÌ'), 640), BM + 6, y + 44);
+  x.textAlign = 'right'; x.fillText(`Thời gian làm bài: ${o.tg} phút`, BW - BM - 6, y + 44); x.textAlign = 'left';
+  y += 84; x.fillStyle = BK.ink; x.font = `700 34px ${FB}`; x.textAlign = 'center'; x.fillText('BÀI LÀM MÔN TOÁN', BW / 2, y); x.textAlign = 'left';
+  if (o.de) { y += 30; x.font = `italic 400 19px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'center'; x.fillText(fitText(x, o.de, 900), BW / 2, y); x.textAlign = 'left'; }
+  y += 30;
+  x.font = `600 21px ${FB}`; x.fillStyle = BK.ink; x.fillText('Họ và tên:', BM + 6, y + 22);
+  x.strokeStyle = BK.mute; x.setLineDash([2, 5]); x.beginPath(); x.moveTo(BM + 120, y + 26); x.lineTo(BM + 720, y + 26); x.stroke(); x.setLineDash([]);
+  x.fillText('Lớp:', BM + 750, y + 22); x.setLineDash([2, 5]); x.beginPath(); x.moveTo(BM + 805, y + 26); x.lineTo(BW - BM - 6, y + 26); x.stroke(); x.setLineDash([]);
+  if (o.lop && o.lop.trim()) { x.font = `italic 400 21px ${FB}`; x.fillStyle = BK.mute; x.fillText(o.lop, BM + 820, y + 20); }
+  y += 46; x.font = `600 21px ${FB}`; x.fillStyle = BK.ink; x.fillText('Số báo danh', BM + 6, y + 30);
+  x.strokeStyle = BK.ink; x.lineWidth = 1.5; for (let i = 0; i < 6; i++) x.strokeRect(BM + 150 + i * 44, y, 44, 46);
+  x.fillText('Mã đề', BW - BM - 6 - 3 * 44 - 90, y + 30); for (let i = 0; i < 3; i++) x.strokeRect(BW - BM - 6 - (3 - i) * 44, y, 44, 46);
+  y += 62;
+  const heads = ['Điểm bằng số', 'Điểm bằng chữ', 'Giám khảo 1 (ký)', 'Giám khảo 2 (ký)'], W = BW - 2 * BM - 12, cw = W / 4;
+  x.strokeStyle = BK.ink; x.lineWidth = 2; x.strokeRect(BM + 6, y, W, 92);
+  heads.forEach((h, i) => { if (i) { x.beginPath(); x.moveTo(BM + 6 + i * cw, y); x.lineTo(BM + 6 + i * cw, y + 92); x.stroke(); }
+    x.font = `600 16px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'center'; x.fillText(h, BM + 6 + i * cw + cw / 2, y + 22); x.textAlign = 'left'; });
+  y += 104;
+  const r5 = v => Math.max(5, Math.round(v / 5) * 5), tg = o.tg;
+  const tip = ts ? `Gợi ý thời gian (${tg}′): Bài 1–2 ~${r5(tg * 0.17)}′ · các bài toán thực tế ~${r5(tg * 0.46)}′ · bài hình ~${r5(tg * 0.29)}′ · soát lỗi ~${r5(tg * 0.08)}′`
+    : `Gợi ý: đọc lướt cả đề ~${r5(tg * 0.05)}′ · làm câu dễ trước · dành ~${r5(tg * 0.1)}′ cuối để thử lại kết quả`;
+  x.fillStyle = BK.tint; x.fillRect(BM + 6, y, W, 38); x.font = `600 16px ${FB}`; x.fillStyle = BK.ink; x.fillText(fitText(x, tip, W - 28), BM + 20, y + 26);
+  return y + 50;
+}
+function bookletToan(o) {
+  const n = 4, out = [], BOT = BH - BM - 34, ts = o.layout !== 'free', LO = { bai: true, gk: 'Điểm GK' };
+  const say = (x, y, t, sub) => bkTitle(x, y, t, sub);
+  // Trang 1
+  { const { c, x } = bkBase(1, n, o); let y = bkHeadToan(x, o, ts);
+    y = say(x, y, 'BÀI LÀM', 'Ghi số bài, số câu ở cột "Bài" (VD 1a). Trình bày từng bước, mỗi bước một dòng; có kết luận hoặc đáp số.');
+    if (ts) {
+      // khung đồ thị Bài 1: bảng giá trị + lưới
+      const L = BM + 6, W = BW - 2 * BM - 12, h = 392;
+      x.strokeStyle = BK.ink; x.lineWidth = 2; x.strokeRect(L, y, W, h);
+      x.fillStyle = BK.ink; x.font = `700 18px ${FB}`; x.fillText('ĐỒ THỊ (Bài 1)', L + 14, y + 28);
+      x.font = `italic 400 15px ${FB}`; x.fillStyle = BK.mute; x.fillText('Lập bảng giá trị, vẽ trục Oxy, ghi tên (P), (d) và tọa độ giao điểm', L + 160, y + 28);
+      const tw = 470, cw = (tw - 110) / 5, ty = y + 50;
+      [['(P):', ty + 26], ['(d):', ty + 26 + 104 + 52]].forEach(([cap, t0]) => {
+        x.font = `700 16px ${FB}`; x.fillStyle = BK.ink; x.fillText(cap, L + 14, t0 - 8);
+        ['x', 'y = …'].forEach((lab, r) => { const yy = t0 + r * 52;
+          x.strokeStyle = BK.ink; x.lineWidth = 1.3; x.strokeRect(L + 14, yy, 110, 52); for (let k = 0; k < 5; k++) x.strokeRect(L + 124 + k * cw, yy, cw, 52);
+          x.font = `600 17px ${FB}`; x.fillStyle = BK.mute; x.fillText(lab, L + 24, yy + 32); });
+      });
+      const gx = L + tw + 40, gw = W - tw - 54, gy = y + 46, gh = h - 56, G = 29.5;
+      x.lineWidth = 1;
+      for (let k = 0, xx = gx; xx <= gx + gw; xx += G, k++) { x.strokeStyle = k % 2 ? '#e6e6e6' : '#d2d2d2'; x.beginPath(); x.moveTo(xx, gy); x.lineTo(xx, gy + gh); x.stroke(); }
+      for (let k = 0, yy = gy; yy <= gy + gh; yy += G, k++) { x.strokeStyle = k % 2 ? '#e6e6e6' : '#d2d2d2'; x.beginPath(); x.moveTo(gx, yy); x.lineTo(gx + gw, yy); x.stroke(); }
+      y += h + 14;
+    }
+    bkLines(x, y, BOT, LO); out.push(c); }
+  // Trang 2, 3
+  let start = 0;
+  for (const p of [2, 3]) { const { c, x } = bkBase(p, n, o); let y = BM + 44;
+    y = say(x, y, 'BÀI LÀM (tiếp)'); bkLines(x, y, BOT, LO); out.push(c); }
+  // Trang 4: hình vẽ + bài làm + tự kiểm tra
+  { const { c, x } = bkBase(4, n, o); let y = BM + 44;
+    y = say(x, y, ts ? 'BÀI HÌNH HỌC' : 'BÀI LÀM (tiếp)', ts ? 'Vẽ hình bằng bút chì, thước; ghi đủ tên điểm. Hình vẽ đúng mới được chấm phần chứng minh.' : '');
+    y = bkGrid(x, y, ts ? 470 : 380, 'HÌNH VẼ', ts ? '' : 'Vẽ hình, đồ thị (nếu cần), ghi rõ thuộc bài nào') + 12;
+    bkLines(x, y, BOT - 212, LO);
+    bkChecks(x, BOT - 192, 192, 'TỰ KIỂM TRA TRƯỚC KHI NỘP (đánh dấu vào ô)', [
+      'Ghi rõ số bài, số câu ở cột "Bài"', 'Có điều kiện xác định, đã đối chiếu điều kiện',
+      'Mỗi câu có kết luận hoặc đáp số rõ ràng', 'Toán thực tế: đúng đơn vị, trả lời đúng câu hỏi',
+      'Bài hình: hình đúng, nêu căn cứ từng bước', 'Đã thử lại nghiệm, soát dấu và phép tính']);
+    out.push(c); }
+  return out;
+}
+function bookletPages(o) {
+  if (o.mon === 'toan') return bookletToan(o);
+  if (o.layout === 'ts10') return bookletTs10(o);
+  const n = 4, out = [], thpt = o.layout !== 'free', BOT = BH - BM - 34;
+  // Trang 1
+  { const { c, x } = bkBase(1, n, o); let y = BM + 44;
+    x.fillStyle = BK.ink; x.font = `600 19px ${FB}`; x.fillText(fitText(x, (o.truong || '').toUpperCase(), 620), BM + 6, y + 18);
+    x.font = `400 18px ${FB}`; x.fillStyle = BK.mute; x.fillText(fitText(x, o.ky || 'KIỂM TRA ĐỊNH KÌ', 620), BM + 6, y + 44);
+    x.textAlign = 'right'; x.fillText(`Thời gian làm bài: ${o.tg} phút`, BW - BM - 6, y + 44); x.textAlign = 'left';
+    y += 90; x.fillStyle = BK.ink; x.font = `700 36px ${FB}`; x.textAlign = 'center'; x.fillText('GIẤY LÀM BÀI MÔN NGỮ VĂN', BW / 2, y); x.textAlign = 'left';
+    if (o.de) { y += 32; x.font = `italic 400 19px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'center'; x.fillText(fitText(x, 'Đề: ' + o.de, 900), BW / 2, y); x.textAlign = 'left'; }
+    y += 40;
+    x.font = `600 21px ${FB}`; x.fillStyle = BK.ink; x.fillText('Họ và tên:', BM + 6, y + 22);
+    x.strokeStyle = BK.mute; x.setLineDash([2, 5]); x.beginPath(); x.moveTo(BM + 120, y + 26); x.lineTo(BM + 720, y + 26); x.stroke(); x.setLineDash([]);
+    x.fillText('Lớp:', BM + 750, y + 22); x.setLineDash([2, 5]); x.beginPath(); x.moveTo(BM + 805, y + 26); x.lineTo(BW - BM - 6, y + 26); x.stroke(); x.setLineDash([]);
+    if (o.lop) { x.font = `italic 400 21px ${FB}`; x.fillStyle = BK.mute; x.fillText(o.lop, BM + 820, y + 20); }
+    y += 50; x.font = `600 21px ${FB}`; x.fillStyle = BK.ink; x.fillText('Số báo danh', BM + 6, y + 30);
+    x.strokeStyle = BK.ink; x.lineWidth = 1.5; for (let i = 0; i < 6; i++) x.strokeRect(BM + 150 + i * 44, y, 44, 46);
+    x.fillText('Mã đề', BW - BM - 6 - 3 * 44 - 90, y + 30); for (let i = 0; i < 3; i++) x.strokeRect(BW - BM - 6 - (3 - i) * 44, y, 44, 46);
+    y += 66;
+    const heads = ['Điểm bằng số', 'Điểm bằng chữ', 'Giám khảo 1 (ký)', 'Giám khảo 2 (ký)'], W = BW - 2 * BM - 12, cw = W / 4;
+    x.strokeStyle = BK.ink; x.lineWidth = 2; x.strokeRect(BM + 6, y, W, 120);
+    heads.forEach((h, i) => { if (i) { x.beginPath(); x.moveTo(BM + 6 + i * cw, y); x.lineTo(BM + 6 + i * cw, y + 120); x.stroke(); }
+      x.font = `600 16px ${FB}`; x.fillStyle = BK.mute; x.textAlign = 'center'; x.fillText(h, BM + 6 + i * cw + cw / 2, y + 24); x.textAlign = 'left'; });
+    y += 136;
+    x.fillStyle = BK.tint; x.fillRect(BM + 6, y, W, 40); x.font = `600 17px ${FB}`; x.fillStyle = BK.ink; x.fillText(bkTime(o.tg), BM + 20, y + 27);
+    y += 58;
+    if (thpt) {
+      y = bkTitle(x, y, 'PHẦN I. ĐỌC HIỂU', 'Ghi số câu ở đầu mỗi câu trả lời (Câu 1, Câu 2…). Trả lời đúng trọng tâm câu hỏi; câu hỏi nhiều ý thì gạch đầu dòng từng ý.');
+    } else y = bkTitle(x, y, 'BÀI LÀM', 'Ghi rõ phần, số câu trước mỗi câu trả lời (VD: I. Câu 1, II. Câu 2).');
+    bkLines(x, y, BOT); out.push(c); }
+  // Trang 2
+  { const { c, x } = bkBase(2, n, o); let y = BM + 44;
+    if (thpt) {
+      y = bkTitle(x, y, 'PHẦN II. VIẾT · Câu 1 – Đoạn văn nghị luận (khoảng 200 chữ)', 'Một đoạn duy nhất: mở bằng câu chủ đề, không xuống dòng giữa đoạn, kết bằng câu chốt ý.');
+      y = bkBox(x, y + 4, 196, 'PHÁC THẢO NHANH (không chấm · 2 phút)', ['Câu chủ đề:', 'Lí lẽ 1:', 'Lí lẽ 2:', 'Dẫn chứng:', 'Phản đề/mở rộng:', 'Câu kết:'], 2) + 16;
+      bkLines(x, y, BOT, { mark: { at: 16, label: '≈200 chữ' } });
+    } else bkLines(x, y, BOT);
+    out.push(c); }
+  // Trang 3
+  { const { c, x } = bkBase(3, n, o); let y = BM + 44;
+    if (thpt) {
+      y = bkTitle(x, y, 'Câu 2 – Bài văn nghị luận (khoảng 600 chữ)', 'Mỗi luận điểm một đoạn: câu luận điểm → lí lẽ → dẫn chứng → liên hệ. Viết tiếp sang trang 4.');
+      y = bkBox(x, y + 4, 250, 'DÀN Ý NHANH (không chấm · 5 phút)', ['Mở bài – nêu vấn đề:', 'Luận điểm 1:', 'Luận điểm 2:', 'Luận điểm 3:', 'Phản đề / mở rộng:', 'Kết bài – bài học, hành động:'], 1) + 16;
+      bkLines(x, y, BOT);
+    } else bkLines(x, y, BOT);
+    out.push(c); }
+  // Trang 4
+  { const { c, x } = bkBase(4, n, o); let y = BM + 44;
+    y = bkTitle(x, y, thpt ? 'Câu 2 (tiếp)' : 'Bài làm (tiếp)');
+    const checks = thpt
+      ? ['Trả lời đủ các câu Đọc hiểu, đúng số câu', 'Đoạn văn có câu chủ đề, đủ khoảng 200 chữ', 'Bài văn đủ Mở bài – Thân bài – Kết bài', 'Mỗi luận điểm có lí lẽ và dẫn chứng cụ thể', 'Có phản đề hoặc mở rộng, có bài học riêng', 'Đã soát chính tả, tên riêng, dấu câu']
+      : ['Làm đủ các câu, ghi rõ số câu', 'Bố cục rõ ràng, mỗi ý một đoạn', 'Có dẫn chứng cụ thể cho mỗi ý', 'Đủ dung lượng đề yêu cầu', 'Có liên hệ, bài học riêng', 'Đã soát chính tả, dấu câu'];
+    bkLines(x, y, BOT - 236);
+    bkChecks(x, BOT - 214, 214, 'TỰ KIỂM TRA TRƯỚC KHI NỘP (đánh dấu vào ô)', checks);
+    out.push(c); }
+  return out;
+}
+async function bookletPdf() {
+  if (!window.jspdf) await loadScript(JSPDF_SRC);
+  await ensureFonts();
+  const de = vDe(), T = isToan(), pages = bookletPages({ mon: MON(), truong: cfg.rep.truong, ky: cfg.van.ky, tg: +(T ? cfg.van.tgT : cfg.van.tg) || 90, layout: T ? cfg.van.layoutT : cfg.van.layout, tsN: +cfg.van.tsN || 5, de: de?.name || '', lop: cfg.curClass || cfg.rep.lop || '' });
+  const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compress: true });
+  pages.forEach((c, i) => { if (i) doc.addPage(); doc.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297, undefined, 'FAST'); });
+  doc.setProperties({ title: 'Giấy làm bài ' + MONNAME() });
+  return doc.output('blob');
+}
+
+/* ---------- Nhận bài làm (mỗi bài N trang) ---------- */
+function newEssay(name) {
+  const e = { id: ++vuid, mon: MON(), name: name || `Bài ${mEss().length + 1}`, pages: [], status: 'wait', step: '', err: '', deId: cfg.van.curDe, tr: null, trText: '', g: null, edit: {}, nx: null };
+  essays.push(e); return e;
+}
+async function vanAddCanvas(c, name, forceNew) {
+  const pp = Math.max(1, +cfg.van.pagesPer || 4);
+  let e = essays[essays.length - 1];
+  if (forceNew || !e || e.mon !== MON() || e.pages.length >= pp || e.status !== 'wait') e = newEssay(name);
+  const t = document.createElement('canvas'); t.width = 220; t.height = Math.round(c.height * 220 / c.width);
+  t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
+  const full = await canvasBlob(c, 0.88);
+  const [top, bot] = await Promise.all([canvasBlob(crop(c, 0, 0.54), 0.88), canvasBlob(crop(c, 0.46, 1), 0.88)]);
+  e.pages.push({ full, top, bot, url: URL.createObjectURL(full), thumb: t.toDataURL('image/jpeg', 0.7) });
+  return e;
+}
+async function vanAddFiles(list) {
+  const files = [...list].sort((a, b) => a.name.localeCompare(b.name, 'vi', { numeric: true })); if (!files.length) return;
+  const st = $('#vanStatus'), pp = Math.max(1, +cfg.van.pagesPer || 4), before = essays.length; let errs = 0;
+  for (const f of files) {
+    try {
+      if (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)) {
+        if (!window.pdfjsLib) throw new Error('pdf');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+        for (let p = 1; p <= pdf.numPages; p++) {
+          if (st) st.textContent = `Đang mở ${f.name} · trang ${p}/${pdf.numPages}`;
+          const page = await pdf.getPage(p), v1 = page.getViewport({ scale: 1 });
+          const vp = page.getViewport({ scale: Math.min(3, 2000 / Math.max(v1.width, v1.height)) });
+          const c = whiteCanvas(Math.ceil(vp.width), Math.ceil(vp.height));
+          await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+          const nm = pdf.numPages > pp ? `${f.name.replace(/\.pdf$/i, '')} · bài ${Math.floor((p - 1) / pp) + 1}` : f.name.replace(/\.pdf$/i, '');
+          await vanAddCanvas(flatten(c), nm, (p - 1) % pp === 0);
+        }
+      } else {
+        let bmp;
+        try { bmp = await createImageBitmap(f, { imageOrientation: 'from-image' }); }
+        catch (e) { bmp = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(e); im.src = URL.createObjectURL(f); }); }
+        const k = Math.min(1, 2200 / Math.max(bmp.width, bmp.height)), c = whiteCanvas(Math.round(bmp.width * k), Math.round(bmp.height * k));
+        c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+        await vanAddCanvas(flatten(c), f.name.replace(/\.[^.]+$/, ''));
+      }
+    } catch (e) { errs++; }
+    renderVan();
+  }
+  if (st) st.textContent = '';
+  const n = essays.length - before, short = essays.filter(e => e.status === 'wait' && e.pages.length < pp).length;
+  toast(`Đã thêm ${n} bài${short ? ` · ${short} bài chưa đủ ${pp} trang` : ''}${errs ? ` · ${errs} file không mở được` : ''}`);
+}
+
+/* ---------- Chép chữ viết tay ---------- */
+const TR_RULES_T = [
+  'Chép lại CHÍNH XÁC lời giải viết tay của học sinh, kể cả phép tính sai; không sửa, không giải hộ, không thêm bước.',
+  'Mỗi dòng viết trên giấy chép thành một dòng, đầu dòng ghi số dòng in sẵn ở lề trái, dạng "12| nội dung". Dòng trống thì bỏ qua.',
+  'Công thức viết bằng ký hiệu thường, dễ đọc: x², x³, √(x+1), x₁ + x₂, a/b hoặc (2x+1)/(x−3), ≤, ≥, ≠, ⇔, ⇒, ∈, Δ, π, °, ∠ABC, △ABC, AB ⊥ CD, AB // CD. KHÔNG dùng LaTeX.',
+  'Số bài, số câu học sinh ghi ở cột "Bài" bên trái (VD 1a, 2, 3b) ghi thành một dòng riêng "## Bài 1a" đặt trước phần lời giải đó.',
+  'Hình vẽ, đồ thị: mô tả ngắn trong ngoặc vuông, VD [Hình: tam giác ABC nội tiếp (O), đường cao AD, BE cắt nhau tại H] hoặc [Đồ thị: parabol đỉnh O, đi qua (±2; 2) và đường thẳng cắt tại …]; nêu rõ nếu hình thiếu hoặc vẽ sai. Bảng giá trị chép thành dòng "x | −2 | −1 | 0 | 1 | 2".',
+  'Chữ hoặc số không đọc được ghi [?]; chữ bị gạch xóa thì bỏ qua. Bỏ qua chữ in sẵn của giấy (tiêu đề khung, lời dặn, số dòng, cột Điểm GK, bảng tự kiểm tra).'
+].join('\n');
+const TR_RULES = [
+  'Chép lại CHÍNH XÁC chữ học sinh viết tay: giữ nguyên lỗi chính tả, dùng từ, dấu câu; không sửa, không thêm, không tóm tắt.',
+  'Mỗi dòng viết trên giấy chép thành một dòng, đầu dòng ghi số dòng in sẵn ở lề trái, dạng "12| nội dung". Dòng trống thì bỏ qua.',
+  'Chữ không đọc được ghi [?]. Chữ bị gạch xóa thì bỏ qua.',
+  'Tiêu đề và nhãn in sẵn của giấy (PHẦN I, Câu 1, Câu 2 – Đoạn văn…, nhãn a., b., c…, "Luận đề:", "Luận điểm 1:") ghi thành một dòng riêng "## <tiêu đề hoặc nhãn>" đặt trước phần học sinh viết. Bỏ qua chữ in sẵn khác (lời dặn, gợi ý in nghiêng, số dòng, cột Giám khảo, bảng tự kiểm tra).',
+  'Nếu học sinh có viết vào khung "Phác thảo nhanh" hoặc "Dàn ý nhanh" thì chép vào trường "dan_y" (không lẫn vào bài).',
+  'Ảnh có thể hơi nghiêng hoặc mờ: đọc hết sức, chỗ nào đoán thì thêm [?] ngay sau chữ đó.'
+].join('\n');
+async function vanTranscribe(e, signal) {
+  const n = e.pages.length, out = { ho_ten: '', sbd: '', lop: '', ma_de: '', trang: [] };
+  const head = 'Đọc thêm ở đầu trang 1: họ tên, lớp, số báo danh (6 ô), mã đề (3 ô) học sinh ghi.', R = monOf(deOf(e)) === 'toan' ? TR_RULES_T : TR_RULES, MN = MONNAME(monOf(deOf(e)));
+  if (engine() === 'gemini') {
+    const o = await vanAI(`Đây là ${n} trang giấy làm bài môn ${MN} viết tay của MỘT học sinh, theo thứ tự trang 1 → ${n}.\n${R}\n${head}\nChỉ trả về JSON: {"ho_ten":"","sbd":"","lop":"","ma_de":"","trang":[{"so":1,"van_ban":"1| …\\n2| …","dan_y":""}]}`,
+      e.pages.map(p => p.full), 'default', signal);
+    Object.assign(out, { ho_ten: vStr(o?.ho_ten), sbd: vStr(o?.sbd), lop: vStr(o?.lop), ma_de: vStr(o?.ma_de) });
+    out.trang = (Array.isArray(o?.trang) ? o.trang : []).map((t, i) => ({ so: +t.so || i + 1, van_ban: vStr(t.van_ban), dan_y: vStr(t.dan_y) }));
+  } else {
+    for (let p = 0; p < n; p++) {
+      if (signal?.aborted) throw { code: 'cancelled' };
+      e.step = `Đang chép chữ viết tay · trang ${p + 1}/${n}`; renderVan();
+      const pg = e.pages[p], two = maxImgs >= 2 && pg.top;
+      const o = await vanAI(`Đây là trang ${p + 1}/${n} giấy làm bài môn ${MN} viết tay của một học sinh.${two ? ' Ảnh 1 là nửa trên, ảnh 2 là nửa dưới của CÙNG trang; hai ảnh chồng lấn một dải ở giữa, không chép trùng dòng.' : ''}\n${R}\n${p === 0 ? head : ''}\nChỉ trả về JSON: {${p === 0 ? '"ho_ten":"","sbd":"","lop":"","ma_de":"",' : ''}"van_ban":"1| …\\n2| …","dan_y":""}`,
+        two ? [pg.top, pg.bot] : [pg.full], 'default', signal);
+      if (p === 0) Object.assign(out, { ho_ten: vStr(o?.ho_ten), sbd: vStr(o?.sbd), lop: vStr(o?.lop), ma_de: vStr(o?.ma_de) });
+      out.trang.push({ so: p + 1, van_ban: vStr(o?.van_ban), dan_y: vStr(o?.dan_y) });
+    }
+  }
+  return out;
+}
+const trToText = tr => tr.trang.map(t => `=== TRANG ${t.so} ===\n${t.van_ban || '(trống)'}${t.dan_y ? `\n[Dàn ý nháp của học sinh – không chấm]\n${t.dan_y}` : ''}`).join('\n\n');
+function vanMatch(e) {
+  const m = matchStudent(e.tr?.sbd, e.tr?.ho_ten);
+  if (m?.st) { e.sbd = m.st.sbd; e.ten = m.st.ten; e.stt = m.st.stt; e.how = m.how; }
+  else { e.sbd = e.tr?.sbd || ''; e.ten = e.tr?.ho_ten || ''; e.stt = ''; e.how = m ? 'none' : ''; }
+}
+
+/* ---------- Chấm theo hướng dẫn chấm ---------- */
+function toanOutlinePrompt(de) {
+  return [
+    'Bạn là tổ trưởng chuyên môn Toán. Từ đề kiểm tra tự luận và hướng dẫn chấm (HDC, đáp án – thang điểm) dưới đây, lập KHUNG ĐIỂM để chấm.',
+    'Yêu cầu: liệt kê mọi câu/ý được chấm điểm theo đúng thứ tự trong đề; điểm tối đa lấy ĐÚNG theo HDC; mỗi câu kèm các BƯỚC chấm và điểm từng bước đúng như HDC (VD "Tính Δ = 25 → 0,25", "Kết luận nghiệm → 0,25").',
+    'id theo số bài và ý của đề: "1a", "1b", "2", "3a"… (đề ghi "Câu" thì vẫn dùng số câu). Ý nhỏ a, b, c được chấm riêng thì tách mỗi ý một mục.',
+    'Ghi vào "yeu_cau" kết quả đúng cuối cùng của câu (đáp số, nghiệm, giá trị cần chứng minh) để giám khảo đối chiếu.',
+    'Nếu HDC chỉ có đáp số/lời giải, không ghi điểm: lấy tổng điểm từng bài trong đề (nếu có) và chia bước 0,25 hợp lí theo độ dài lời giải; ghi rõ vào "ghi_chu" là điểm do AI đề xuất để giáo viên kiểm tra.',
+    'Viết công thức bằng ký hiệu thường (x², √, ≤, ≠, Δ, π, °), không dùng LaTeX.',
+    '', '=== ĐỀ ===', de.de.slice(0, 15000), '', '=== HƯỚNG DẪN CHẤM ===', de.hdc.slice(0, 20000), '',
+    'Chỉ trả về JSON: {"cau":[{"id":"1a","ten":"Bài 1a – Vẽ (P) và (d)","yeu_cau":"kết quả đúng","toi_da":0.5,"tieu_chi":[{"nd":"Lập bảng giá trị đúng","diem":0.25},{"nd":"Vẽ đúng đồ thị","diem":0.25}]}],"so_chu":{},"ghi_chu":"lưu ý của HDC nếu có"}'
+  ].join('\n');
+}
+function toanGradePrompt(de, e) {
+  const ol = de.outline.map(c => `- ${c.id} | ${c.ten} | tối đa ${c.toi_da} điểm${c.yeu_cau ? ' | kết quả đúng: ' + c.yeu_cau : ''}${(c.tieu_chi || []).length ? '\n' + c.tieu_chi.map(t => `    • ${t.nd} (${t.diem} đ)`).join('\n') : ''}`).join('\n');
+  return [
+    'Bạn đồng thời là (1) giáo viên Toán xuất sắc, 20 năm kinh nghiệm dạy và luyện thi tuyển sinh 10, tốt nghiệp THPT, và (2) giám khảo khó tính nhất hội đồng chấm thi môn Toán.',
+    'Nhiệm vụ: chấm bài tự luận dưới đây ĐÚNG THEO đáp án – thang điểm, rồi nhận xét giúp học sinh đạt điểm cao hơn ở lần sau.',
+    'NGUYÊN TẮC CHẤM (giám khảo Toán khó tính):',
+    '- Chấm theo TỪNG BƯỚC của HDC, mỗi bước 0,25; tự kiểm tra lại mọi phép tính của học sinh trước khi cho điểm.',
+    '- Sai ở bước nào thì các bước sau DỰA TRÊN kết quả sai đó không cho điểm (trừ khi HDC cho khác). Bước độc lập vẫn chấm bình thường.',
+    '- Kết quả đúng nhưng lập luận sai, thiếu, hoặc "đoán" đáp số không có lời giải: không cho đủ điểm (câu chỉ hỏi kết quả thì theo HDC).',
+    '- Cách giải khác HDC nhưng đúng và chặt chẽ: cho điểm tối đa phần đó; nói rõ đã chấp nhận cách giải khác.',
+    '- Trừ điểm theo HDC khi: thiếu điều kiện xác định hoặc không đối chiếu điều kiện; thiếu kết luận/đáp số; bài toán thực tế thiếu hoặc sai đơn vị, không trả lời đúng câu hỏi; làm tròn sai yêu cầu.',
+    '- Bài hình: không vẽ hình hoặc hình vẽ sai cơ bản thì không chấm phần chứng minh liên quan đến hình đó; chứng minh thiếu căn cứ (không nêu lí do, định lí) thì trừ bước đó.',
+    '- Câu bỏ trống: 0 điểm. Chỗ [?] là chữ không đọc được: nếu bước vẫn rõ thì không trừ. Không vượt điểm tối đa; phân vân thì chọn mức thấp hơn và nói rõ lí do.',
+    'NGUYÊN TẮC NHẬN XÉT (giáo viên giỏi): gọi học sinh là "em"; chỉ đúng bước sai đầu tiên của mỗi câu, trích nguyên văn dòng sai, giải thích vì sao sai và sửa thế nào; nêu cái được trước, cái chưa được sau; không viết chung chung.',
+    'Viết mọi công thức bằng ký hiệu thường (x², √(x+1), x₁ + x₂, ≤, ≠, ⇔, Δ, π, °, ∠ABC), KHÔNG dùng LaTeX.',
+    'Bản chép có số dòng theo giấy làm bài ("12| …"); vị trí lỗi ghi "Trang x, dòng y".',
+    '', '=== ĐỀ BÀI ===', de.de.slice(0, 12000), '', '=== ĐÁP ÁN – HƯỚNG DẪN CHẤM ===', de.hdc.slice(0, 16000), de.ghi_chu ? 'Lưu ý của HDC: ' + de.ghi_chu : '',
+    '', '=== KHUNG ĐIỂM (dùng đúng các id này) ===', ol, '',
+    '=== BÀI LÀM CỦA HỌC SINH (chép từ chữ viết tay) ===', (e.trText || '').slice(0, 30000), '',
+    'Chỉ trả về MỘT đối tượng JSON theo mẫu; mảng "cau" có đủ mọi id trong khung điểm, đúng thứ tự:',
+    '{"cau":[{"id":"1a","diem":0.5,"dat":["bước làm đúng"],"chua_dat":["bước sai/thiếu, ghi rõ bước sai đầu tiên"],"trich":"dòng tính toán tiêu biểu của em","nhan_xet":"1–3 câu"}],' +
+    '"nhan_xet_chung":"3–5 câu, giọng giáo viên","diem_manh":["…"],"han_che":["…"],' +
+    '"loi":[{"vi_tri":"Trang 2, dòng 5","loai":"Tính toán|Lập luận|Điều kiện|Kết luận|Đơn vị|Hình vẽ|Trình bày|Kiến thức","trich":"…","sua":"…"}],' +
+    '"nang_diem":["việc cụ thể, theo thứ tự ưu tiên"],"viet_lai":{"muc":"câu em mất nhiều điểm nhất, VD: Bài 5b","doan":"lời giải đúng, đầy đủ các bước, ngắn gọn"},' +
+    '"giam_khao":"2–3 câu thẳng thắn của giám khảo khó tính: em mất điểm ở đâu, vì sao","ren_luyen":["dạng bài cần luyện thêm trong 1 tuần"]}',
+    'Độ dài: "loi" tối đa 10 lỗi tiêu biểu; "nang_diem" 4–6 việc; "viet_lai.doan" là lời giải mẫu đầy đủ của MỘT câu em làm sai nhiều nhất, mỗi bước một dòng; "ren_luyen" 2–3 dạng bài.'
+  ].filter(s => s !== '').join('\n');
+}
+function vanGradePrompt(de, e) {
+  if (monOf(de) === 'toan') return toanGradePrompt(de, e);
+  const ol = de.outline.map(c => `- ${c.id} | ${c.ten} | tối đa ${c.toi_da} điểm${c.yeu_cau ? ' | yêu cầu: ' + c.yeu_cau : ''}${(c.tieu_chi || []).length ? '\n' + c.tieu_chi.map(t => `    • ${t.nd} (${t.diem} đ)`).join('\n') : ''}`).join('\n');
+  const sc = de.so_chu && Object.keys(de.so_chu).length ? 'Dung lượng đề yêu cầu: ' + Object.entries(de.so_chu).map(([k, v]) => `${k} khoảng ${v} chữ`).join('; ') + '. Ước lượng số chữ học sinh viết (mỗi dòng viết tay khoảng 10–12 chữ).' : '';
+  return [
+    'Bạn đồng thời là (1) giáo viên Ngữ văn THPT xuất sắc, 20 năm kinh nghiệm dạy và luyện thi tốt nghiệp THPT, và (2) giám khảo khó tính nhất hội đồng chấm thi.',
+    'Nhiệm vụ: chấm bài làm dưới đây ĐÚNG THEO hướng dẫn chấm, rồi viết nhận xét giúp học sinh đạt điểm cao hơn ở lần sau.',
+    'NGUYÊN TẮC CHẤM (giám khảo khó tính):',
+    '- Chỉ cho điểm ý học sinh thực sự viết ra; không suy diễn hộ, không châm chước. Ý diễn đạt khác HDC nhưng đúng bản chất thì vẫn cho điểm.',
+    '- Bám thang điểm HDC; cho điểm từng câu theo bước 0,25; không vượt điểm tối đa; khi phân vân thì chọn mức thấp hơn và nói rõ lí do.',
+    '- Trừ điểm theo HDC khi: thiếu ý, sai kiến thức, lạc đề, sai kiểu bài/hình thức (đoạn văn tách nhiều đoạn, bài văn thiếu bố cục), không đủ dung lượng, lỗi chính tả – dùng từ – ngữ pháp nhiều, diễn đạt tối nghĩa, dẫn chứng sai hoặc chung chung.',
+    '- Câu bỏ trống hoặc chỉ chép lại đề: 0 điểm. Chỗ [?] là chữ không đọc được: không trừ điểm vì chỗ đó nếu ý vẫn rõ.',
+    '- Nếu hướng dẫn chấm là "gợi ý làm bài"/bài làm mẫu: chỉ dùng để xác định các ý chính cần có; KHÔNG đòi học sinh viết giống bài mẫu; ý đúng, có lập luận và dẫn chứng hợp lí ngoài gợi ý vẫn được điểm.',
+    '- Câu yêu cầu trả lời thành đoạn (VD "đoạn 5–7 câu"), đoạn văn khoảng 200 chữ, bài văn khoảng 600 chữ: sai hình thức hoặc thiếu dung lượng rõ rệt thì trừ phần điểm hình thức.',
+    'NGUYÊN TẮC NHẬN XÉT (giáo viên giỏi): gọi học sinh là "em"; cụ thể, trích nguyên văn từ bài trong ngoặc kép; nêu cái được trước, cái chưa được sau; mỗi góp ý kèm cách sửa làm được ngay; không viết chung chung kiểu "cần cố gắng hơn".',
+    'Bản chép có số dòng theo giấy làm bài ("12| …"); vị trí lỗi ghi "Trang x, dòng y".', sc,
+    '', '=== ĐỀ BÀI ===', de.de.slice(0, 12000), '', '=== HƯỚNG DẪN CHẤM ===', de.hdc.slice(0, 16000), de.ghi_chu ? 'Lưu ý của HDC: ' + de.ghi_chu : '',
+    '', '=== KHUNG ĐIỂM (dùng đúng các id này) ===', ol, '',
+    '=== BÀI LÀM CỦA HỌC SINH (chép từ chữ viết tay) ===', (e.trText || '').slice(0, 30000), '',
+    'Chỉ trả về MỘT đối tượng JSON theo mẫu; mảng "cau" có đủ mọi id trong khung điểm, đúng thứ tự:',
+    '{"cau":[{"id":"I.1","diem":0.5,"dat":["ý đạt"],"chua_dat":["ý thiếu/sai"],"trich":"câu trích nguyên văn tiêu biểu","nhan_xet":"1–3 câu"}],' +
+    '"nhan_xet_chung":"3–5 câu, giọng giáo viên","diem_manh":["…"],"han_che":["…"],' +
+    '"loi":[{"vi_tri":"Trang 2, dòng 5","loai":"Chính tả|Dùng từ|Ngữ pháp|Diễn đạt|Lập luận|Kiến thức","trich":"…","sua":"…"}],' +
+    '"nang_diem":["việc cụ thể, theo thứ tự ưu tiên"],"viet_lai":{"muc":"phần được viết lại, VD: Mở bài câu II.2","doan":"…"},' +
+    '"giam_khao":"2–3 câu thẳng thắn của giám khảo khó tính: vì sao bài chưa được điểm cao hơn","ren_luyen":["bài tập rèn luyện ngắn trong 1 tuần"]}',
+    'Độ dài: "loi" tối đa 10 lỗi tiêu biểu; "nang_diem" 4–6 việc; "viet_lai.doan" 80–150 chữ viết lại PHẦN YẾU NHẤT của bài cho đúng và hay hơn, giữ ý của em, không viết thay cả bài; "ren_luyen" 2–3 bài tập.'
+  ].filter(s => s !== '').join('\n');
+}
+function vanNorm(o, de) {
+  o = o && typeof o === 'object' ? o : {};
+  const cau = (Array.isArray(o.cau) ? o.cau : []).map(c => ({ id: vStr(c.id), diem: num(c.diem), dat: vArr(c.dat), chua_dat: vArr(c.chua_dat), trich: vStr(c.trich), nhan_xet: vStr(c.nhan_xet) }));
+  const vl = o.viet_lai && typeof o.viet_lai === 'object' ? { muc: vStr(o.viet_lai.muc), doan: vStr(o.viet_lai.doan) } : { muc: '', doan: vStr(o.viet_lai) };
+  return {
+    cau, nhan_xet_chung: vStr(o.nhan_xet_chung), diem_manh: vArr(o.diem_manh), han_che: vArr(o.han_che),
+    loi: (Array.isArray(o.loi) ? o.loi : []).map(l => ({ vi_tri: vStr(l.vi_tri), loai: vStr(l.loai), trich: vStr(l.trich), sua: vStr(l.sua) })).filter(l => l.trich || l.sua).slice(0, 12),
+    nang_diem: vArr(o.nang_diem), viet_lai: vl, giam_khao: vStr(o.giam_khao), ren_luyen: vArr(o.ren_luyen)
+  };
+}
+async function vanOne(e, mode) {
+  const ctl = new AbortController(); vanCtrls.add(ctl);
+  const de = (e.g || e.trText) && deOf(e) && monOf(deOf(e)) === (e.mon || 'van') ? deOf(e) : vDe(); e.deId = de.id; e.status = 'busy'; e.err = ''; renderVan();
+  try {
+    if (!e.trText || mode === 'all') {
+      e.step = 'Đang chép chữ viết tay…'; renderVan();
+      e.tr = await vanTranscribe(e, ctl.signal); e.trText = trToText(e.tr);
+    }
+    vanMatch(e);
+    e.step = 'Đang chấm theo hướng dẫn chấm…'; renderVan();
+    e.g = vanNorm(await vanAI(vanGradePrompt(de, e), [], cfg.van.tier, ctl.signal), de);
+    e.edit = {}; e.nx = null; e.status = 'done'; e.step = '';
+  } catch (err) {
+    const code = err?.code || (err?.name === 'AbortError' ? 'cancelled' : '');
+    if (code === 'cancelled') { e.status = e.g ? 'done' : 'wait'; }
+    else if (['not_granted', 'sampling_disabled', 'rate_limited', 'session_expired', 'capability_disabled', 'images_unavailable'].includes(code)) { e.status = e.g ? 'done' : 'wait'; vanHalt = aiErrText(err); }
+    else { e.status = 'error'; e.err = aiErrText(err); }
+    e.step = '';
+  } finally { vanCtrls.delete(ctl); renderVan(); }
+}
+async function vanRunAll(ids, mode) {
+  if (vanRun) return;
+  if (!engineReady()) { toast('Chưa có AI. Chọn AI ở ô AI đọc phiếu'); return; }
+  const de = vDe();
+  if (!de || !de.de.trim() || !de.hdc.trim()) { toast('Nhập đề và hướng dẫn chấm trước (thẻ Đề & HDC)'); vanSetTab('de'); return; }
+  if (!de.outline?.length && !(await vanAnalyze(true))) return;
+  const pp = Math.max(1, +cfg.van.pagesPer || 4);
+  const todo = ids ? essays.filter(e => ids.includes(e.id)) : mEss().filter(e => (e.status === 'wait' || e.status === 'error') && (e.pages.length >= pp || !scan.on));
+  if (!todo.length) return;
+  vanRun = true; vanHalt = '';
+  try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
+  const t0 = performance.now(); let idx = 0; renderVan();
+  const worker = async () => { while (idx < todo.length && !vanHalt && vanRun) await vanOne(todo[idx++], mode); };
+  await Promise.all(Array.from({ length: Math.min(engine() === 'claude' ? 2 : 3, todo.length) }, worker));
+  vanRun = false; renderVan();
+  if (vanHalt) toast(vanHalt);
+  else if (scan.on && scan.target === 'van') { if (cfg.scanGrade && mEss().some(e => e.status === 'wait' && e.pages.length >= pp)) setTimeout(() => vanRunAll(), 30); }
+  else toast(`Đã chấm ${todo.filter(e => e.status === 'done').length} bài trong ${Math.round((performance.now() - t0) / 1000)} giây`);
+}
+function vanStop() { vanRun = false; vanHalt = 'Đã dừng chấm Văn'; vanCtrls.forEach(c => c.abort()); }
+
+/* ---------- Phiếu nhận xét PDF ---------- */
+function vFlow() {
+  const pages = [], W = RW - 2 * RM, BOT = RH - 96; let x, y;
+  const F = { pages, W };
+  const font = (sz, w = 400, it) => `${it ? 'italic ' : ''}${w} ${sz}px ${FB}`;
+  F.np = () => { const c = whiteCanvas(RW, RH); x = c.getContext('2d'); x.textBaseline = 'alphabetic'; pages.push(c); y = RM; F.x = x; };
+  F.need = h => { if (y + h > BOT) F.np(); };
+  F.y = () => y; F.setY = v => { y = v; };
+  F.para = (t, o = {}) => {
+    const sz = o.size || 22, lh = Math.round(sz * (o.lh || 1.5)), ind = o.indent || 0;
+    for (const block of String(t || '').split(/\n+/)) {
+      x.font = font(sz, o.weight, o.italic);
+      for (const ln of wrapLines(x, block, W - ind)) { F.need(lh); x.font = font(sz, o.weight, o.italic); x.fillStyle = o.color || PC.ink; x.fillText(ln, RM + ind, y + sz); y += lh; }
+    }
+    y += o.gap ?? 8;
+  };
+  F.h2 = (t, right) => {
+    F.need(96); y += 18; x.fillStyle = PC.ink; x.font = font(26, 700); x.fillText(t, RM, y + 26);
+    if (right) { x.font = font(21, 600); x.fillStyle = PC.acc; x.textAlign = 'right'; x.fillText(right, RW - RM, y + 26); x.textAlign = 'left'; }
+    y += 38; x.strokeStyle = PC.ink; x.lineWidth = 2; x.beginPath(); x.moveTo(RM, y); x.lineTo(RW - RM, y); x.stroke(); y += 16;
+  };
+  F.label = (t, color) => { F.need(40); x.font = font(18, 700); x.fillStyle = color || PC.muted; x.fillText(t.toUpperCase(), RM, y + 18); y += 30; };
+  F.bullets = (arr, o = {}) => {
+    arr.forEach((b, i) => {
+      const sz = o.size || 21, lh = Math.round(sz * 1.48); x.font = font(sz, o.weight);
+      const lines = wrapLines(x, b, W - 34); F.need(lh);
+      x.fillStyle = o.mark || PC.ink; x.font = font(sz, 700); x.fillText(o.num ? `${i + 1}.` : '•', RM + 2, y + sz);
+      lines.forEach((ln, k) => { if (k) F.need(lh); x.font = font(sz, o.weight); x.fillStyle = o.color || PC.ink; x.fillText(ln, RM + 34, y + sz); y += lh; });
+      y += 4;
+    });
+    y += 6;
+  };
+  F.boxed = (title, text, bg, border, o = {}) => {
+    const sz = o.size || 22, lh = Math.round(sz * 1.5); x.font = font(sz, 400, o.italic);
+    const lines = String(text).split(/\n+/).flatMap(b => wrapLines(x, b, W - 48)), h = 62 + lines.length * lh + 14;
+    if (h > BOT - RM - 40) { F.label(title, border); F.para(text, { italic: o.italic }); return; }
+    F.need(h); rrect(x, RM, y, W, h, 14); x.fillStyle = bg; x.fill(); x.strokeStyle = border; x.lineWidth = 2; x.stroke();
+    x.font = font(17, 700); x.fillStyle = border; x.fillText(title.toUpperCase(), RM + 24, y + 34);
+    x.font = font(sz, 400, o.italic); x.fillStyle = PC.ink; lines.forEach((ln, k) => x.fillText(ln, RM + 24, y + 66 + k * lh + sz * 0.3));
+    y += h + 18;
+  };
+  F.np();
+  return F;
+}
+async function vanReport(e) {
+  await ensureFonts();
+  const de = deOf(e), g = e.g, R = cfg.rep, F = vFlow(), x0 = () => F.x;
+  const tot = vTotal(e), mx = vMax(de);
+  let x = x0(), y = RM;
+  x.fillStyle = PC.muted; x.font = `600 20px ${FB}`; x.fillText(fitText(x, (R.truong || '').toUpperCase(), 760), RM, y + 16);
+  x.textAlign = 'right'; x.font = `400 20px ${FB}`; x.fillText(new Date().toLocaleDateString('vi-VN'), RW - RM, y + 16); x.textAlign = 'left';
+  y += 60; x.fillStyle = PC.ink; x.font = `700 36px ${FB}`; x.fillText(`Nhận xét bài làm môn ${MONNAME(monOf(de))}`, RM, y);
+  y += 36; x.fillStyle = PC.muted; x.font = `400 21px ${FB}`; x.fillText(fitText(x, [de?.name, (cfg.curClass || R.lop) && 'Lớp ' + (cfg.curClass || R.lop), R.gv && 'GV: ' + R.gv].filter(Boolean).join('   ·   '), RW - 2 * RM), RM, y);
+  y += 24; x.strokeStyle = PC.ink; x.lineWidth = 2.5; x.beginPath(); x.moveTo(RM, y); x.lineTo(RW - RM, y); x.stroke();
+  y += 24; const top = y, bw = 290, bh = 150, bx = RW - RM - bw;
+  x.fillStyle = PC.muted; x.font = `600 18px ${FB}`; x.fillText('HỌ VÀ TÊN', RM, y + 20);
+  x.fillStyle = PC.ink; x.font = `700 40px ${FB}`; x.fillText(fitText(x, vName(e) || '(chưa ghi tên)', bx - RM - 30), RM, y + 70);
+  x.fillStyle = PC.muted; x.font = `400 22px ${FB}`; x.fillText(`SBD  ${e.sbd || '—'}${e.tr?.lop ? '      Lớp  ' + e.tr.lop : ''}`, RM, y + 112);
+  rrect(x, bx, top, bw, bh, 18); x.fillStyle = PC.accBg; x.fill(); x.lineWidth = 3; x.strokeStyle = PC.acc; x.stroke();
+  cell(x, tot == null ? '?' : fmt(tot), bx + bw / 2, top + 88, bw, PC.acc, `700 72px ${FM}`);
+  cell(x, tot == null ? '' : `trên ${fmt(mx)} điểm · ${vXepLoai(tot, mx)}`, bx + bw / 2, top + 128, bw, PC.ink, `600 21px ${FB}`);
+  F.setY(top + bh + 20);
+  // Bảng điểm
+  F.h2('Điểm từng câu', `${fmt(tot ?? 0)}/${fmt(mx)}`);
+  x = x0(); const cols = [140, RW - 2 * RM - 140 - 260, 130, 130], rh = 44;
+  const cx = [RM]; cols.forEach(w => cx.push(cx[cx.length - 1] + w));
+  const row = (vals, head, hi) => {
+    F.need(rh); x = x0(); const yy = F.y();
+    x.fillStyle = head ? PC.band : hi ? PC.badBg : '#fff'; x.fillRect(RM, yy, RW - 2 * RM, rh);
+    vals.forEach((v, i) => { x.font = head ? `600 18px ${FB}` : i === 1 ? `400 19px ${FB}` : `700 20px ${FM}`; x.fillStyle = head ? PC.muted : PC.ink;
+      if (i === 1) x.fillText(fitText(x, v, cols[1] - 20), cx[1] + 12, yy + 29); else { x.textAlign = 'center'; x.fillText(String(v), cx[i] + cols[i] / 2, yy + 29); x.textAlign = 'left'; } });
+    x.strokeStyle = PC.line; x.lineWidth = 1.5; x.strokeRect(RM, yy, RW - 2 * RM, rh); cx.slice(1, -1).forEach(v => { x.beginPath(); x.moveTo(v, yy); x.lineTo(v, yy + rh); x.stroke(); });
+    F.setY(yy + rh);
+  };
+  row(['Câu', 'Nội dung', 'Điểm', 'Tối đa'], true);
+  de.outline.forEach(c => { const s = vScore(e, c); row([c.id, c.ten, fmt(s), fmt(c.toi_da)], false, s < c.toi_da * 0.5); });
+  F.setY(F.y() + 16);
+  if (g.nhan_xet_chung) F.boxed('Nhận xét chung của giáo viên', g.nhan_xet_chung, PC.note, PC.muted);
+  if (g.diem_manh.length) { F.label('Điểm mạnh', PC.ok); F.bullets(g.diem_manh); }
+  if (g.han_che.length) { F.label('Hạn chế', PC.bad); F.bullets(g.han_che); }
+  // Từng câu
+  F.h2(monOf(de) === 'toan' ? 'Nhận xét từng bài' : 'Nhận xét từng câu');
+  de.outline.forEach(c => {
+    const it = g.cau.find(z => z.id === String(c.id)) || {};
+    F.need(120); x = x0(); const yy = F.y();
+    x.font = `700 22px ${FB}`; x.fillStyle = PC.ink; x.fillText(fitText(x, `${c.id} · ${c.ten}`, RW - 2 * RM - 160), RM, yy + 24);
+    x.font = `700 22px ${FM}`; x.fillStyle = PC.acc; x.textAlign = 'right'; x.fillText(`${fmt(vScore(e, c))}/${fmt(c.toi_da)}`, RW - RM, yy + 24); x.textAlign = 'left';
+    F.setY(yy + 38);
+    if (it.dat?.length) F.bullets(it.dat.map(s => 'Đạt: ' + s), { mark: PC.ok, size: 20 });
+    if (it.chua_dat?.length) F.bullets(it.chua_dat.map(s => 'Chưa đạt: ' + s), { mark: PC.bad, size: 20 });
+    if (it.trich) F.para(`${monOf(de) === 'toan' ? 'Bài em viết' : 'Trích bài em'}: “${it.trich}”`, { size: 20, italic: true, color: PC.muted, indent: 34 });
+    if (it.nhan_xet) F.para(it.nhan_xet, { size: 20, indent: 34, gap: 14 });
+  });
+  if (g.loi.length) { F.h2('Lỗi cần sửa', `${g.loi.length} lỗi`); F.bullets(g.loi.map(l => `${l.vi_tri ? l.vi_tri + ' · ' : ''}${l.loai ? l.loai + ': ' : ''}“${l.trich}”${l.sua ? ' → ' + l.sua : ''}`), { size: 20, mark: PC.bad }); }
+  if (g.nang_diem.length) { F.h2('Để đạt điểm cao hơn'); F.bullets(g.nang_diem, { num: true, mark: PC.acc }); }
+  if (g.viet_lai?.doan) F.boxed(`${monOf(de) === 'toan' ? 'Lời giải đúng' : 'Viết lại mẫu'}${g.viet_lai.muc ? ' · ' + g.viet_lai.muc : ''}`, g.viet_lai.doan, PC.okBg, PC.ok, { italic: monOf(de) !== 'toan' });
+  if (g.ren_luyen.length) { F.label(monOf(de) === 'toan' ? 'Dạng bài cần luyện trong tuần' : 'Bài tập rèn luyện trong tuần', PC.acc); F.bullets(g.ren_luyen, { num: true }); }
+  if (g.giam_khao) F.boxed('Ý kiến giám khảo', g.giam_khao, PC.badBg, PC.bad);
+  // chân trang
+  F.pages.forEach((c, i) => { const xx = c.getContext('2d'); cell(xx, `${vName(e) || ''} · ${MONNAME(monOf(de))} · Trang ${i + 1}/${F.pages.length}`, RW / 2, RH - 40, RW - 2 * RM, PC.muted, `400 17px ${FB}`); });
+  return F.pages;
+}
+async function vanPdf(list, onProg) {
+  if (!window.jspdf) await loadScript(JSPDF_SRC);
+  const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compress: true }); let first = true;
+  for (let i = 0; i < list.length; i++) {
+    onProg?.(i + 1, list.length);
+    for (const c of await vanReport(list[i])) { if (!first) doc.addPage(); first = false; doc.addImage(c.toDataURL('image/jpeg', 0.86), 'JPEG', 0, 0, 210, 297, undefined, 'FAST'); }
+    await new Promise(r => setTimeout(r, 0));
+  }
+  return doc.output('blob');
+}
+const vanDone = () => mEss().filter(e => e.status === 'done' && e.g).sort((a, b) => (+a.stt || 1e6 + a.id) - (+b.stt || 1e6 + b.id));
+const vanFileName = e => `${slug(e.sbd || String(e.id).padStart(2, '0'))} - ${String(vName(e) || 'Hoc sinh').replace(/[\\/:*?"<>|]+/g, '').trim()} - ${(e.mon || 'van') === 'toan' ? 'Toan' : 'Ngu van'}.pdf`;
+const monSlug = () => isToan() ? 'toan' : 'ngu-van';
+async function vanExport(kind, btn) {
+  const L = vanDone(); if (!L.length) { toast('Chưa có bài Văn nào chấm xong'); return; }
+  const say = t => { const el = $('#vanExpStatus'); if (el) el.textContent = t; };
+  document.querySelectorAll('[data-vexp]').forEach(b => { b.disabled = true; });
+  try {
+    if (kind === 'pdfall') { const b = await vanPdf(L, (i, n) => say(`Đang tạo nhận xét ${i}/${n}…`)); await saveFile(`nhan-xet-${monSlug()}${cfg.curClass ? '-' + slug(cfg.curClass) : ''}.pdf`, b, 'Đã lưu PDF nhận xét cả lớp'); }
+    else if (kind === 'pdfzip') {
+      if (!window.JSZip) await loadScript(JSZIP_SRC);
+      const zip = new JSZip(), used = new Set();
+      for (let i = 0; i < L.length; i++) { say(`Đang tạo PDF ${i + 1}/${L.length}…`); let nm = vanFileName(L[i]); while (used.has(nm)) nm = nm.replace(/\.pdf$/, ' (2).pdf'); used.add(nm); zip.file(nm, await vanPdf([L[i]])); }
+      say('Đang nén…'); await saveFile(`nhan-xet-${monSlug()}-tung-em${cfg.curClass ? '-' + slug(cfg.curClass) : ''}.zip`, await zip.generateAsync({ type: 'blob' }), `Đã lưu ${L.length} file PDF`);
+    } else if (kind === 'xlsx') {
+      if (!window.XLSX) await loadScript(XLSX_SRC);
+      const de = vDe(), ol = de?.outline || [];
+      const rows = [['STT', 'SBD', 'Họ tên', ...ol.map(c => `${c.id} (${fmt(c.toi_da)})`), 'Tổng', 'Xếp loại', 'Nhận xét chung', 'Để đạt điểm cao hơn', 'Ý kiến giám khảo']];
+      L.forEach((e, i) => { const t = vTotal(e); rows.push([e.stt || i + 1, e.sbd, vName(e), ...ol.map(c => vScore(e, c)), t, vXepLoai(t, vMax(de)), e.g.nhan_xet_chung, e.g.nang_diem.join('; '), e.g.giam_khao]); });
+      const ws = XLSX.utils.aoa_to_sheet(rows); ws['!cols'] = rows[0].map((h, i) => ({ wch: i === 2 ? 24 : i >= rows[0].length - 3 ? 60 : 9 }));
+      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Điểm ' + MONNAME());
+      await saveFile(`diem-${monSlug()}${cfg.curClass ? '-' + slug(cfg.curClass) : ''}.xlsx`, new Blob([XLSX.write(wb, { type: 'array', bookType: 'xlsx' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `Đã lưu bảng điểm ${MONNAME()}`);
+    } else if (kind === 'one') { const e = vEss(vanCurId); if (e) await saveFile(vanFileName(e), await vanPdf([e]), 'Đã lưu PDF nhận xét'); }
+  } catch (err) { toast(err?.message || 'Không tạo được file'); }
+  finally { say(''); document.querySelectorAll('[data-vexp]').forEach(b => { b.disabled = false; }); }
+}
+
+/* ---------- Giao diện ---------- */
+function vanSetTab(t) { vanTab = t; renderVan(); }
+function renderVan() {
+  renderTiles();
+  const box = $('#paneVan'); if (!box) return;
+  document.querySelectorAll('#vanTabs [data-vtab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.vtab === vanTab)));
+  ['de', 'giay', 'bai', 'xuat'].forEach(t => { $('#vt_' + t).hidden = t !== vanTab; });
+  const de = vDe();
+  const T = isToan(), ME = mEss();
+  $('#h_van').textContent = `Chấm tự luận ${MONNAME()}`;
+  document.querySelectorAll('#vanMon [data-mon]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.mon === MON())));
+  $('#vanSub').textContent = de ? `${de.name} · ${ME.length} bài · đã chấm ${vanDone().length}` : 'Chưa có đề';
+  $('#vanDe').placeholder = T ? 'Dán toàn bộ đề Toán: Bài 1, Bài 2… (công thức gõ thường, VD x^2 – 5x + 6 = 0)…' : 'Dán toàn bộ đề: văn bản đọc hiểu, các câu hỏi, đề viết đoạn văn và bài văn…';
+  $('#vanHdc').placeholder = T ? 'Dán đáp án – thang điểm, có điểm từng bước 0,25…' : 'Dán hướng dẫn chấm, có điểm từng câu, từng ý…';
+  $('#vanName').placeholder = T ? 'VD: Kiểm tra giữa kì I · Toán 10' : 'VD: Kiểm tra giữa kì I · Ngữ văn 10';
+  $('#vanLayout').hidden = T; $('#vanLayoutT').hidden = !T; $('#vanFeatV').hidden = T; $('#vanFeatT').hidden = !T;
+  document.querySelectorAll('#vanLayoutT [data-vlayt]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.vlayt === cfg.van.layoutT)));
+  // Đề & HDC
+  $('#vanDeSel').innerHTML = monDes().length ? monDes().map(d => `<option value="${esc(d.id)}"${d.id === cfg.van[curKey()] ? ' selected' : ''}>${esc(d.name)}</option>`).join('') : '<option value="">Chưa có đề</option>';
+  $('#vanDeForm').hidden = !de; $('#vanDeDel').hidden = !de;
+  if (de) {
+    for (const [id, k] of [['vanName', 'name'], ['vanDe', 'de'], ['vanHdc', 'hdc']]) { const el = $('#' + id); if (document.activeElement !== el) el.value = de[k] || ''; }
+    const mx = vMax(de), ol = de.outline || [];
+    $('#vanOutline').innerHTML = ol.length ? `<div class="ol-head"><b>Khung điểm (${ol.length} câu)</b><span class="${Math.abs(mx - 10) > 1e-9 ? 'warn' : 'ok'}">Tổng ${fmt(mx)} điểm${Math.abs(mx - 10) > 1e-9 ? ' · khác 10, thầy kiểm tra lại' : ''}</span></div>
+      ${ol.map((c, i) => `<div class="ol-row"><span class="mono ol-id">${esc(c.id)}</span><div class="ol-txt"><b>${esc(c.ten)}</b>${c.tieu_chi?.length ? `<small>${esc(c.tieu_chi.map(t => `${t.nd} (${fmt(t.diem)})`).join(' · '))}</small>` : c.yeu_cau ? `<small>${esc(c.yeu_cau)}</small>` : ''}</div>
+        <label class="ol-pt"><span class="sr">Điểm tối đa ${esc(c.id)}</span><input type="number" step="0.25" min="0" inputmode="decimal" id="olpt${i}" data-olpt="${i}" value="${c.toi_da}"></label></div>`).join('')}`
+      : '<div class="empty">Chưa có khung điểm. Nhập đề và HDC rồi bấm nút trên để AI lập khung điểm từng câu.</div>';
+  }
+  // Giấy
+  const ky = $('#vanKy'); if (document.activeElement !== ky) ky.value = cfg.van.ky || '';
+  const tg = $('#vanTg'); if (document.activeElement !== tg) tg.value = (T ? cfg.van.tgT : cfg.van.tg) || 90;
+  document.querySelectorAll('#vanLayout [data-vlay]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.vlay === cfg.van.layout)));
+  $('#vanTsNRow').hidden = T || cfg.van.layout !== 'ts10';
+  const tsn = $('#vanTsN'); if (document.activeElement !== tsn) tsn.value = cfg.van.tsN || 5;
+  $('#vanLayHint').textContent = { thpt: 'Đọc hiểu (các câu ngắn) · Câu 1 đoạn văn 200 chữ · Câu 2 bài văn 600 chữ.',
+    ts10: 'Phần I: Câu 1 chia khối a, b, c… (ý cuối là đoạn 5–7 câu), Câu 2 đoạn văn 200 chữ · Phần II: Câu 1 luận đề – luận điểm, Câu 2 bài văn 600 chữ.',
+    free: 'Trang 1 có thông tin học sinh, 4 trang kẻ dòng tự do.' }[cfg.van.layout] || '';
+  if (T) $('#vanLayHint').textContent = cfg.van.layoutT === 'ts10' ? 'Trang 1: khung đồ thị Bài 1 (bảng giá trị + lưới) · trang 2–3 kẻ dòng · trang 4: khung hình vẽ bài hình học + bảng tự kiểm tra.' : 'Kẻ dòng có cột "Bài" và cột "Điểm GK"; trang 4 có khung lưới vẽ hình, đồ thị.';
+  // Bài làm
+  const pp = $('#vanPP'); if (document.activeElement !== pp) pp.value = cfg.van.pagesPer;
+  document.querySelectorAll('#vanTier [data-vtier]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.vtier === cfg.van.tier)));
+  $('#vanTierRow').hidden = engine() !== 'claude';
+  const pend = ME.filter(e => e.status === 'wait' || e.status === 'error').length;
+  $('#vanRun').hidden = vanRun; $('#vanStop').hidden = !vanRun;
+  $('#vanRun').disabled = !pend || !engineReady(); $('#vanRun').textContent = pend ? `Chấm ${pend} bài` : 'Chấm bài';
+  const busy = ME.filter(e => e.status === 'busy');
+  $('#vanRunNote').textContent = !engineReady() ? 'Chưa có AI: chọn ở ô AI đọc phiếu.' : vanRun ? (busy.map(e => `${vName(e)}: ${e.step}`).join(' · ') || 'Đang chấm…') : '';
+  const L = $('#vanList');
+  L.innerHTML = ME.length ? ME.map(e => {
+    const t = vTotal(e), short = e.status === 'wait' && e.pages.length < (+cfg.van.pagesPer || 4);
+    const st = e.status === 'done' ? `<span class="sc">${t == null ? '?' : fmt(t)}<small>/ ${fmt(vMax(deOf(e)))}</small></span>` : e.status === 'busy' ? '<span class="pill">Đang chấm</span>' : e.status === 'error' ? '<span class="tag bad">Lỗi</span>' : '<span class="tag">Chờ chấm</span>';
+    return `<button class="row vrow" type="button" data-vopen="${e.id}"><img src="${e.pages[0]?.thumb || ''}" alt="">
+      <span class="who"><b>${esc(vName(e))}</b><small>${e.sbd ? 'SBD ' + esc(e.sbd) + ' · ' : ''}${e.pages.length} trang${short ? ' · chưa đủ trang' : ''}${e.status === 'busy' ? ' · ' + esc(e.step) : e.err ? ' · ' + esc(e.err) : ''}${e.how === 'none' ? ' · không có trong DS lớp' : ''}</small></span>${st}</button>`;
+  }).join('') : '<div class="empty">Chưa có bài. Quét bằng camera hoặc tải PDF (mỗi bài ' + (cfg.van.pagesPer || 4) + ' trang, PDF nhiều bài thì app tự tách).</div>';
+  $('#vanClear').hidden = !ME.length || vanRun;
+  // Xuất
+  const D = vanDone(), mx = vMax(de);
+  $('#vanStats').innerHTML = D.length ? (() => { const ts = D.map(vTotal), avg = ts.reduce((a, b) => a + b, 0) / ts.length;
+    return `<div class="stats"><div class="stat"><b>${D.length}</b><span>bài đã chấm</span></div><div class="stat"><b>${fmt(avg)}</b><span>điểm trung bình</span></div><div class="stat"><b>${fmt(Math.max(...ts))}</b><span>cao nhất</span></div><div class="stat"><b>${fmt(Math.min(...ts))}</b><span>thấp nhất</span></div></div>
+      ${de?.outline?.length ? `<p class="hint">Tỉ lệ điểm trung bình từng câu: ${de.outline.map(c => `<b>${esc(c.id)}</b> ${Math.round(D.reduce((a, e) => a + vScore(e, c), 0) / D.length / (c.toi_da || 1) * 100)}%`).join(' · ')}</p>` : ''}`; })()
+    : '<div class="empty">Chưa có bài nào chấm xong.</div>';
+  if (vanCurId != null && !$('#ovVan').hidden) renderVanDetail();
+}
+function openVanDetail(id) { vanCurId = id; $('#ovVan').hidden = false; syncLock(); renderVanDetail(); $('#ovVanBody').scrollTop = 0; $('#ovVanClose').focus(); }
+function closeVanDetail() { $('#ovVan').hidden = true; vanCurId = null; syncLock(); renderVan(); }
+function renderVanDetail() {
+  const e = vEss(vanCurId); if (!e) { closeVanDetail(); return; }
+  const de = deOf(e), g = e.g, t = vTotal(e);
+  $('#ovVanTitle').textContent = vName(e) || 'Bài làm';
+  const keep = document.activeElement?.id;
+  let h = `<div class="vpages">${e.pages.map((p, i) => `<a class="vpg" href="${p.url}" target="_blank" rel="noopener"><img src="${p.thumb}" alt="Trang ${i + 1}"><span>Trang ${i + 1}</span></a>`).join('')}</div>`;
+  h += `<div class="idgrid"><label class="field f-name"><span>Họ tên</span><input type="text" id="veTen" data-vf="ten" value="${esc(vName(e))}" autocomplete="off"></label>
+    <label class="field"><span>SBD</span><input type="text" id="veSbd" data-vf="sbd" value="${esc(e.sbd || '')}" class="mono" autocomplete="off"></label><label class="field"><span>Trang</span><input type="text" value="${e.pages.length}" disabled></label></div>`;
+  if (e.status === 'error') h += `<div class="note bad">Chưa chấm được: ${esc(e.err)}</div>`;
+  if (e.status === 'busy') h += `<div class="note warn">${esc(e.step || 'Đang chấm…')}</div>`;
+  if (g && de?.outline) {
+    h += `<div class="scorebar"><span class="big">${fmt(t)}<small>trên ${fmt(vMax(de))} điểm</small></span><div>${esc(vXepLoai(t, vMax(de)))} · chạm ô điểm để sửa</div></div>`;
+    h += `<section class="sec"><h4>Điểm từng câu <span>giám khảo AI đề xuất · thầy sửa được</span></h4><div class="vscores">${de.outline.map((c, i) => {
+      const it = g.cau.find(z => z.id === String(c.id)) || {}, edited = e.edit[c.id] !== undefined && e.edit[c.id] !== '';
+      return `<div class="vsc"><div class="vsc-h"><b>${esc(c.id)} · ${esc(c.ten)}</b><label><span class="sr">Điểm ${esc(c.id)}</span><input type="number" step="0.25" min="0" max="${c.toi_da}" inputmode="decimal" id="vs${i}" data-vscore="${esc(c.id)}" value="${vScore(e, c)}"${edited ? ' class="edited"' : ''}></label><span class="mono">/ ${fmt(c.toi_da)}</span></div>
+        ${it.nhan_xet ? `<p>${esc(it.nhan_xet)}</p>` : ''}${it.chua_dat?.length ? `<p class="bad-t">Chưa đạt: ${esc(it.chua_dat.join('; '))}</p>` : ''}</div>`; }).join('')}</div></section>`;
+    h += `<label class="field"><span>Nhận xét chung (in trên phiếu nhận xét)</span><textarea id="veNx" rows="4">${esc(g.nhan_xet_chung)}</textarea></label>`;
+    if (g.nang_diem.length) h += `<section class="sec"><h4>Để đạt điểm cao hơn</h4><ol class="vlist">${g.nang_diem.map(s => `<li>${esc(s)}</li>`).join('')}</ol></section>`;
+    if (g.giam_khao) h += `<div class="note bad"><b>Giám khảo:</b> ${esc(g.giam_khao)}</div>`;
+  }
+  h += `<details class="howto"${!g ? ' open' : ''}><summary>Bản chép bài làm ${e.trText ? '(sửa được, rồi bấm Chấm lại)' : ''}</summary>
+    <textarea id="veTr" rows="12" class="mono-ta" placeholder="AI sẽ chép chữ viết tay vào đây khi chấm">${esc(e.trText || '')}</textarea></details>`;
+  h += `<div class="btnrow">
+    <button class="btn" type="button" data-vact="regrade" ${vanRun || !engineReady() || !e.trText ? 'disabled' : ''}>Chấm lại theo bản chép</button>
+    <button class="btn" type="button" data-vact="redo" ${vanRun || !engineReady() ? 'disabled' : ''}>${g ? 'Đọc lại ảnh và chấm lại' : 'Chấm bài này'}</button>
+    ${g ? '<button class="btn primary-soft" type="button" data-vexp="one">PDF nhận xét của em</button>' : ''}
+    <button class="btn danger" type="button" data-vact="del" ${e.status === 'busy' ? 'disabled' : ''}>Xóa bài</button></div>`;
+  $('#ovVanBody').innerHTML = h;
+  if (keep && $('#' + keep)) { const el = $('#' + keep); el.focus(); }
+}
+
+/* ---------- Sự kiện: Văn ---------- */
+$('#vanTabs').addEventListener('click', e => { const b = e.target.closest('[data-vtab]'); if (b) vanSetTab(b.dataset.vtab); });
+$('#vanDeSel').addEventListener('change', e => { cfg.van[curKey()] = e.target.value; saveCfg(); renderVan(); });
+$('#vanMon').addEventListener('click', e => { const b = e.target.closest('[data-mon]'); if (!b || b.dataset.mon === MON()) return; cfg.van.mon = b.dataset.mon; ensureMonDe(); saveCfg(); renderVan(); });
+$('#vanLayoutT').addEventListener('click', e => { const b = e.target.closest('[data-vlayt]'); if (!b) return; cfg.van.layoutT = b.dataset.vlayt; if (b.dataset.vlayt === 'ts10' && (+cfg.van.tgT || 90) < 120) cfg.van.tgT = 120; saveCfg(); renderVan(); });
+$('#vanDeNew').addEventListener('click', () => {
+  const d = { id: newSid().slice(0, 10), mon: MON(), name: `Đề ${monDes().length + 1}`, de: '', hdc: '', outline: [], so_chu: {} };
+  cfg.van.des.push(d); cfg.van[curKey()] = d.id; saveCfg(); renderVan(); $('#vanName').focus(); $('#vanName').select();
+});
+$('#vanDeDel').addEventListener('click', () => {
+  const d = vDe(); if (!d) return; const i = cfg.van.des.indexOf(d);
+  cfg.van.des.splice(i, 1); cfg.van[curKey()] = monDes()[0]?.id || ''; ensureMonDe(); saveCfg(); renderVan();
+  toast(`Đã xóa đề "${d.name}"`, { label: 'Hoàn tác', fn: () => { cfg.van.des.splice(i, 0, d); cfg.van[curKey()] = d.id; saveCfg(); renderVan(); } });
+});
+[['vanName', 'name'], ['vanDe', 'de'], ['vanHdc', 'hdc']].forEach(([id, k]) => $('#' + id).addEventListener('input', e => {
+  const d = vDe(); if (!d) return; d[k] = e.target.value; saveCfg();
+  if (k === 'name') { $('#vanDeSel').selectedOptions[0] && ($('#vanDeSel').selectedOptions[0].textContent = d.name); $('#vanSub').textContent = d.name; renderTiles(); }
+}));
+let vanFileFor = 'de';
+document.querySelectorAll('[data-vfile]').forEach(b => b.addEventListener('click', () => { vanFileFor = b.dataset.vfile; $('#vanTxtIn').click(); }));
+$('#vanTxtIn').addEventListener('change', async e => {
+  const f = e.target.files?.[0]; e.target.value = ''; if (!f) return;
+  const d = vDe(); if (!d) return; const st = $('#vanFileStatus'), what = vanFileFor === 'de' ? 'đề kiểm tra' : 'hướng dẫn chấm';
+  st.textContent = `Đang đọc ${f.name}…`;
+  try {
+    const t = (await fileToText(f, what)).trim();
+    if (!t) throw new Error('File không có chữ');
+    d[vanFileFor] = t; if (vanFileFor === 'de' && /^Đề \d+$/.test(d.name)) d.name = f.name.replace(/\.[^.]+$/, '');
+    if (vanFileFor === 'de') vanAutoLayout(t, f.name);
+    saveCfg(); renderVan(); st.textContent = `Đã đọc ${what} từ ${f.name} (${t.length.toLocaleString('vi-VN')} ký tự). Thầy xem lại nội dung trong ô.`;
+  } catch (err) { st.textContent = 'Không đọc được file: ' + aiErrText(err); }
+});
+function vanAutoLayout(t, fname) {
+  if (isToan()) {
+    const up = (t + ' ' + (fname || '')).toUpperCase(), ts = /TUYỂN SINH|VÀO 10|VÀO LỚP 10|TS10/.test(up), nb = (t.match(/^\s*Bài\s*\d+/gim) || []).length;
+    const want = ts || nb >= 6 ? 'ts10' : 'free';
+    if (want !== cfg.van.layoutT || (want === 'ts10' && (+cfg.van.tgT || 90) < 120)) { cfg.van.layoutT = want; if (want === 'ts10' && (+cfg.van.tgT || 90) < 120) cfg.van.tgT = 120; saveCfg(); renderVan(); toast(want === 'ts10' ? 'Nhận ra đề tuyển sinh 10: đã chọn giấy làm bài Toán kiểu Tuyển sinh 10 (có khung đồ thị, khung hình vẽ), 120 phút' : 'Đã chọn giấy làm bài Toán kiểu kẻ dòng'); }
+    return;
+  }
+  const r = detectTs10(t + ' ' + (fname || ''));
+  if (!r.ts || cfg.van.layout === 'ts10') { if (r.n) { cfg.van.tsN = r.n; saveCfg(); } return; }
+  cfg.van.layout = 'ts10'; if (r.n) cfg.van.tsN = r.n; if ((+cfg.van.tg || 90) < 120) cfg.van.tg = 120; saveCfg(); renderVan();
+  toast(`Nhận ra đề tuyển sinh 10${r.n ? ` (Câu 1 có ${r.n} ý)` : ''}: đã chọn giấy làm bài kiểu Tuyển sinh 10, 120 phút`);
+}
+$('#vanDe').addEventListener('change', e => vanAutoLayout(e.target.value, ''));
+$('#vanAnalyze').addEventListener('click', () => vanAnalyze(false));
+$('#vanOutline').addEventListener('change', e => {
+  const i = e.target.dataset.olpt; if (i === undefined) return; const d = vDe(); if (!d?.outline[i]) return;
+  d.outline[i].toi_da = Math.max(0, num(e.target.value)); saveCfg(); renderVan();
+});
+$('#vanKy').addEventListener('input', e => { cfg.van.ky = e.target.value; saveCfg(); });
+$('#vanTg').addEventListener('change', e => { cfg.van[isToan() ? 'tgT' : 'tg'] = Math.max(15, Math.min(240, Math.round(num(e.target.value)) || 90)); saveCfg(); renderVan(); });
+$('#vanLayout').addEventListener('click', e => { const b = e.target.closest('[data-vlay]'); if (!b) return; cfg.van.layout = b.dataset.vlay; if (b.dataset.vlay === 'ts10' && (+cfg.van.tg || 90) < 120) cfg.van.tg = 120; saveCfg(); renderVan(); });
+$('#vanTsN').addEventListener('change', e => { cfg.van.tsN = Math.max(2, Math.min(7, Math.round(num(e.target.value)) || 5)); saveCfg(); renderVan(); });
+$('#vanBooklet').addEventListener('click', async e => {
+  const b = e.currentTarget, st = $('#vanBkStatus'); b.disabled = true; st.textContent = 'Đang tạo PDF…';
+  try { await saveFile(`giay-lam-bai-${monSlug()}${vDe() ? '-' + slug(vDe().name) : ''}.pdf`, await bookletPdf(), 'Đã lưu giấy làm bài'); st.textContent = ''; }
+  catch (err) { st.textContent = err?.message || 'Không tạo được PDF'; }
+  finally { b.disabled = false; }
+});
+$('#vanPP').addEventListener('change', e => { cfg.van.pagesPer = Math.max(1, Math.min(12, Math.round(num(e.target.value)) || 4)); saveCfg(); renderVan(); });
+$('#vanTier').addEventListener('click', e => { const b = e.target.closest('[data-vtier]'); if (!b) return; cfg.van.tier = b.dataset.vtier; saveCfg(); renderVan(); });
+$('#vanCam').addEventListener('click', () => { closePane(); openScanner('van'); });
+$('#vanFileIn').addEventListener('change', e => { const f = e.target.files; if (f?.length) vanAddFiles(f).finally(() => { e.target.value = ''; }); });
+$('#vanCamIn').addEventListener('change', e => { const f = e.target.files; if (f?.length) vanAddFiles(f).then(() => { vanSetTab('bai'); openPane('van'); }).finally(() => { e.target.value = ''; }); });
+$('#vanUp').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#vanFileIn').click(); } });
+$('#vanRun').addEventListener('click', () => vanRunAll());
+$('#vanStop').addEventListener('click', vanStop);
+$('#vanClear').addEventListener('click', () => {
+  const old = essays; essays = []; renderVan();
+  toast(`Đã xóa ${old.length} bài Văn`, { label: 'Hoàn tác', fn: () => { essays = old.concat(essays); renderVan(); } });
+});
+$('#vanList').addEventListener('click', e => { const b = e.target.closest('[data-vopen]'); if (b) openVanDetail(+b.dataset.vopen); });
+document.addEventListener('click', e => { const b = e.target.closest('[data-vexp]'); if (b && !b.disabled) vanExport(b.dataset.vexp, b); });
+$('#ovVanClose').addEventListener('click', closeVanDetail);
+$('#ovVan').addEventListener('click', e => { if (e.target.id === 'ovVan') closeVanDetail(); });
+$('#ovVanBody').addEventListener('change', e => {
+  const ess = vEss(vanCurId); if (!ess) return; const t = e.target;
+  if (t.dataset.vscore) { ess.edit[t.dataset.vscore] = t.value; renderVan(); return; }
+  if (t.dataset.vf === 'ten') { ess.ten = t.value.trim(); renderVan(); }
+  if (t.dataset.vf === 'sbd') { ess.sbd = t.value.trim(); const m = matchStudent(ess.sbd, ''); if (m?.st) { ess.ten = m.st.ten; ess.stt = m.st.stt; ess.how = m.how; } renderVan(); }
+});
+$('#ovVanBody').addEventListener('input', e => {
+  const ess = vEss(vanCurId); if (!ess) return;
+  if (e.target.id === 'veNx' && ess.g) ess.g.nhan_xet_chung = e.target.value;
+  if (e.target.id === 'veTr') ess.trText = e.target.value;
+});
+$('#ovVanBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-vact]'); if (!b || b.disabled) return; const ess = vEss(vanCurId); if (!ess) return;
+  if (b.dataset.vact === 'regrade') vanRunAll([ess.id], 'grade');
+  else if (b.dataset.vact === 'redo') vanRunAll([ess.id], 'all');
+  else if (b.dataset.vact === 'del') {
+    const i = essays.indexOf(ess); essays.splice(i, 1); closeVanDetail();
+    toast('Đã xóa bài', { label: 'Hoàn tác', fn: () => { essays.splice(i, 0, ess); renderVan(); } });
+  }
+});
+
 /* ---------- Khởi động ---------- */
 $('#camHint').textContent = camLive() ? 'Camera tự chụp khi thấy 4 ô vuông đen ở góc phiếu, đổi phiếu là chụp tiếp.' : 'Trong Claude mỗi lần chụp một phiếu; quét liên tục tự động dùng bản đưa lên Vercel.';
-renderFmt(); renderKeys(); setKeyOpen(cfg.keyOpen !== false); setClsOpen(cfg.clsOpen !== false); renderGas(); renderEngine(); renderAll();
+function ensureMonDe() {
+  if (!monDes().length) { const d = { id: newSid().slice(0, 10), mon: MON(), name: 'Đề 1', de: '', hdc: '', outline: [], so_chu: {} }; cfg.van.des.push(d); cfg.van[curKey()] = d.id; }
+  if (!vDe()) cfg.van[curKey()] = monDes()[0].id;
+}
+{ const m0 = cfg.van.mon; for (const m of ['toan', 'van']) { cfg.van.mon = m; ensureMonDe(); } cfg.van.mon = m0 === 'toan' ? 'toan' : 'van'; }
+renderFmt(); renderKeys(); setKeyOpen(cfg.keyOpen !== false); setClsOpen(cfg.clsOpen !== false); renderGas(); renderEngine(); renderAll(); renderVan();
 })();
 </script>
 
